@@ -29,7 +29,7 @@ get_linear_tau2 = function(n, w)
   return(to_return)
 }
 
-# user accessed functions
+# user accessed functions - they can specify options
 BFF_z_test = function(z_stat, effect_size, n, one_sample = TRUE, n1 = NULL, n2 = NULL, tau2 = NULL)
 {
   # get correct tau^2 value
