@@ -1,6 +1,8 @@
-exportPattern("^[[:alpha:]]+")
-
 export(BFF_z_test)
 export(BFF_t_test)
 export(BFF_chi2_test)
 export(BFF_F_test)
+
+importFrom("grDevices", "adjustcolor", "dev.off", "pdf")
+importFrom("graphics", "abline", "axis", "plot", "rect")
+import(BSDA)
