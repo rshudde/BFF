@@ -1,6 +1,6 @@
-source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
 
 ################# chih2 functions if r is an integer and equal to 1
 G_val_r1 = function(tau2, chi2_stat, df)
