@@ -1,8 +1,13 @@
-export(BFF_z_test)
-export(BFF_t_test)
-export(BFF_chi2_test)
-export(BFF_F_test)
+export(z.test.BFF)
+export(t.test.BFF)
+export(chi2.test.BFF)
+export(f.test.BFF)
+
 
 importFrom("grDevices", "adjustcolor", "dev.off", "pdf")
 importFrom("graphics", "abline", "axis", "plot", "rect")
 import(BSDA)
+import(hypergeo)
+import(ggplot2)
+import(Matrix)
+import(gsl)
