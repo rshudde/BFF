@@ -63,6 +63,10 @@ T test using BFF methods. Setting r > 1 uses the higher order moments. Fractiona
 All results are on the log scale. Plot saved to working directory unless a full path is specified in the 'savename' variable.
 }
 \examples{
-t.test.BFF(t_stat=2.5, n = 50, df = 20, save=FALSE)
-t.test.BFF(t_stat=2.5, n1 = 50, n2 = 40, df = 20, save=FALSE, one_sample = FALSE)
+t.test.BFF(t_stat=2.5, n = 50, df = 10, save=FALSE)
+t.test.BFF(t_stat=2.5, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save=FALSE)
+t.test.BFF(t_stat = 2.5, n = 50, r = 2, df = 10, save = FALSE)
+t.test.BFF(t_stat=2.5, r = 2, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save=FALSE)
+t.test.BFF(t_stat = 2.5, n = 50, r = 2.5, df = 10, save = FALSE)
+t.test.BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save=FALSE)
 }
