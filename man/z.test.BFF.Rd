@@ -61,4 +61,9 @@ All results are on the log scale. Plot saved to working directory unless a full 
 }
 \examples{
 z.test.BFF(z_stat=2.5, n = 50, save=FALSE)
+z.test.BFF(z_stat=2.5, n1 = 50, n2 = 30, one_sample = FALSE, save=FALSE)
+z.test.BFF(z_stat = 2.5, n = 50, r = 2, save = FALSE)
+z.test.BFF(z_stat=2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE, save=FALSE)
+z.test.BFF(z_stat = 2.5, n = 50, r = 2.5, save = FALSE)
+z.test.BFF(z_stat=2.5, r = 2.5, n1 = 50, n2 = 30, one_sample = FALSE, save=FALSE)
 }

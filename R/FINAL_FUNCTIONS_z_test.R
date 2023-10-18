@@ -1,6 +1,6 @@
-# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
 ################# Z functions if r is an integer and equal to 1
 z_val_r1 = function(tau2, z_stat)
 {
@@ -124,6 +124,11 @@ log_Z_frac_onesided = function(z, r, tau)
 #'
 #' @examples
 #' z.test.BFF(z_stat=2.5, n = 50, save=FALSE)
+#' z.test.BFF(z_stat=2.5, n1 = 50, n2 = 30, one_sample = FALSE, save=FALSE)
+#' z.test.BFF(z_stat = 2.5, n = 50, r = 2, save = FALSE)
+#' z.test.BFF(z_stat=2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE, save=FALSE)
+#' z.test.BFF(z_stat = 2.5, n = 50, r = 2.5, save = FALSE)
+#' z.test.BFF(z_stat=2.5, r = 2.5, n1 = 50, n2 = 30, one_sample = FALSE, save=FALSE)
 z.test.BFF = function(z_stat,
                       n = NULL,
                       one_sample = TRUE,
@@ -180,7 +185,7 @@ z.test.BFF = function(z_stat,
       tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
     } else {
       tau2 = get_tau_z_t_two_sample_frac(
-        n1 = n,
+        n1 = n1,
         n2 = n2,
         w = effect_size,
         r = r
@@ -196,7 +201,7 @@ z.test.BFF = function(z_stat,
       log_vals = log_Z_frac_onesided(z = z_stat, r = r, tau = tau2)
     } else {
       tau2 = get_tau_z_t_two_sample_frac(
-        n1 = n,
+        n1 = n1,
         n2 = n2,
         w = effect_size,
         r = r

@@ -167,8 +167,12 @@ log_T_frac_onesided = function(t, v, tau, r)
 #' @export
 #'
 #' @examples
-#' t.test.BFF(t_stat=2.5, n = 50, df = 20, save=FALSE)
-#' t.test.BFF(t_stat=2.5, n1 = 50, n2 = 40, df = 20, save=FALSE, one_sample = FALSE)
+#' t.test.BFF(t_stat=2.5, n = 50, df = 10, save=FALSE)
+#' t.test.BFF(t_stat=2.5, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save=FALSE)
+#' t.test.BFF(t_stat = 2.5, n = 50, r = 2, df = 10, save = FALSE)
+#' t.test.BFF(t_stat=2.5, r = 2, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save=FALSE)
+#' t.test.BFF(t_stat = 2.5, n = 50, r = 2.5, df = 10, save = FALSE)
+#' t.test.BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save=FALSE)
 t.test.BFF = function(t_stat,
                       n = NULL,
                       df = NULL,
@@ -228,7 +232,7 @@ t.test.BFF = function(t_stat,
       tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
     } else {
       tau2 = get_tau_z_t_two_sample_frac(
-        n1 = n,
+        n1 = n1,
         n2 = n2,
         w = effect_size,
         r = r
@@ -247,7 +251,7 @@ t.test.BFF = function(t_stat,
       log_vals = log_T_frac_onesided(t = t_stat, r = r, tau = tau2, v = df)
     } else {
       tau2 = get_tau_z_t_two_sample_frac(
-        n1 = n,
+        n1 = n1,
         n2 = n2,
         w = effect_size,
         r = r
