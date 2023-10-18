@@ -93,8 +93,10 @@ log_Z_frac_onesided = function(z, r, tau)
 
 #' z.test.BFF
 #'
-#' Z test using BFF methods. Setting r > 1 uses the higher order moments. Fractional moments are set with r > 1 and r not an integer.
-#' All results are on the log scale. Plot saved to working directory unless a full path is specified in the 'savename' variable.
+#' z.test.BFF constructs BFFs based on the z test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
+#' All results are on the log scale.
+#' Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
 #'
 #' @param z_stat z statistic
 #' @param n sample size (if one sample test)
@@ -123,7 +125,11 @@ log_Z_frac_onesided = function(z, r, tau)
 #' @export
 #'
 #' @examples
-#' z.test.BFF(z_stat=2.5, n = 50, save=FALSE)
+#' zBFF <- z.test.BFF(z_stat = 2.5, n = 50, save = FALSE)  # for one sample z test
+#' zBFF2 <- z.test.BFF(z_stat = 2.5, n1 = 50, n2 = 35, one_sample = FALSE, save = FALSE)  # for two sample z test
+#' zBFF$BFF_max_RMSE   # maximum BFF value
+#' zBFF$max_RMSE       # effect size which maximizes the BFF value
+#'
 z.test.BFF = function(z_stat,
                       n = NULL,
                       one_sample = TRUE,
