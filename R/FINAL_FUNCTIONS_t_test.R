@@ -139,8 +139,10 @@ log_T_frac_onesided = function(tau, t, v, r)
 
 #' t.test.BFF
 #'
-#' T test using BFF methods. Setting r > 1 uses the higher order moments. Fractional moments are set with r > 1 and r not an integer.
-#' All results are on the log scale. Plot saved to working directory unless a full path is specified in the 'savename' variable.
+#' t.test.BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
+#' All results are on the log scale.
+#' Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
 #'
 #' @param t_stat T statistic
 #' @param df degrees of freedom
@@ -170,12 +172,15 @@ log_T_frac_onesided = function(tau, t, v, r)
 #' @export
 #'
 #' @examples
-#' t.test.BFF(t_stat=2.5, n = 50, df = 10, save=FALSE)
-#' t.test.BFF(t_stat=2.5, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save=FALSE)
-#' t.test.BFF(t_stat = 2.5, n = 50, r = 2, df = 10, save = FALSE)
-#' t.test.BFF(t_stat=2.5, r = 2, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save=FALSE)
-#' t.test.BFF(t_stat = 2.5, n = 50, r = 2.5, df = 10, save = FALSE)
-#' t.test.BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save=FALSE)
+#' tBBF <- t.test.BFF(t_stat = 2.5, n = 50, df = 20, save = FALSE)   # for one-sample t test
+#' tBFF2 <- t.test.BFF(t_stat = 2.5, n1 = 50, n2 = 40, df = 20, save = FALSE, one_sample = FALSE)  # for two-sample t test
+#' t.test.BFF(t_stat = 2.5, n = 50, r = 2, df = 10, save = FALSE)   # r>1 for one sample t test
+#' t.test.BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save = FALSE)  # r>1 for two sample t test
+#' t.test.BFF(t_stat = 2.5, n = 50, r = 2.5, df = 10, save = FALSE)   # continuous r for one sample t test
+#' t.test.BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save=FALSE)   #continuous r for two sample t test
+#' tBFF$BFF_max_RMSE   # maximum BFF value
+#' tBFF$max_RMSE       # effect size which maximizes the BFF value
+#'
 t.test.BFF = function(t_stat,
                       n = NULL,
                       df = NULL,

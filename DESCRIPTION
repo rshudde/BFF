@@ -1,6 +1,6 @@
 Package: BFF
 Title: Bayes Factor Functions
-Version: 2.2.0
+Version: 2.5.0
 Authors@R: 
     c(person(given = "Rachael",
            family = "Shudde",
@@ -23,7 +23,7 @@ Authors@R:
            email = "vejohnson@exchange.tamu.edu"))
 Author: Rachael Shudde [aut, cre], Saptati Datta [aut], Riana Guha [aut], Sandy Pramanik [aut], Valen E. Johnson [aut]
 Maintainer: Rachael Shudde <rachael.shudde@gmail.com>
-Description: Bayes factors represent the ratio of probabilities assigned to data by competing scientific hypotheses. Drawbacks of Bayes factors are their dependence on prior specifications that define null and alternative hypotheses and difficulties encountered in their computation. To address these problems we define Bayes factor functions (BFF) directly from common test statistics. BFFs depend on a single non-centrality parameter that can be expressed as a function of standardized effect sizes, and plots of BFFs versus effect size provide informative summaries of hypothesis tests that can be easily aggregated across studies. Such summaries eliminate the need for arbitrary bright-line thresholds to determine “statistical significance.” BFFs are available in closed form and can be computed easily from z, t, chi^2, and F statistics. For higher order Bayes factors, the parameter "r" in each function can be changed. 
+Description: Bayes factors represent the ratio of probabilities assigned to data by competing scientific hypotheses. However, one drawback of Bayes factors is their dependence on prior specifications that define null and alternative hypotheses. Additionally, there are challenges in their computation. To address these issues, we define Bayes factor functions (BFFs) directly from common test statistics. BFFs express Bayes factors as a function of the prior densities used to define the alternative hypotheses. These prior densities are centered on standardized effects, which serve as indices for the BFF. Therefore, BFFs offer a summary of evidence in favor of alternative hypotheses that correspond to a range of scientifically interesting effect sizes. Such summaries remove the need for arbitrary thresholds to determine "statistical significance." BFFs are available in closed form and can be easily computed from z, t, chi-squared, and F statistics. They depend on hyperparameters "r" and "tau^2", which determine the shape and scale of the prior distributions defining the alternative hypotheses. For replicated designs, the "r" parameter in each function can be adjusted to be greater than 1. Plots of BFFs versus effect size provide informative summaries of hypothesis tests that can be easily aggregated across studies.
 License: GPL (>= 2)
 Encoding: UTF-8
 Imports: BSDA, grDevices, graphics, hypergeo, ggplot2, Matrix, gsl

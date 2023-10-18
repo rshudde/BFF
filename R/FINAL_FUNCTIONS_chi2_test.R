@@ -96,8 +96,10 @@ log_G_frac = function(tau, h, k, r)
 
 #' chi2.test.BFF
 #'
-#' Chi^2 test using BFF methods. Setting r > 1 uses the higher order moments. Fractional moments are set with r > 1 and r not an integer.
-#' All results are on the log scale. Plot saved to working directory unless a full path is specified in the 'savename' variable.
+#' chi2.test.BFF constructs BFFs based on the chi-squared test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses. 
+#' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
+#' All results are on the log scale. 
+#' Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
 #'
 #' @param chi2_stat chi^2 statistic
 #' @param df degrees of freedom
@@ -125,7 +127,10 @@ log_G_frac = function(tau, h, k, r)
 #' @export
 #'
 #' @examples
-#' chi2.test.BFF(chi2_stat=2.5, n = 50, df = 20, save=FALSE)
+#' chi2BFF <- chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 20, save = FALSE) 
+#' chi2BFF$BFF_max_RMSE  # maximum BFF value
+#' chi2BFF$max_RMSE      # effect size which maximizes the BFF
+#' 
 chi2.test.BFF = function(chi2_stat,
                       n = NULL,
                       df = NULL,
