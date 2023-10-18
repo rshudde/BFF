@@ -1,6 +1,6 @@
 Package: BFF
 Title: Bayes Factor Functions
-Version: 2.0.0
+Version: 2.5.0
 Authors@R: 
     c(person(given = "Rachael",
            family = "Shudde",
