@@ -1,6 +1,6 @@
-source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
 ################# Z functions if r is an integer and equal to 1
 z_val_r1 = function(tau2, z_stat)
 {

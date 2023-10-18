@@ -1,3 +1,7 @@
+# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+
 ################# T functions if r is an integer and equal to 1
 t_val_r1 = function(tau2, t_stat, df)
 {
@@ -79,52 +83,51 @@ log_T = function(t, r, tau, v)
 ################# T functions if r is a fraction
 log_T_frac = function(t, v, r, tau)
 {
-  tp1 = 1 + tau
-  one = 1 / (tp1 ^ (r + 1 / 2))
+  tp1 = 1 + tau # one plus tau
+  c = 1 / (tp1 ^ (r + 1 / 2)) # c
 
   a1 = (v + 1) / 2
   b1 = r + 1 / 2
   c1 = 1 / 2
-  d1 = tau * t ^ 2 / ((t ^ 2 + v) * tp1)
-  two = Gauss2F1(a1, b1, c1, d1)
+  y = tau * t / sqrt((t ^ 2 + v) * tp1)
+  first_hypergeo = Gauss2F1(a1, b1, c1, y^2)
 
-  three = t * sqrt(tau) / (sqrt(t ^ 2 + v) * tp1 ^ (r + 1))
-  four = sterling_gamma(v / 2 + 1) / sterling_gamma((v + 1) / 2)
-  five = sterling_gamma(r + 1) / sterling_gamma(r + 1 / 2)
+  four = sterling_gamma(v / 2 + 1) * sterling_gamma(r + 1)
+  five = sterling_gamma((v+1)/2) * sterling_gamma(r + 1/2)
+  gamma_term = four / five
 
   aa = v / 2 + 1
   bb = r + 1
   cc = 3 / 2
-  dd = d1
-  six = Gauss2F1(aa, bb, cc, dd)
+  second_hypergeo = Gauss2F1(aa, bb, cc, y^2)
 
-  to_return = one * two + three * four * five * six
+  to_return = c * (first_hypergeo + y * gamma_term * second_hypergeo)
   to_return = log(to_return)
 
   return(to_return)
 }
 
-log_T_frac_onesided = function(t, v, tau, r)
+log_T_frac_onesided = function(tau, t, v, r)
 {
-  one = 1 / ((1 + tau) ^ (r + 1 / 2))
+  tp1 = 1 + tau
+  c = 1 / (tp1 ^ (r + 1 / 2)) # c
 
   a1 = (v + 1) / 2
   b1 = r + 1 / 2
   c1 = 1 / 2
-  d1 = tau * t ^ 2 / ((t ^ 2 + v) * (tau + 1))
-  two = Gauss2F1(a1, b1, c1, d1)
+  y = tau * t / sqrt((t ^ 2 + v) * tp1)
+  first_hypergeo = Gauss2F1(a1, b1, c1, y^2)
 
-  three = 2 * t * sqrt(tau) / (sqrt(t ^ 2 + v) * (tau + 1) ^ (r + 1))
-  four = sterling_gamma(v / 2 + 1) / sterling_gamma((v + 1) / 2)
-  five = sterling_gamma(r + 1) / sterling_gamma(r + 1 / 2)
+  four = sterling_gamma(v / 2 + 1) * sterling_gamma(r + 1)
+  five = sterling_gamma((v+1)/2) * sterling_gamma(r + 1/2)
+  gamma_term = four / five
 
   aa = v / 2 + 1
   bb = r + 1
   cc = 3 / 2
-  dd = d1
-  six = Gauss2F1(aa, bb, cc, dd)
+  second_hypergeo = Gauss2F1(aa, bb, cc, y^2)
 
-  to_return = one * two + three * four * five * six
+  to_return = c * (first_hypergeo + 2*y * gamma_term * second_hypergeo)
   to_return = log(to_return)
 
   return(to_return)
@@ -215,6 +218,7 @@ t.test.BFF = function(t_stat,
   }
 
   log_vals = rep(0, length(effect_size))
+
   if (r1) {
     if (one_sample)
     {
@@ -248,7 +252,8 @@ t.test.BFF = function(t_stat,
     if (one_sample)
     {
       tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
-      log_vals = log_T_frac_onesided(t = t_stat, r = r, tau = tau2, v = df)
+      # log_vals = lapply(tau2, log_T_frac_onesided, r = r, v = df, t = t_stat)
+      # log_vals = log_T_frac_onesided(t = t_stat, r = r, tau = tau2, v = df)
     } else {
       tau2 = get_tau_z_t_two_sample_frac(
         n1 = n1,
@@ -256,12 +261,13 @@ t.test.BFF = function(t_stat,
         w = effect_size,
         r = r
       )
-      log_vals = log_T_frac_onesided(
-        t = t_stat,
-        r = r,
-        tau = tau2,
-        v = df
-      )
+      # log_vals = log_T_frac_onesided(
+      #   t = t_stat,
+      #   r = r,
+      #   tau = tau2,
+      #   v = df
+      # )
+      log_vals = unlist(lapply(tau2, log_T_frac_onesided, r = r, v = df, t = t_stat))
     }
   }
 
@@ -275,8 +281,11 @@ t.test.BFF = function(t_stat,
   # check the results are finite
   if (!all(is.finite(BFF)))
   {
-    stop(
-      "Values entered produced non-finite numbers. The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow. Please contact the maintainer for more information."
+    warning(
+      "Values entered produced non-finite numbers for some effect sizes.
+      The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow.
+      Only effect sizes with non-NaN values are kept in the plots.
+      Please contact the maintainer for more information."
     )
   }
 
