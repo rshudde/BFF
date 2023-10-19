@@ -81,7 +81,7 @@ log_T = function(t, r, tau, v)
 }
 
 ################# T functions if r is a fraction
-log_T_frac = function(t, v, r, tau)
+log_T_frac = function(tau, t, v, r)
 {
   tp1 = 1 + tau # one plus tau
   c = 1 / (tp1 ^ (r + 1 / 2)) # c
@@ -172,12 +172,12 @@ log_T_frac_onesided = function(tau, t, v, r)
 #' @export
 #'
 #' @examples
-#' tBBF <- t.test.BFF(t_stat = 2.5, n = 50, df = 20, save = FALSE)   # for one-sample t test
-#' tBFF2 <- t.test.BFF(t_stat = 2.5, n1 = 50, n2 = 40, df = 20, save = FALSE, one_sample = FALSE)  # for two-sample t test
-#' t.test.BFF(t_stat = 2.5, n = 50, r = 2, df = 10, save = FALSE)   # r>1 for one sample t test
-#' t.test.BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save = FALSE)  # r>1 for two sample t test
-#' t.test.BFF(t_stat = 2.5, n = 50, r = 2.5, df = 10, save = FALSE)   # continuous r for one sample t test
-#' t.test.BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 10, one_sample = FALSE, save=FALSE)   #continuous r for two sample t test
+#' tBFF = t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE)
+#' t.test.BFF(t_stat = 2.5, n1 = 50, n2 = 40, df = 88, save = FALSE, one_sample = FALSE)
+#' t.test.BFF(t_stat = 2.5, n = 50, r = 2, df = 49, save = FALSE)
+#' t.test.BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save = FALSE)
+#' t.test.BFF(t_stat = 2.5, n = 50, r = 2.5, df = 49, save = FALSE)
+#' t.test.BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save=FALSE)
 #' tBFF$BFF_max_RMSE   # maximum BFF value
 #' tBFF$max_RMSE       # effect size which maximizes the BFF value
 #'
@@ -258,7 +258,7 @@ t.test.BFF = function(t_stat,
     {
       tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
       # log_vals = lapply(tau2, log_T_frac_onesided, r = r, v = df, t = t_stat)
-      # log_vals = log_T_frac_onesided(t = t_stat, r = r, tau = tau2, v = df)
+      log_vals = unlist(lapply(tau2, log_T, r = r, v = df, t = t_stat))
     } else {
       tau2 = get_tau_z_t_two_sample_frac(
         n1 = n1,
@@ -266,12 +266,7 @@ t.test.BFF = function(t_stat,
         w = effect_size,
         r = r
       )
-      # log_vals = log_T_frac_onesided(
-      #   t = t_stat,
-      #   r = r,
-      #   tau = tau2,
-      #   v = df
-      # )
+
       log_vals = unlist(lapply(tau2, log_T_frac_onesided, r = r, v = df, t = t_stat))
     }
   }

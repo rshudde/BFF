@@ -58,7 +58,7 @@ log_Z = function(z, r, tau)
   return(to_return)
 }
 ################# Z functions if r is a f raction
-log_Z_frac = function(z, r, tau)
+log_Z_frac = function(tau, z, r)
 {
   one = 1 / ((1 + tau) ^ (r + 1 / 2))
 
@@ -70,7 +70,7 @@ log_Z_frac = function(z, r, tau)
   return(to_return)
 }
 
-log_Z_frac_onesided = function(z, r, tau)
+log_Z_frac_onesided = function(tau, z, r)
 {
   one = 1 / ((1 + tau) ^ (r + 1 / 2))
 
@@ -125,12 +125,12 @@ log_Z_frac_onesided = function(z, r, tau)
 #' @export
 #'
 #' @examples
-#' zBFF <- z.test.BFF(z_stat = 2.5, n = 50, save = FALSE)  # for one sample z test
-#' zBFF2 <- z.test.BFF(z_stat = 2.5, n1 = 50, n2 = 35, one_sample = FALSE, save = FALSE)  # for two sample z test
-#' z.test.BFF(z_stat = 2.5, n = 50, r = 2, save = FALSE)  # r>1 for one sample z test
-#' z.test.BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE)  # r>1 for two sample z test
-#' z.test.BFF(z_stat = 2.5, n = 50, r = 2.5, save = FALSE)   # continuous r for one sample z test
-#' z.test.BFF(z_stat = 2.5, r = 2.5, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE)  # continuous r for two sample z test
+#' zBFF = z.test.BFF(z_stat = 2.5, n = 50, save = FALSE)
+#' z.test.BFF(z_stat = 2.5, n1 = 50, n2 = 35, one_sample = FALSE, save = FALSE)
+#' z.test.BFF(z_stat = 2.5, n = 50, r = 2, save = FALSE)
+#' z.test.BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE)
+#' z.test.BFF(z_stat = 2.5, n = 50, r = 2.5, save = FALSE)
+#' z.test.BFF(z_stat = 2.5, r = 2.5, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE)
 #' zBFF$BFF_max_RMSE   # maximum BFF value
 #' zBFF$max_RMSE       # effect size which maximizes the BFF value
 #'

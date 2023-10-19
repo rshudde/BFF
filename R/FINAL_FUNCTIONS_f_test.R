@@ -1,3 +1,7 @@
+source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+
 ################# F functions if r is an integer and equal to 1
 f_val_r1 = function(tau2, f_stat, df1, df2)
 {
@@ -69,7 +73,7 @@ sum_val_function_f = function(k, f, m, r, tau)
   return(val)
 }
 
-log_F = function(f, k, m, r, tau)
+log_F = function(tau, f, k, m, r)
 {
   num1 = sterling_gamma(k / 2)
   den1 = sterling_gamma(k / 2 + r)
@@ -99,7 +103,7 @@ log_F = function(f, k, m, r, tau)
 }
 
 ################# F functions if r is a fraction
-log_F_frac = function(f, k, m, tau, r)
+log_F_frac = function(tau, f, k, m, r)
 {
   one = 1 / ((1 + tau) ^ (k / 2 + r))
 
@@ -154,7 +158,9 @@ log_F_frac = function(f, k, m, tau, r)
 #' @export
 #'
 #' @examples
-#' fBFF <- f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 33, save = FALSE)
+#' fBFF = f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE)
+#' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2, save = FALSE)
+#' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2.5, save = FALSE)
 #' fBFF$BFF_max_RMSE  # maximum BFF value
 #' fBFF$max_RMSE      # effect size which maximizes the BFF value
 #'
@@ -222,13 +228,8 @@ f.test.BFF = function(f_stat,
                                w = effect_size,
                                r = r)
 
-    log_vals = log_F_frac(
-      f = f_stat,
-      k = df1,
-      m = df2,
-      r = r,
-      tau = tau2
-    )
+    log_vals = unlist(lapply(tau2, log_F_frac, f=f_stat, k= df1, m = df2, r = r))
+
   }
 
   # stuff to return

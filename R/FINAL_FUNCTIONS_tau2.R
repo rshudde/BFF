@@ -1,3 +1,8 @@
+# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+
+
 ###########################################################################################################
 ###########functions to set tau2 - user does not interact with these ######################################
 ###########################################################################################################
@@ -35,9 +40,11 @@ get_linear_tau2 = function(n, w)
 ################## for fractional cases
 get_wbar = function(w, k)
 {
-  a = 1/k
-  b = sum(w^2)
-  to_return = sqrt(a * b)
+  # a = 1/k
+  # b = sum(w^2)
+  # to_return = sqrt(a * b)
+
+  to_return = w^2
 
   return(to_return)
 }
