@@ -53,9 +53,16 @@ Returns Bayes factor function results
 }
 }
 \description{
-F test using BFF methods. Setting r > 1 uses the higher order moments. Fractional moments are set with r > 1 and r not an integer.
-All results are on the log scale. Plot saved to working directory unless a full path is specified in the 'savename' variable.
+f.test.BFF constructs BFFs based on the F test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
+All results are on the log scale.
+Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
 }
 \examples{
-f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 33, save=FALSE)
+fBFF = f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE)
+f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2, save = FALSE)
+f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2.5, save = FALSE)
+fBFF$BFF_max_RMSE  # maximum BFF value
+fBFF$max_RMSE      # effect size which maximizes the BFF value
+
 }
