@@ -152,6 +152,7 @@ log_T_frac_onesided = function(tau, t, v, r)
 #' @param n2 sample size of group two for two sample test
 #' @param savename optional, filename for saving the pdf of the final plot
 #' @param r r value
+#' @param tau2 tau2 values
 #' @param save should a copy of the plot be saved?
 #' @param xlab optional, x label for plot
 #' @param ylab optional, y label for plot
@@ -189,6 +190,7 @@ t.test.BFF = function(t_stat,
                       n2 = NULL,
                       savename = NULL,
                       r = 1,
+                      tau2 = NULL,
                       save = TRUE,
                       xlab = NULL,
                       ylab = NULL,
@@ -205,6 +207,9 @@ t.test.BFF = function(t_stat,
 
   # same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
+
+  user_supplied_tau2 = TRUE
+  if (is.null(tau2)) user_supplied_tau2 = FALSE
 
   r1 = FALSE
   frac_r = FALSE
@@ -225,20 +230,24 @@ t.test.BFF = function(t_stat,
   log_vals = rep(0, length(effect_size))
 
   if (r1) {
+    if(is.null(tau2)){
     if (one_sample)
     {
-      tau2 = get_one_sample_tau2(n = n, w = effect_size)
+      if(!user_supplied_tau2) tau2 = get_one_sample_tau2(n = n, w = effect_size)
     } else {
-      tau2 = get_two_sample_tau2(n1 = n1, n2 = n2, w = effect_size)
+      if(!user_supplied_tau2) tau2 = get_two_sample_tau2(n1 = n1, n2 = n2, w = effect_size)
     }
     log_vals = unlist(lapply(tau2, t_val_r1, t_stat=t_stat, df=df))
+    }else{
+      log_vals = unlist(lapply(tau2, t_val_r1, t_stat=t_stat, df=df))
   }
-
+}
 
   if (integer_r) {
+    if(is.null(tau2)){
     if (one_sample)
     {
-      tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
+      if(!user_supplied_tau2) tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
     } else {
       tau2 = get_tau_z_t_two_sample_frac(
         n1 = n1,
@@ -251,22 +260,32 @@ t.test.BFF = function(t_stat,
                      r = r,
                      tau = tau2,
                      v = df)
+    }else{
+      log_vals = log_T(t = t_stat,
+                       r = r,
+                       tau = tau2,
+                       v = df)
+    }
   }
 
   if (frac_r) {
+    if(is.null(tau2)){
     if (one_sample)
     {
-      tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
+      if(!user_supplied_tau2) tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
       # log_vals = lapply(tau2, log_T_frac_onesided, r = r, v = df, t = t_stat)
       log_vals = unlist(lapply(tau2, log_T, r = r, v = df, t = t_stat))
     } else {
-      tau2 = get_tau_z_t_two_sample_frac(
+      if(!user_supplied_tau2) tau2 = get_tau_z_t_two_sample_frac(
         n1 = n1,
         n2 = n2,
         w = effect_size,
         r = r
       )
 
+      log_vals = unlist(lapply(tau2, log_T_frac_onesided, r = r, v = df, t = t_stat))
+    }
+    }else{
       log_vals = unlist(lapply(tau2, log_T_frac_onesided, r = r, v = df, t = t_stat))
     }
   }
@@ -289,29 +308,36 @@ t.test.BFF = function(t_stat,
     )
   }
 
-  # plotting
-  bff_plot = c()
-  bff_plot[[1]] = BFF
+  # plotting if tau2 is not specified
+  if(!user_supplied_tau2){
+    bff_plot = c()
+    bff_plot[[1]] = BFF
 
-  plot_BFF(
-    effect_size = effect_size,
-    BFF = bff_plot,
-    save = save,
-    savename = savename,
-    xlab = xlab,
-    ylab = ylab,
-    main = main,
-    r = r
-  )
+    plot_BFF(effect_size = effect_size,
+             BFF = bff_plot,
+             save = save,
+             savename = savename,
+             xlab = xlab,
+             ylab = ylab,
+             main = main,
+             r = r)
+  }
 
-  return(
-    list(
+
+  if(user_supplied_tau2) {
+    to_return = list(
+      BFF = BFF,
+      tau2 = tau2
+    )
+  } else {
+    to_return = list(
       BFF = BFF,
       effect_size = effect_size,
       BFF_max_RMSE = BFF_max_RMSE,
       max_RMSE = max_RMSE,
       tau2 = tau2
     )
-  )
+  }
+  return(to_return)
 
 }

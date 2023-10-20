@@ -105,6 +105,7 @@ log_Z_frac_onesided = function(tau, z, r)
 #' @param n2 sample size of group two for two sample test
 #' @param savename optional, filename for saving the pdf of the final plot
 #' @param r r value
+#' @param tau2 tau2 values
 #' @param save should a copy of the plot be saved?
 #' @param xlab optional, x label for plot
 #' @param ylab optional, y label for plot
@@ -141,6 +142,7 @@ z.test.BFF = function(z_stat,
                       n2 = NULL,
                       savename = NULL,
                       r = 1,
+                      tau2 = NULL,
                       save = TRUE,
                       xlab = NULL,
                       ylab = NULL,
@@ -156,6 +158,9 @@ z.test.BFF = function(z_stat,
 
   # same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
+
+  user_supplied_tau2 = TRUE
+  if (is.null(tau2)) user_supplied_tau2 = FALSE
 
   r1 = FALSE
   frac_r = FALSE
@@ -175,21 +180,26 @@ z.test.BFF = function(z_stat,
 
   log_vals = rep(0, length(effect_size))
   if (r1) {
+    if(is.null(tau2)){
     if (one_sample)
     {
-      tau2 = get_one_sample_tau2(n = n, w = effect_size)
+      if(!user_supplied_tau2) tau2 = get_one_sample_tau2(n = n, w = effect_size)
     } else {
-      tau2 = get_two_sample_tau2(n1 = n1, n2 = n2, w = effect_size)
+      if(!user_supplied_tau2) tau2 = get_two_sample_tau2(n1 = n1, n2 = n2, w = effect_size)
     }
     log_vals = z_val_r1(tau2 = tau2, z_stat = z_stat)
+    }else{
+      log_vals = z_val_r1(tau2 = tau2, z_stat = z_stat)
+    }
   }
 
   if (integer_r) {
+    if(is.null(tau2)){
     if (one_sample)
     {
-      tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
+      if(!user_supplied_tau2) tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
     } else {
-      tau2 = get_tau_z_t_two_sample_frac(
+      if(!user_supplied_tau2) tau2 = get_tau_z_t_two_sample_frac(
         n1 = n1,
         n2 = n2,
         w = effect_size,
@@ -197,20 +207,27 @@ z.test.BFF = function(z_stat,
       )
     }
     log_vals = log_Z(z = z_stat, r = r, tau = tau2)
+    }else{
+      log_vals = log_Z(z = z_stat, r = r, tau = tau2)
+  }
   }
 
   if (frac_r) {
+    if(is.null(tau2)){
     if (one_sample)
     {
-      tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
+      if(!user_supplied_tau2) tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
       log_vals = log_Z_frac_onesided(z = z_stat, r = r, tau = tau2)
     } else {
-      tau2 = get_tau_z_t_two_sample_frac(
+      if(!user_supplied_tau2) tau2 = get_tau_z_t_two_sample_frac(
         n1 = n1,
         n2 = n2,
         w = effect_size,
         r = r
       )
+      log_vals = log_Z_frac_onesided(z = z_stat, r = r, tau = tau2)
+    }
+    }else{
       log_vals = log_Z_frac_onesided(z = z_stat, r = r, tau = tau2)
     }
   }
@@ -230,7 +247,8 @@ z.test.BFF = function(z_stat,
     )
   }
 
-  # plotting
+  # plotting if tau2 is not specified
+  if(!user_supplied_tau2){
   bff_plot = c()
   bff_plot[[1]] = BFF
 
@@ -242,15 +260,24 @@ z.test.BFF = function(z_stat,
                       ylab = ylab,
                       main = main,
                       r = r)
+  }
 
-    return(
-      list(
+
+    if(user_supplied_tau2) {
+      to_return = list(
+        BFF = BFF,
+        tau2 = tau2
+      )
+    } else {
+      to_return = list(
         BFF = BFF,
         effect_size = effect_size,
         BFF_max_RMSE = BFF_max_RMSE,
         max_RMSE = max_RMSE,
         tau2 = tau2
       )
-    )
+    }
+    return(to_return)
 
 }
+

@@ -107,6 +107,7 @@ log_G_frac = function(tau, h, k, r)
 #' @param count Is this a test of Pearson’s chi^2 test for goodness-of-fit? Default is TRUE. FALSE assumes a likelihood ratio test
 #' @param savename optional, filename for saving the pdf of the final plot
 #' @param r r value
+#' @param tau2 tau2 values
 #' @param save should a copy of the plot be saved?
 #' @param xlab optional, x label for plot
 #' @param ylab optional, y label for plot
@@ -141,18 +142,21 @@ chi2.test.BFF = function(chi2_stat,
                       count = TRUE,
                       savename = NULL,
                       r = 1,
+                      tau2 = NULL,
                       save = TRUE,
                       xlab = NULL,
                       ylab = NULL,
                       main = NULL)
 
 {
-
   if (is.null(df))
     stop("df is required")
 
   # same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
+
+  user_supplied_tau2 = TRUE
+  if (is.null(tau2)) user_supplied_tau2 = FALSE
 
   r1 = FALSE
   frac_r = FALSE
@@ -171,43 +175,55 @@ chi2.test.BFF = function(chi2_stat,
   }
 
   log_vals = rep(0, length(effect_size))
-  if (r1) {
-    if (count)
-    {
-      tau2 = get_count_tau2(n=n, w=effect_size)
-    } else {
-      tau2 = get_LRT_tau2(n=n, w=effect_size)
-    }
-    log_vals = unlist(lapply(tau2, G_val_r1, chi2_stat=chi2_stat, df=df))
-  }
+  if(r1){
+  if (is.null(tau2)) {
+      if (count) {
+        if(!user_supplied_tau2) tau2 = get_count_tau2(n = n, w = effect_size)
+      } else {
+        if(!user_supplied_tau2)tau2 = get_LRT_tau2(n = n, w = effect_size)
+      }
 
+      log_vals = unlist(lapply(tau2, G_val_r1, chi2_stat = chi2_stat, df = df))
+  } else {
+    log_vals = unlist(lapply(tau2, G_val_r1, chi2_stat = chi2_stat, df = df))
+  }
+}
 
   if (integer_r) {
+  if(is.null(tau2)){
     if (count)
     {
-      tau2 = get_tau_poisson_frac(n=n, w=effect_size, k = df, r =r)
+      if(!user_supplied_tau2) tau2 = get_tau_poisson_frac(n=n, w=effect_size, k = df, r =r)
     } else {
-      tau2 = get_tau_likelihood_frac(n=n, w=effect_size, k = df, r = r)
+      if(!user_supplied_tau2) tau2 = get_tau_likelihood_frac(n=n, w=effect_size, k = df, r = r)
     }
     log_vals = log_G(h = chi2_stat,
                      r = r,
                      tau = tau2,
                      k = df)
+  }else{
+    log_vals = log_G(h = chi2_stat,
+                     r = r,
+                     tau = tau2,
+                     k = df)
   }
+}
 
   if (frac_r) {
+    if(is.null(tau2)){
     if (count)
     {
-      tau2 = get_tau_poisson_frac(n=n, w=effect_size, k = df, r =r)
+      if(!user_supplied_tau2) tau2 = get_tau_poisson_frac(n=n, w=effect_size, k = df, r =r)
     } else {
-      tau2 = get_tau_likelihood_frac(n=n, w=effect_size, k = df, r=r)
+      if(!user_supplied_tau2) tau2 = get_tau_likelihood_frac(n=n, w=effect_size, k = df, r=r)
     }
 
-    print(tau2)
     log_vals = unlist(lapply(tau2, log_G_frac, h=chi2_stat, r=r, k=df))
+    }else{
+      log_vals = unlist(lapply(tau2, log_G_frac, h=chi2_stat, r=r, k=df))
     }
+  }
 
-  print(log_vals)
   # stuff to return
   BFF = log_vals
   effect_size = effect_size
@@ -219,33 +235,42 @@ chi2.test.BFF = function(chi2_stat,
   if (!all(is.finite(BFF)))
   {
     stop(
-      "Values entered produced non-finite numbers. The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow. Please contact the maintainer for more information."
+      "Values entered produced non-finite numbers. The most likely scenario is the evidence was so strongly in
+      favor of the alternative that there was numeric overflow. Please contact the maintainer for more information."
     )
   }
 
-  # plotting
-  bff_plot = c()
-  bff_plot[[1]] = BFF
+  # plotting if tau2 is not specified
+  if(!user_supplied_tau2){
+    bff_plot = c()
+    bff_plot[[1]] = BFF
 
-  plot_BFF(
-    effect_size = effect_size,
-    BFF = bff_plot,
-    save = save,
-    savename = savename,
-    xlab = xlab,
-    ylab = ylab,
-    main = main,
-    r = r
-  )
+    plot_BFF(effect_size = effect_size,
+             BFF = bff_plot,
+             save = save,
+             savename = savename,
+             xlab = xlab,
+             ylab = ylab,
+             main = main,
+             r = r)
+  }
 
-  return(
-    list(
+
+  if(user_supplied_tau2) {
+    to_return = list(
+      BFF = BFF,
+      tau2 = tau2
+    )
+  } else {
+    to_return = list(
       BFF = BFF,
       effect_size = effect_size,
       BFF_max_RMSE = BFF_max_RMSE,
       max_RMSE = max_RMSE,
       tau2 = tau2
     )
-  )
+  }
+  return(to_return)
 
 }
+
