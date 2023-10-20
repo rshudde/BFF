@@ -138,6 +138,7 @@ log_F_frac = function(tau, f, k, m, r)
 #' @param n sample size
 #' @param savename optional, filename for saving the pdf of the final plot
 #' @param r r value
+#' @param tau2 tau2 values
 #' @param save should a copy of the plot be saved?
 #' @param xlab optional, x label for plot
 #' @param ylab optional, y label for plot
@@ -170,6 +171,7 @@ f.test.BFF = function(f_stat,
                       df2,
                       savename = NULL,
                       r = 1,
+                      tau2 = NULL,
                       save = TRUE,
                       xlab = NULL,
                       ylab = NULL,
@@ -178,6 +180,12 @@ f.test.BFF = function(f_stat,
 {
   # same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
+
+  if(!is.null(tau2)){
+    if(length(tau2) != length(effect_size)){
+      stop("tau2 is not compatible with effect size.")
+    }
+  }
 
   r1 = FALSE
   frac_r = FALSE
@@ -197,6 +205,7 @@ f.test.BFF = function(f_stat,
 
   log_vals = rep(0, length(effect_size))
   if (r1) {
+    if(is.null(tau2)){
     tau2 = get_linear_tau2(n = n, w = effect_size)
     log_vals = unlist(lapply(
       tau2,
@@ -205,10 +214,19 @@ f.test.BFF = function(f_stat,
       df1 = df1,
       df2 = df2
     ))
+    }else{
+      log_vals = unlist(lapply(
+        tau2,
+        f_val_r1,
+        f_stat = f_stat,
+        df1 = df1,
+        df2 = df2))
+    }
   }
 
 
   if (integer_r) {
+    if(is.null(tau2)){
     tau2 = get_tau_linear_frac(n = n,
                                k = df1,
                                w = effect_size,
@@ -220,9 +238,19 @@ f.test.BFF = function(f_stat,
       r = r,
       tau = tau2
     )
+    }else{
+      log_vals = log_F(
+        f = f_stat,
+        k = df1,
+        m = df2,
+        r = r,
+        tau = tau2
+      )
+    }
   }
 
   if (frac_r) {
+    if(is.null(tua2)){
     tau2 = get_tau_linear_frac(n = n,
                                k = df1,
                                w = effect_size,
@@ -230,6 +258,9 @@ f.test.BFF = function(f_stat,
 
     log_vals = unlist(lapply(tau2, log_F_frac, f=f_stat, k= df1, m = df2, r = r))
 
+    }else{
+      log_vals = unlist(lapply(tau2, log_F_frac, f=f_stat, k= df1, m = df2, r = r))
+    }
   }
 
   # stuff to return
