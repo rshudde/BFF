@@ -1,6 +1,6 @@
-source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
 
 ################# F functions if r is an integer and equal to 1
 f_val_r1 = function(tau2, f_stat, df1, df2)
@@ -181,11 +181,8 @@ f.test.BFF = function(f_stat,
   # same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
-  if(!is.null(tau2)){
-    if(length(tau2) != length(effect_size)){
-      stop("tau2 is not compatible with effect size.")
-    }
-  }
+  user_supplied_tau2 = TRUE
+  if (is.null(tau2)) user_supplied_tau2 = FALSE
 
   r1 = FALSE
   frac_r = FALSE
@@ -206,7 +203,7 @@ f.test.BFF = function(f_stat,
   log_vals = rep(0, length(effect_size))
   if (r1) {
     if(is.null(tau2)){
-    tau2 = get_linear_tau2(n = n, w = effect_size)
+      if(!user_supplied_tau2) tau2 = get_linear_tau2(n = n, w = effect_size)
     log_vals = unlist(lapply(
       tau2,
       f_val_r1,
@@ -227,7 +224,7 @@ f.test.BFF = function(f_stat,
 
   if (integer_r) {
     if(is.null(tau2)){
-    tau2 = get_tau_linear_frac(n = n,
+      if(!user_supplied_tau2) tau2 = get_tau_linear_frac(n = n,
                                k = df1,
                                w = effect_size,
                                r = r)
@@ -251,7 +248,7 @@ f.test.BFF = function(f_stat,
 
   if (frac_r) {
     if(is.null(tua2)){
-    tau2 = get_tau_linear_frac(n = n,
+      if(!user_supplied_tau2) tau2 = get_tau_linear_frac(n = n,
                                k = df1,
                                w = effect_size,
                                r = r)
@@ -278,29 +275,37 @@ f.test.BFF = function(f_stat,
     )
   }
 
-  # plotting
-  bff_plot = c()
-  bff_plot[[1]] = BFF
+  # plotting if tau2 is not specified
+  if(!user_supplied_tau2){
+    bff_plot = c()
+    bff_plot[[1]] = BFF
 
-  plot_BFF(
-    effect_size = effect_size,
-    BFF = bff_plot,
-    save = save,
-    savename = savename,
-    xlab = xlab,
-    ylab = ylab,
-    main = main,
-    r = r
-  )
+    plot_BFF(effect_size = effect_size,
+             BFF = bff_plot,
+             save = save,
+             savename = savename,
+             xlab = xlab,
+             ylab = ylab,
+             main = main,
+             r = r)
+  }
 
-  return(
-    list(
+
+  if(user_supplied_tau2) {
+    to_return = list(
+      BFF = BFF,
+      tau2 = tau2
+    )
+  } else {
+    to_return = list(
       BFF = BFF,
       effect_size = effect_size,
       BFF_max_RMSE = BFF_max_RMSE,
       max_RMSE = max_RMSE,
       tau2 = tau2
     )
-  )
+  }
+  return(to_return)
+
 
 }

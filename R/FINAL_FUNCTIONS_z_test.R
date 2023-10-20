@@ -159,11 +159,8 @@ z.test.BFF = function(z_stat,
   # same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
-  if(!is.null(tau2)){
-    if(length(tau2) != length(effect_size)){
-      stop("tau2 is not compatible with effect size.")
-    }
-  }
+  user_supplied_tau2 = TRUE
+  if (is.null(tau2)) user_supplied_tau2 = FALSE
 
   r1 = FALSE
   frac_r = FALSE
@@ -186,9 +183,9 @@ z.test.BFF = function(z_stat,
     if(is.null(tau2)){
     if (one_sample)
     {
-      tau2 = get_one_sample_tau2(n = n, w = effect_size)
+      if(!user_supplied_tau2) tau2 = get_one_sample_tau2(n = n, w = effect_size)
     } else {
-      tau2 = get_two_sample_tau2(n1 = n1, n2 = n2, w = effect_size)
+      if(!user_supplied_tau2) tau2 = get_two_sample_tau2(n1 = n1, n2 = n2, w = effect_size)
     }
     log_vals = z_val_r1(tau2 = tau2, z_stat = z_stat)
     }else{
@@ -200,9 +197,9 @@ z.test.BFF = function(z_stat,
     if(is.null(tau2)){
     if (one_sample)
     {
-      tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
+      if(!user_supplied_tau2) tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
     } else {
-      tau2 = get_tau_z_t_two_sample_frac(
+      if(!user_supplied_tau2) tau2 = get_tau_z_t_two_sample_frac(
         n1 = n1,
         n2 = n2,
         w = effect_size,
@@ -219,10 +216,10 @@ z.test.BFF = function(z_stat,
     if(is.null(tau2)){
     if (one_sample)
     {
-      tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
+      if(!user_supplied_tau2) tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
       log_vals = log_Z_frac_onesided(z = z_stat, r = r, tau = tau2)
     } else {
-      tau2 = get_tau_z_t_two_sample_frac(
+      if(!user_supplied_tau2) tau2 = get_tau_z_t_two_sample_frac(
         n1 = n1,
         n2 = n2,
         w = effect_size,
@@ -250,7 +247,8 @@ z.test.BFF = function(z_stat,
     )
   }
 
-  # plotting
+  # plotting if tau2 is not specified
+  if(!user_supplied_tau2){
   bff_plot = c()
   bff_plot[[1]] = BFF
 
@@ -262,15 +260,24 @@ z.test.BFF = function(z_stat,
                       ylab = ylab,
                       main = main,
                       r = r)
+  }
 
-    return(
-      list(
+
+    if(user_supplied_tau2) {
+      to_return = list(
+        BFF = BFF,
+        tau2 = tau2
+      )
+    } else {
+      to_return = list(
         BFF = BFF,
         effect_size = effect_size,
         BFF_max_RMSE = BFF_max_RMSE,
         max_RMSE = max_RMSE,
         tau2 = tau2
       )
-    )
+    }
+    return(to_return)
 
 }
+
