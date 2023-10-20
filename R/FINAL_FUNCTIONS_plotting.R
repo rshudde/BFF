@@ -65,7 +65,7 @@ plot_BFF = function(effect_size, BFF,  save = FALSE, savename=NULL, xlab = NULL,
   if (num_lines > 1)
   {
     graphics::legend("topleft", legend=plot_legend_names,
-           col=c(1:num_lines), lty=c(1:length(BFF)), cex=0.6, bty="n")
+                     col=c(1:num_lines), lty=c(1:length(BFF)), cex=0.6, bty="n")
   }
 
 
