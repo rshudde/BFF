@@ -152,6 +152,7 @@ log_T_frac_onesided = function(tau, t, v, r)
 #' @param n2 sample size of group two for two sample test
 #' @param savename optional, filename for saving the pdf of the final plot
 #' @param r r value
+#' @param tau2 tau2 values
 #' @param save should a copy of the plot be saved?
 #' @param xlab optional, x label for plot
 #' @param ylab optional, y label for plot
@@ -189,6 +190,7 @@ t.test.BFF = function(t_stat,
                       n2 = NULL,
                       savename = NULL,
                       r = 1,
+                      tau2 = NULL,
                       save = TRUE,
                       xlab = NULL,
                       ylab = NULL,
@@ -205,6 +207,12 @@ t.test.BFF = function(t_stat,
 
   # same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
+
+  if(!is.null(tau2)){
+    if(length(tau2) != length(effect_size)){
+      stop("tau2 is not compatible with effect size.")
+    }
+  }
 
   r1 = FALSE
   frac_r = FALSE
@@ -225,6 +233,7 @@ t.test.BFF = function(t_stat,
   log_vals = rep(0, length(effect_size))
 
   if (r1) {
+    if(is.null(tau2)){
     if (one_sample)
     {
       tau2 = get_one_sample_tau2(n = n, w = effect_size)
@@ -232,10 +241,13 @@ t.test.BFF = function(t_stat,
       tau2 = get_two_sample_tau2(n1 = n1, n2 = n2, w = effect_size)
     }
     log_vals = unlist(lapply(tau2, t_val_r1, t_stat=t_stat, df=df))
+    }else{
+      log_vals = unlist(lapply(tau2, t_val_r1, t_stat=t_stat, df=df))
   }
-
+}
 
   if (integer_r) {
+    if(is.null(tau2)){
     if (one_sample)
     {
       tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
@@ -251,9 +263,16 @@ t.test.BFF = function(t_stat,
                      r = r,
                      tau = tau2,
                      v = df)
+    }else{
+      log_vals = log_T(t = t_stat,
+                       r = r,
+                       tau = tau2,
+                       v = df)
+    }
   }
 
   if (frac_r) {
+    if(is.null(tau2)){
     if (one_sample)
     {
       tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
@@ -267,6 +286,9 @@ t.test.BFF = function(t_stat,
         r = r
       )
 
+      log_vals = unlist(lapply(tau2, log_T_frac_onesided, r = r, v = df, t = t_stat))
+    }
+    }else{
       log_vals = unlist(lapply(tau2, log_T_frac_onesided, r = r, v = df, t = t_stat))
     }
   }
