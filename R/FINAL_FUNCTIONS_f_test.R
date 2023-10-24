@@ -160,6 +160,7 @@ log_F_frac = function(tau, f, k, m, r)
 #'
 #' @examples
 #' fBFF = f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE)
+#' BFF = f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = 0.4)
 #' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2, save = FALSE)
 #' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2.5, save = FALSE)
 #' fBFF$BFF_max_RMSE  # maximum BFF value
@@ -247,7 +248,7 @@ f.test.BFF = function(f_stat,
   }
 
   if (frac_r) {
-    if(is.null(tua2)){
+    if(is.null(tau2)){
       if(!user_supplied_tau2) tau2 = get_tau_linear_frac(n = n,
                                k = df1,
                                w = effect_size,
