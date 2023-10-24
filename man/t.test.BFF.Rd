@@ -13,6 +13,7 @@
   n2 = NULL,
   savename = NULL,
   r = 1,
+  tau2 = NULL,
   save = TRUE,
   xlab = NULL,
   ylab = NULL,
@@ -35,6 +36,8 @@
 \item{savename}{optional, filename for saving the pdf of the final plot}
 
 \item{r}{r value}
+
+\item{tau2}{tau2 values}
 
 \item{save}{should a copy of the plot be saved?}
 

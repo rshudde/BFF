@@ -11,6 +11,7 @@ f.test.BFF(
   df2,
   savename = NULL,
   r = 1,
+  tau2 = NULL,
   save = TRUE,
   xlab = NULL,
   ylab = NULL,
@@ -29,6 +30,8 @@ f.test.BFF(
 \item{savename}{optional, filename for saving the pdf of the final plot}
 
 \item{r}{r value}
+
+\item{tau2}{tau2 values}
 
 \item{save}{should a copy of the plot be saved?}
 
@@ -60,6 +63,7 @@ Plot saved to working directory unless a full path is specified in the 'savename
 }
 \examples{
 fBFF = f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE)
+BFF = f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = 0.4)
 f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2, save = FALSE)
 f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2.5, save = FALSE)
 fBFF$BFF_max_RMSE  # maximum BFF value
