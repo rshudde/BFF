@@ -104,6 +104,7 @@ log_Z_frac_onesided = function(tau, z, r)
 #' @param n1 sample size of group one for two sample test
 #' @param n2 sample size of group two for two sample test
 #' @param savename optional, filename for saving the pdf of the final plot
+#' @param maximize Should the value of r be maximized? Default is FALSE. Only set to TRUE if using multiple studies
 #' @param r r value
 #' @param tau2 tau2 values
 #' @param save should a copy of the plot be saved?
@@ -141,6 +142,7 @@ z.test.BFF = function(z_stat,
                       n1 = NULL,
                       n2 = NULL,
                       savename = NULL,
+                      maximize = FALSE,
                       r = 1,
                       tau2 = NULL,
                       save = TRUE,
@@ -243,7 +245,9 @@ z.test.BFF = function(z_stat,
   if (!all(is.finite(BFF)))
   {
     stop(
-      "Values entered produced non-finite numbers. The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow. Please contact the maintainer for more information."
+      "Values entered produced non-finite numbers.
+      The most likely scenario is the evidence was so strongly in favor of the
+      alternative that there was numeric overflow. Please contact the maintainer for more information."
     )
   }
 
