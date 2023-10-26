@@ -37,7 +37,7 @@
 
 \item{r}{r value}
 
-\item{tau2}{tau2 values}
+\item{tau2}{tau2 values (can be a single entry or a vector of values)}
 
 \item{save}{should a copy of the plot be saved?}
 
@@ -50,7 +50,7 @@
 \value{
 Returns Bayes factor function results
  \tabular{ll}{
-   \code{BFF} \tab Bayes Factor Function values \cr
+   \code{BFF} \tab The log of the Bayes Factor Function values \cr
    \tab \cr
    \code{effect_size} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
    \tab \cr
@@ -69,6 +69,8 @@ Plot saved to working directory unless a full path is specified in the 'savename
 }
 \examples{
 tBFF = t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE)
+t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = 0.5)
+t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = c(0.5, 0.2))
 t.test.BFF(t_stat = 2.5, n1 = 50, n2 = 40, df = 88, save = FALSE, one_sample = FALSE)
 t.test.BFF(t_stat = 2.5, n = 50, r = 2, df = 49, save = FALSE)
 t.test.BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save = FALSE)

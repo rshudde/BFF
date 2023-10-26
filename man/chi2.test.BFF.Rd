@@ -8,7 +8,7 @@ chi2.test.BFF(
   chi2_stat,
   n = NULL,
   df = NULL,
-  count = TRUE,
+  pearsons = TRUE,
   savename = NULL,
   r = 1,
   tau2 = NULL,
@@ -25,13 +25,13 @@ chi2.test.BFF(
 
 \item{df}{degrees of freedom}
 
-\item{count}{Is this a test of Pearson’s chi^2 test for goodness-of-fit? Default is TRUE. FALSE assumes a likelihood ratio test}
+\item{pearsons}{Is this a test of Pearson’s chi^2 test for goodness-of-fit? Default is TRUE. FALSE assumes a likelihood ratio test}
 
 \item{savename}{optional, filename for saving the pdf of the final plot}
 
 \item{r}{r value}
 
-\item{tau2}{tau2 values}
+\item{tau2}{tau2 values (can be a single entry or a vector of values)}
 
 \item{save}{should a copy of the plot be saved?}
 
@@ -44,7 +44,7 @@ chi2.test.BFF(
 \value{
 Returns Bayes factor function results
  \tabular{ll}{
-   \code{BFF} \tab Bayes Factor Function values \cr
+   \code{BFF} \tab The log of the Bayes Factor Function values \cr
    \tab \cr
    \code{effect_size} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
    \tab \cr
@@ -62,12 +62,14 @@ All results are on the log scale.
 Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
 }
 \examples{
-chi2BFF = chi2BFF <- chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE)
-chi2BFF <- chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, count = FALSE, save = FALSE)
-chi2BFF <- chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, save = FALSE)
-chi2BFF <- chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, count = FALSE, save = FALSE)
-chi2BFF <- chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, save = FALSE)
-chi2BFF <- chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, count = FALSE, save = FALSE)
+chi2BFF = chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE)
+chi2BFF = chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = 0.5)
+chi2BFF = chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = c(0.5, 0.8))
+chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, pearsons = FALSE, save = FALSE)
+chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, save = FALSE)
+chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, pearsons = FALSE, save = FALSE)
+chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, save = FALSE)
+chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, pearsons = FALSE, save = FALSE)
 chi2BFF$BFF_max_RMSE  # maximum BFF value
 chi2BFF$max_RMSE      # effect size which maximizes the BFF
 }

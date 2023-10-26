@@ -31,7 +31,7 @@ f.test.BFF(
 
 \item{r}{r value}
 
-\item{tau2}{tau2 values}
+\item{tau2}{tau2 values (can be a single entry or a vector of values)}
 
 \item{save}{should a copy of the plot be saved?}
 
@@ -44,7 +44,7 @@ f.test.BFF(
 \value{
 Returns Bayes factor function results
  \tabular{ll}{
-   \code{BFF} \tab Bayes Factor Function values \cr
+   \code{BFF} \tab The log of the Bayes Factor Function values \cr
    \tab \cr
    \code{effect_size} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
    \tab \cr
@@ -63,7 +63,8 @@ Plot saved to working directory unless a full path is specified in the 'savename
 }
 \examples{
 fBFF = f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE)
-BFF = f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = 0.4)
+f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = 0.5)
+f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = c(0.5, 0.8))
 f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2, save = FALSE)
 f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2.5, save = FALSE)
 fBFF$BFF_max_RMSE  # maximum BFF value

@@ -11,6 +11,7 @@ z.test.BFF(
   n1 = NULL,
   n2 = NULL,
   savename = NULL,
+  maximize = FALSE,
   r = 1,
   tau2 = NULL,
   save = TRUE,
@@ -32,9 +33,11 @@ z.test.BFF(
 
 \item{savename}{optional, filename for saving the pdf of the final plot}
 
+\item{maximize}{Should the value of r be maximized? Default is FALSE. Only set to TRUE if using multiple studies}
+
 \item{r}{r value}
 
-\item{tau2}{tau2 values}
+\item{tau2}{tau2 values (can be a single entry or a vector of values)}
 
 \item{save}{should a copy of the plot be saved?}
 
@@ -47,7 +50,7 @@ z.test.BFF(
 \value{
 Returns Bayes factor function results
  \tabular{ll}{
-   \code{BFF} \tab Bayes Factor Function values \cr
+   \code{BFF} \tab The log of the Bayes Factor Function values \cr
    \tab \cr
    \code{effect_size} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
    \tab \cr
@@ -66,6 +69,8 @@ Plot saved to working directory unless a full path is specified in the 'savename
 }
 \examples{
 zBFF = z.test.BFF(z_stat = 2.5, n = 50, save = FALSE)
+z.test.BFF(z_stat = 2.5, n = 50, save = FALSE, tau2 = 0.5)
+z.test.BFF(z_stat = 2.5, n = 50, save = FALSE, tau2 = c(0.5, 0.8))
 z.test.BFF(z_stat = 2.5, n1 = 50, n2 = 35, one_sample = FALSE, save = FALSE)
 z.test.BFF(z_stat = 2.5, n = 50, r = 2, save = FALSE)
 z.test.BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE)
