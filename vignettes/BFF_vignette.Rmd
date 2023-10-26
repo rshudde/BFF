@@ -66,7 +66,7 @@ chi2_BFF_one = chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4)
 ```
 ## F - test
 ```{r}
-# generate some data 
+# generate some data
 n = 100
 p = 3
 X = matrix(rnorm(n*p), nrow = n)
