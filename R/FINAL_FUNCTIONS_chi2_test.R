@@ -176,10 +176,10 @@ chi2.test.BFF = function(chi2_stat,
   if (r1) {
     if (pearsons) {
       if (!user_supplied_tau2)
-        tau2 = get_count_tau2(n = n, w = effect_size)
+        tau2 = get_count_tau2(n = n, k = df, w = effect_size)
     } else {
       if (!user_supplied_tau2)
-        tau2 = get_LRT_tau2(n = n, w = effect_size)
+        tau2 = get_LRT_tau2(n = n, k = df, w = effect_size)
     }
     log_vals = unlist(lapply(tau2, G_val_r1, chi2_stat = chi2_stat, df = df))
   }
@@ -209,13 +209,13 @@ chi2.test.BFF = function(chi2_stat,
     if (pearsons)
     {
       if (!user_supplied_tau2)
-        tau2 = get_tau_poisson_frac(n = n,
+        tau2 = get_count_tau2(n = n,
                                     w = effect_size,
                                     k = df,
                                     r = r)
     } else {
       if (!user_supplied_tau2)
-        tau2 = get_tau_likelihood_frac(n = n,
+        tau2 = get_LRT_tau2(n = n,
                                        w = effect_size,
                                        k = df,
                                        r = r)

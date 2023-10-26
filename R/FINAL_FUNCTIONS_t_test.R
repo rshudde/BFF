@@ -269,7 +269,7 @@ if (frac_r) {
   if (one_sample)
   {
     if (!user_supplied_tau2)
-      tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
+      tau2 = get_one_sample_tau2(n = n, w = effect_size, r = r)
     log_vals = unlist(lapply(
       tau2,
       log_T_frac,
@@ -279,7 +279,7 @@ if (frac_r) {
     ))
   } else {
     if (!user_supplied_tau2)
-      tau2 = get_tau_z_t_two_sample_frac(n1 = n1,
+      tau2 = get_two_sample_tau2(n1 = n1,
                                          n2 = n2,
                                          w = effect_size,
                                          r = r)

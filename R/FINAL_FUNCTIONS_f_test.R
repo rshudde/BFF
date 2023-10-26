@@ -201,7 +201,7 @@ f.test.BFF = function(f_stat,
   log_vals = rep(0, length(effect_size))
   if (r1) {
     if (!user_supplied_tau2)
-      tau2 = get_linear_tau2(n = n, w = effect_size)
+      tau2 = get_linear_tau2(n = n, k = df1, w = effect_size)
     log_vals = unlist(lapply(
       tau2,
       f_val_r1,
@@ -237,20 +237,20 @@ f.test.BFF = function(f_stat,
   # }
 
   if (frac_r) {
-      if (!user_supplied_tau2)
-        tau2 = get_tau_linear_frac(n = n,
-                                   k = df1,
-                                   w = effect_size,
-                                   r = r)
+    if (!user_supplied_tau2)
+      tau2 = get_linear_tau2(n = n,
+                             k = df1,
+                             w = effect_size,
+                             r = r)
 
-      log_vals = unlist(lapply(
-        tau2,
-        log_F_frac,
-        f = f_stat,
-        k = df1,
-        m = df2,
-        r = r
-      ))
+    log_vals = unlist(lapply(
+      tau2,
+      log_F_frac,
+      f = f_stat,
+      k = df1,
+      m = df2,
+      r = r
+    ))
   }
 
   # stuff to return

@@ -1,7 +1,7 @@
-# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
-# source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
+source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
 ################# Z functions if r is an integer and equal to 1
 z_val_r1 = function(tau2, z_stat)
 {
@@ -213,13 +213,13 @@ if (frac_r) {
   if (one_sample)
   {
     if (!user_supplied_tau2)
-      tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
+      tau2 = get_one_sample_tau2(n = n, w = effect_size, r = r)
     log_vals = log_Z_frac_onesided(z = z_stat,
                                    r = r,
                                    tau2 = tau2)
   } else {
     if (!user_supplied_tau2)
-      tau2 = get_tau_z_t_two_sample_frac(n1 = n1,
+      tau2 = get_two_sample_tau2(n1 = n1,
                                          n2 = n2,
                                          w = effect_size,
                                          r = r)
