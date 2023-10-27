@@ -38,8 +38,7 @@ plot_BFF = function(effect_size, BFF,  save = FALSE, savename=NULL, xlab = NULL,
     theme_bw()
   p <- p + labs(x = xlab, y = ylab)+
     ggtitle(main)+
-    theme(plot.title = element_text(hjust = 0.5))+
-    scale_x_continuous(breaks = NULL)
+    theme(plot.title = element_text(hjust = 0.5))
 
   maxval = 1e50
 
