@@ -139,7 +139,7 @@ user_supplied_tau2 = TRUE
 if (is.null(tau2))
   user_supplied_tau2 = FALSE
 
-r1 = FALSE
+r1 = r1
 frac_r = !r1
 
 log_vals = rep(0, length(effect_size))
@@ -179,7 +179,9 @@ BFF = log_vals
 if (!all(is.finite(BFF)))
 {
   stop(
-    "Values entered produced non-finite numbers. The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow. Please contact the maintainer for more information."
+    "Values entered produced non-finite numbers.
+      The most likely scenario is the evidence was so strongly in favor of the
+      alternative that there was numeric overflow. Please contact the maintainer for more information."
   )
 }
 
@@ -202,7 +204,7 @@ return(BFF)
 #' @param n sample size
 #' @param savename optional, filename for saving the pdf of the final plot
 #' @param r r value
-#' @param maximize should the function be maximzied over all possible r values? Default is FALSE.
+#' @param maximize should the function be maximzied over all possible r values? Default is FALSE. Only set to TRUE if analyzing multiple studies
 #' @param tau2 tau2 values (can be a single entry or a vector of values)
 #' @param save should a copy of the plot be saved?
 #' @param xlab optional, x label for plot
