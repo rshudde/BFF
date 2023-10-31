@@ -1,8 +1,8 @@
-# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
-# source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
-# library(gsl)
+source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
+library(gsl)
 
 ################# F functions if r is an integer and equal to 1
 f_val_r1 = function(tau2, f_stat, df1, df2)
@@ -123,6 +123,68 @@ log_F_frac = function(tau2, f, k, m, r)
 }
 
 
+####################### backend implementation
+backend_f = function(r,
+                     f_stat,
+                     n,
+                     df1,
+                     df2,
+                     r1,
+                     tau2 = NULL)
+{
+  # same effect sizes for all tests
+  effect_size = seq(0.01, 1, by = 0.01)
+
+user_supplied_tau2 = TRUE
+if (is.null(tau2))
+  user_supplied_tau2 = FALSE
+
+r1 = FALSE
+frac_r = !r1
+
+log_vals = rep(0, length(effect_size))
+if (r1) {
+  if (!user_supplied_tau2)
+    tau2 = get_linear_tau2(n = n, k = df1, w = effect_size)
+  log_vals = unlist(lapply(
+    tau2,
+    f_val_r1,
+    f_stat = f_stat,
+    df1 = df1,
+    df2 = df2
+  ))
+}
+
+if (frac_r) {
+  if (!user_supplied_tau2)
+    tau2 = get_linear_tau2(n = n,
+                           k = df1,
+                           w = effect_size,
+                           r = r)
+
+  log_vals = unlist(lapply(
+    tau2,
+    log_F_frac,
+    f = f_stat,
+    k = df1,
+    m = df2,
+    r = r
+  ))
+}
+
+# stuff to return
+BFF = log_vals
+
+# check the results are finite
+if (!all(is.finite(BFF)))
+{
+  stop(
+    "Values entered produced non-finite numbers. The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow. Please contact the maintainer for more information."
+  )
+}
+
+return(BFF)
+}
 
 
 ################# F function user interaction
@@ -140,6 +202,7 @@ log_F_frac = function(tau2, f, k, m, r)
 #' @param n sample size
 #' @param savename optional, filename for saving the pdf of the final plot
 #' @param r r value
+#' @param maximize should the function be maximzied over all possible r values? Default is FALSE.
 #' @param tau2 tau2 values (can be a single entry or a vector of values)
 #' @param save should a copy of the plot be saved?
 #' @param xlab optional, x label for plot
@@ -166,6 +229,9 @@ log_F_frac = function(tau2, f, k, m, r)
 #' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = c(0.5, 0.8))
 #' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2, save = FALSE)
 #' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2.5, save = FALSE)
+#' f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE)
+#' f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE, tau2 = 0.5)
+#' f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE, tau2 = c(0.5, 0.8))
 #' fBFF$BFF_max_RMSE  # maximum BFF value
 #' fBFF$max_RMSE      # effect size which maximizes the BFF value
 #'
@@ -175,6 +241,7 @@ f.test.BFF = function(f_stat,
                       df2,
                       savename = NULL,
                       r = 1,
+                      maximize = FALSE,
                       tau2 = NULL,
                       save = TRUE,
                       xlab = NULL,
@@ -182,96 +249,26 @@ f.test.BFF = function(f_stat,
                       main = NULL)
 
 {
-  # same effect sizes for all tests
+  #####  same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
+
+  ##### is tau2 supplied as an argument?
   user_supplied_tau2 = TRUE
   if (is.null(tau2))
-    user_supplied_tau2 = FALSE
-
-  r1 = FALSE
-  frac_r = FALSE
-
-  if (r == 1) {
-    r1 = TRUE
-  } else {
-    frac_r = TRUE
-  }
-
-  log_vals = rep(0, length(effect_size))
-  if (r1) {
-    if (!user_supplied_tau2)
-      tau2 = get_linear_tau2(n = n, k = df1, w = effect_size)
-    log_vals = unlist(lapply(
-      tau2,
-      f_val_r1,
-      f_stat = f_stat,
-      df1 = df1,
-      df2 = df2
-    ))
-  }
-
-
-  # if (integer_r) {
-  #   if(is.null(tau2)){
-  #     if(!user_supplied_tau2) tau2 = get_tau_linear_frac(n = n,
-  #                              k = df1,
-  #                              w = effect_size,
-  #                              r = r)
-  #   log_vals = log_F(
-  #     f = f_stat,
-  #     k = df1,
-  #     m = df2,
-  #     r = r,
-  #     tau = tau2
-  #   )
-  #   }else{
-  #     log_vals = log_F(
-  #       f = f_stat,
-  #       k = df1,
-  #       m = df2,
-  #       r = r,
-  #       tau = tau2
-  #     )
-  #   }
-  # }
-
-  if (frac_r) {
-    if (!user_supplied_tau2)
-      tau2 = get_linear_tau2(n = n,
-                             k = df1,
-                             w = effect_size,
-                             r = r)
-
-    log_vals = unlist(lapply(
-      tau2,
-      log_F_frac,
-      f = f_stat,
-      k = df1,
-      m = df2,
-      r = r
-    ))
-  }
-
-  # stuff to return
-  BFF = log_vals
-  effect_size = effect_size
-  idx_max = which.max(BFF)
-  BFF_max_RMSE = BFF[idx_max]
-  max_RMSE = effect_size[idx_max]
-
-  # check the results are finite
-  if (!all(is.finite(BFF)))
   {
-    stop(
-      "Values entered produced non-finite numbers. The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow. Please contact the maintainer for more information."
-    )
+    user_supplied_tau2 = FALSE
   }
 
-  # plotting if tau2 is not specified
-  if (!user_supplied_tau2) {
+  #####  call results
+  r1 = FALSE
+  if (r == 1) r1 = TRUE
+  results = backend_f(f_stat = f_stat, n = n, df1 = df1, df2 = df2, r = r, tau2 = tau2, r1 = r1)
+
+  #####  plotting if tau2 is not specified
+  if (!user_supplied_tau2 && !maximize) {
     bff_plot = c()
-    bff_plot[[1]] = BFF
+    bff_plot[[1]] = results
 
     plot_BFF(
       effect_size = effect_size,
@@ -285,8 +282,32 @@ f.test.BFF = function(f_stat,
     )
   }
 
+  ##### optimzation logic
+  if (maximize)
+  {
+    if (is.null(tau2)) tau2 = seq(0, 1, 0.1)
+    optimal_r = vector(length = length(tau2))
+    count = 1
+    for (i in tau2)
+    {
+      optimal_r[count] = optimize(backend_f, c(1, 20), tol = 0.001, f_stat = f_stat, n = n, df1 = df1, df2 = df2, r1 = FALSE, tau2 = i, maximum = TRUE)$maximum
+      count = count + 1
+    }
+    maximized_values = as.data.frame(cbind(tau2, optimal_r))
+  }
 
-  if (user_supplied_tau2) {
+
+  ###### return logic
+  BFF = results
+  effect_size = effect_size
+  idx_max = which.max(BFF)
+  BFF_max_RMSE = BFF[idx_max]
+  max_RMSE = effect_size[idx_max]
+
+  if (maximize) {
+    print("The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value.")
+    to_return = maximized_values
+  } else if (user_supplied_tau2) {
     to_return = list(BFF = BFF,
                      tau2 = tau2)
   } else {
@@ -294,11 +315,10 @@ f.test.BFF = function(f_stat,
       BFF = BFF,
       effect_size = effect_size,
       BFF_max_RMSE = BFF_max_RMSE,
-      max_RMSE = max_RMSE,
-      tau2 = tau2
+      max_RMSE = max_RMSE
     )
+
   }
   return(to_return)
-
 
 }
