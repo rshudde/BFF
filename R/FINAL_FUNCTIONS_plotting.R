@@ -130,7 +130,7 @@ plot_BFF = function(effect_size,
                10,
                5,
                2)
-  negative = -1 * positive
+  negative = -1*positive
   positive_labels = vector()
   negative_labels = vector()
 
@@ -138,15 +138,16 @@ plot_BFF = function(effect_size,
     positive_labels[k] = paste(as.character(format(positive[k],
                                                    scientific = FALSE)),
                                ":1", sep = "")
-    negative_labels[k] = paste(as.character(format(negative[k],
-                                                         scientific = FALSE)),
-                               ":1", sep = "")
+    negative_labels[k] = paste("1:", as.character(format(positive[k],
+                                                         scientific = FALSE)),sep = "")
   }
   axis_position = c(positive, log(1), negative)
   axis_labels = c(positive_labels, "1:1", negative_labels)
 
   p <-
-    p + scale_y_continuous(breaks = axis_position, labels = axis_labels, guide = guide_axis(check.overlap = TRUE))
+    p + scale_y_continuous(breaks = axis_position, labels = axis_labels, guide = guide_axis(check.overlap = TRUE))+
+    geom_hline(yintercept = log(1), lwd = 0.2)
+
   p <- p + theme(panel.grid = element_blank())
 
   if (save) {
