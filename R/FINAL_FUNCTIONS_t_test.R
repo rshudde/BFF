@@ -137,6 +137,90 @@ log_T_frac_onesided = function(tau2, t, v, r)
   return(to_return)
 }
 
+####################### backend implementation
+backend_t = function(r,
+                     t_stat,
+                     n = NULL,
+                     df = NULL,
+                     one_sample = TRUE,
+                     n1 = NULL,
+                     n2 = NULL,
+                     savename = NULL,
+                     r1 = FALSE,
+                     tau2 = NULL)
+
+{
+
+
+  # same effect sizes for all tests
+  effect_size = seq(0.01, 1, by = 0.01)
+
+  user_supplied_tau2 = TRUE
+  if (is.null(tau2))
+    user_supplied_tau2 = FALSE
+
+  r1 = r1
+  frac_r = !r1
+
+  log_vals = rep(0, length(effect_size))
+
+  if (r1) {
+    if (one_sample)
+    {
+      if (!user_supplied_tau2)
+        tau2 = get_one_sample_tau2(n = n, w = effect_size)
+    } else {
+      if (!user_supplied_tau2)
+        tau2 = get_two_sample_tau2(n1 = n1, n2 = n2, w = effect_size)
+    }
+    log_vals = unlist(lapply(tau2, t_val_r1, t_stat = t_stat, df = df))
+  }
+
+  if (frac_r) {
+    if (one_sample)
+    {
+      if (!user_supplied_tau2)
+        tau2 = get_one_sample_tau2(n = n, w = effect_size, r = r)
+      log_vals = unlist(lapply(
+        tau2,
+        log_T_frac,
+        r = r,
+        v = df,
+        t = t_stat
+      ))
+    } else {
+      if (!user_supplied_tau2)
+        tau2 = get_two_sample_tau2(n1 = n1,
+                                   n2 = n2,
+                                   w = effect_size,
+                                   r = r)
+
+      log_vals = unlist(lapply(
+        tau2,
+        log_T_frac_onesided,
+        r = r,
+        v = df,
+        t = t_stat
+      ))
+    }
+  }
+
+  # stuff to return
+  BFF = log_vals
+
+  # check the results are finite
+  if (!all(is.finite(BFF)))
+  {
+    warning(
+      "Values entered produced non-finite numbers for some effect sizes.
+      The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow.
+      Only effect sizes with non-NaN values are kept in the plots.
+      Please contact the maintainer for more information."
+    )
+  }
+
+  return(BFF)
+}
 
 ################# T function user interaction
 
@@ -154,6 +238,7 @@ log_T_frac_onesided = function(tau2, t, v, r)
 #' @param n1 sample size of group one for two sample test
 #' @param n2 sample size of group two for two sample test
 #' @param savename optional, filename for saving the pdf of the final plot
+#' @param maximize should the function be maximzied over all possible r values? Default is FALSE. Only set to TRUE if analyzing multiple studies
 #' @param r r value
 #' @param tau2 tau2 values (can be a single entry or a vector of values)
 #' @param save should a copy of the plot be saved?
@@ -184,6 +269,9 @@ log_T_frac_onesided = function(tau2, t, v, r)
 #' t.test.BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save = FALSE)
 #' t.test.BFF(t_stat = 2.5, n = 50, r = 2.5, df = 49, save = FALSE)
 #' t.test.BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save=FALSE)
+#' t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE)
+#' t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = 0.5)
+#' t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = c(0.5, 0.8))
 #' tBFF$BFF_max_RMSE   # maximum BFF value
 #' tBFF$max_RMSE       # effect size which maximizes the BFF value
 #'
@@ -194,6 +282,7 @@ t.test.BFF = function(t_stat,
                       n1 = NULL,
                       n2 = NULL,
                       savename = NULL,
+                      maximize = FALSE,
                       r = 1,
                       tau2 = NULL,
                       save = TRUE,
@@ -210,138 +299,76 @@ t.test.BFF = function(t_stat,
   if (is.null(df))
     stop("df is required")
 
-  # same effect sizes for all tests
+  #####  same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
+
+  ##### is tau2 supplied as an argument?
   user_supplied_tau2 = TRUE
   if (is.null(tau2))
-    user_supplied_tau2 = FALSE
-
-  r1 = FALSE
-  frac_r = FALSE
-
-  if (r == 1) {
-    r1 = TRUE
-  } else {
-    frac_r = TRUE
-  }
-
-  log_vals = rep(0, length(effect_size))
-
-  if (r1) {
-    if (one_sample)
-    {
-      if (!user_supplied_tau2)
-        tau2 = get_one_sample_tau2(n = n, w = effect_size)
-    } else {
-      if (!user_supplied_tau2)
-        tau2 = get_two_sample_tau2(n1 = n1, n2 = n2, w = effect_size)
-    }
-    log_vals = unlist(lapply(tau2, t_val_r1, t_stat = t_stat, df = df))
-}
-
-# if (integer_r) {
-#   if(is.null(tau2)){
-#   if (one_sample)
-#   {
-#     if(!user_supplied_tau2) tau2 = get_tau_z_t_one_sample_frac(n = n, w = effect_size, r = r)
-#   } else {
-#     tau2 = get_tau_z_t_two_sample_frac(
-#       n1 = n1,
-#       n2 = n2,
-#       w = effect_size,
-#       r = r
-#     )
-#   }
-#   log_vals = log_T(t = t_stat,
-#                    r = r,
-#                    tau = tau2,
-#                    v = df)
-#   }else{
-#     log_vals = log_T(t = t_stat,
-#                      r = r,
-#                      tau = tau2,
-#                      v = df)
-#   }
-# }
-
-if (frac_r) {
-  if (one_sample)
   {
-    if (!user_supplied_tau2)
-      tau2 = get_one_sample_tau2(n = n, w = effect_size, r = r)
-    log_vals = unlist(lapply(
-      tau2,
-      log_T_frac,
-      r = r,
-      v = df,
-      t = t_stat
-    ))
-  } else {
-    if (!user_supplied_tau2)
-      tau2 = get_two_sample_tau2(n1 = n1,
-                                         n2 = n2,
-                                         w = effect_size,
-                                         r = r)
-
-    log_vals = unlist(lapply(
-      tau2,
-      log_T_frac_onesided,
-      r = r,
-      v = df,
-      t = t_stat
-    ))
+    user_supplied_tau2 = FALSE
   }
-}
 
-# stuff to return
-BFF = log_vals
-effect_size = effect_size
-idx_max = which.max(BFF)
-BFF_max_RMSE = BFF[idx_max]
-max_RMSE = effect_size[idx_max]
+  #####  call results
+  r1 = FALSE
+  if (r == 1) r1 = TRUE
+  results = backend_t(t_stat = t_stat, n = n, df = df, r = r, n1 = n1, n2 = n2, tau2 = tau2, r1 = r1, one_sample = one_sample)
 
-# check the results are finite
-if (!all(is.finite(BFF)))
-{
-  warning(
-    "Values entered produced non-finite numbers for some effect sizes.
-      The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow.
-      Only effect sizes with non-NaN values are kept in the plots.
-      Please contact the maintainer for more information."
-  )
-}
+  #####  plotting if tau2 is not specified
+  if (!user_supplied_tau2 && !maximize) {
+    bff_plot = c()
+    bff_plot[[1]] = results
 
-# plotting if tau2 is not specified
-if (!user_supplied_tau2) {
-  bff_plot = c()
-  bff_plot[[1]] = BFF
+    plot_BFF(
+      effect_size = effect_size,
+      BFF = bff_plot,
+      save = save,
+      savename = savename,
+      xlab = xlab,
+      ylab = ylab,
+      main = main,
+      r = r
+    )
+  }
 
-  plot_BFF(
-    effect_size = effect_size,
-    BFF = bff_plot,
-    save = save,
-    savename = savename,
-    xlab = xlab,
-    ylab = ylab,
-    main = main,
-    r = r
-  )
-}
+  ##### optimzation logic
+  if (maximize)
+  {
+    if (is.null(tau2)) tau2 = seq(0, 1, 0.1)
+    optimal_r = vector(length = length(tau2))
+    count = 1
+    for (i in tau2)
+    {
+      optimal_r[count] = optimize(backend_t, c(1, 20), tol = 0.001, t_stat = t_stat, n = n, n1 = n1, n2 = n2, df = df, one_sample = one_sample, r1 = FALSE, tau2 = i, maximum = TRUE)$maximum
+      count = count + 1
+    }
+    maximized_values = as.data.frame(cbind(tau2, optimal_r))
+  }
 
 
-if (user_supplied_tau2) {
-  to_return = list(BFF = BFF,
-                   tau2 = tau2)
-} else {
-  to_return = list(
-    BFF = BFF,
-    effect_size = effect_size,
-    BFF_max_RMSE = BFF_max_RMSE,
-    max_RMSE = max_RMSE,
-    tau2 = tau2
-  )
-}
-return(to_return)
+  ###### return logic
+  BFF = results
+  effect_size = effect_size
+  idx_max = which.max(BFF)
+  BFF_max_RMSE = BFF[idx_max]
+  max_RMSE = effect_size[idx_max]
+
+  if (maximize) {
+    print("The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value.")
+    to_return = maximized_values
+  } else if (user_supplied_tau2) {
+    to_return = list(BFF = BFF,
+                     tau2 = tau2)
+  } else {
+    to_return = list(
+      BFF = BFF,
+      effect_size = effect_size,
+      BFF_max_RMSE = BFF_max_RMSE,
+      max_RMSE = max_RMSE
+    )
+
+  }
+  return(to_return)
 
 }
