@@ -43,7 +43,7 @@ plot_BFF = function(effect_size,
     print(savename)
   }
   #Making the plot
-  data <- data.frame(effect_size = effect_size, BFF = BFF)
+  data <- data.frame(effect_size = effect_size, BFF = BFF[[1]])
   p <- ggplot(data, aes(x = effect_size, y = BFF)) +
     geom_line() +
     theme_bw()
@@ -52,6 +52,21 @@ plot_BFF = function(effect_size,
     theme(plot.title = element_text(hjust = 0.5))
 
   maxval = 1e50
+
+  if (num_lines > 1)
+  {
+    count = 2
+    for (k in c(2:num_lines))
+    {
+      values = BFF[[k]]
+      data2 <- data.frame(effect_size = effect_size, BFF = BFF[[k]])
+      p <- ggplot(data2, aes(x = effect_size, y = BFF)) +
+        geom_line(linetype = count, colour = k) +
+        theme_bw()
+      count = count+1
+    }
+  }
+
 
   min_lim_x = min(effect_size)
   max_lim_x = max(effect_size)
