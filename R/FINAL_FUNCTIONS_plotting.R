@@ -133,17 +133,20 @@ plot_BFF = function(effect_size,
   negative = -1 * positive
   positive_labels = vector()
   negative_labels = vector()
+
   for (k in 1:length(positive)) {
-    positive_labels[k] = paste(as.character(format(positive[k], scientific =
-                                                     FALSE)), ":1", sep = "")
-    negative_labels[k] = paste(":1", as.character(format(negative[k], scientific =
-                                                           FALSE)), sep = "")
+    positive_labels[k] = paste(as.character(format(positive[k],
+                                                   scientific = FALSE)),
+                               ":1", sep = "")
+    negative_labels[k] = paste(":1", as.character(format(negative[k],
+                                                         scientific = FALSE)),
+                               sep = "")
   }
   axis_position = c(positive, log(1), negative)
   axis_labels = c(positive_labels, "1:1", negative_labels)
 
   p <-
-    p + scale_y_continuous(breaks = axis_position, labels = axis_labels)
+    p + scale_y_continuous(breaks = axis_position, labels = axis_labels, guide = guide_axis(check.overlap = TRUE))
   p <- p + theme(panel.grid = element_blank())
 
   if (save) {
