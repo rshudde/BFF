@@ -138,9 +138,9 @@ plot_BFF = function(effect_size,
     positive_labels[k] = paste(as.character(format(positive[k],
                                                    scientific = FALSE)),
                                ":1", sep = "")
-    negative_labels[k] = paste(":1", as.character(format(negative[k],
+    negative_labels[k] = paste(as.character(format(negative[k],
                                                          scientific = FALSE)),
-                               sep = "")
+                               ":1", sep = "")
   }
   axis_position = c(positive, log(1), negative)
   axis_labels = c(positive_labels, "1:1", negative_labels)
