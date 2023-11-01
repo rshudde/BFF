@@ -62,7 +62,7 @@ z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = 
 ```
 
 Maximizing r for each specified tau2 using z.test.BFF
-```{r maziming r for z test}
+```{r maximing r for z test}
 # default tau2
 z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, maximize = TRUE) #one sample z-test
 z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, maximize = TRUE) #two sample z-test
@@ -131,7 +131,7 @@ t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2
 ```
 
 Maximizing r for each specified tau2 using t.test.BFF
-```{r maziming r for t test}
+```{r maximing r for t test}
 # default tau2
 t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, maximize = TRUE) #one sample t-test
 t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, maximize = TRUE) #two sample t-test
@@ -192,7 +192,7 @@ chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FAL
 ```
 
 Maximizing r for each specified tau2 using chi2.test.BFF
-```{r maziming r for chi2 test}
+```{r maximing r for chi2 test}
 # default tau2
 chi2_BFF_pear = chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, maximize = TRUE) #Pearson's chi2 test
 chi2_BFF_lrt = chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, maximize = TRUE) #Likelihood ratio chi2 test
@@ -252,7 +252,7 @@ f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n 
 ```
 
 Maximizing r for each specified tau2 using f.test.BFF
-```{r maziming r for f test}
+```{r maximing r for f test}
 # default tau2
 f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = FALSE, maximize = TRUE)
 
