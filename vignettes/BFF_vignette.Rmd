@@ -163,12 +163,11 @@ t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2
 
 ## chi^2 - test
 ```{r chi2-test}
-# generate some data - take from chisq.test example
+# generate some data
 x <- matrix(c(12, 5, 7, 7), ncol = 2)
-chi2_stat = chisq.test(x)$statistic        
 
-# calculate a BFF
-chi2_BFF_pear = chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE)
+# calculating chi2 test statistic from chisq.test
+chi2_stat = chisq.test(x)$statistic        
 ```
 
 Calculating BFF using chi2.test.BFF
@@ -233,11 +232,49 @@ y = X %*% beta + rnorm(n)
 model1 = lm(y ~ X)
 anova_model = anova(model1)
 F_stat = anova_model$`F value`[1]
-
-# calculate a BFF
-F_BFF_one = f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n)
 ```
 
+
+Calculating BFF using f.test.BFF
+```{r calculating BFF for f test}
+# default r and tau2
+F_BFF_one = f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = FALSE)
+
+# default r and user specified tau2
+# single tau2
+f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = 0.5, save = FALSE)
+# vector of tau2 values
+f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = c(0.5, 0.8), save = FALSE)
+  
+# user specified r and default tau2
+f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, r = 2, save = FALSE) #integer r >1  (higher order moments) 
+f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, r = 2.5, save = FALSE) #continuous r (fractional moments)
+```
+
+Maximizing r for each specified tau2 using f.test.BFF
+```{r maziming r for f test}
+# default tau2
+f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = FALSE, maximize = TRUE)
+
+# user specified tau2
+# single tau2
+f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = 0.5, save = FALSE, maximize = TRUE)
+# vector of tau2 values
+f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = c(0.5, 0.8), save = FALSE, maximize = TRUE)
+```
+
+Plotting with f.test.BFF
+```{r plotting for f test}
+# saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
+f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = TRUE)
+
+# saving the plot as a pdf with user specified name. Stored in working directory.
+f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = TRUE, savename = "f-BFF-plot.pdf")
+ 
+# customizing x-axis labels, y-axis labels and main title
+f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = TRUE, xlab = "RMSE", ylab = "Logarithm of Bayes Factor", main = "BFF curves")
+f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves")
+```
 
 
 
