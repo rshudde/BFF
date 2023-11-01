@@ -19,6 +19,9 @@ library(BSDA)
 ```
 # The following examples will show how the BFF package calculates Bayes factors based on test statistics
 
+## tau2 values recommended by authos
+insert latex code i'll send it to you
+
 ## z - test
 ```{r}
 # generate some data
