@@ -21,6 +21,9 @@ library(BSDA)
 
 ## tau2 values recommended by authos
 insert latex code i'll send it to you
+- section on plotting
+-section on general usage (like maximization, setting tau, etc)
+- examples for each test
 
 ## z - test
 ```{r}

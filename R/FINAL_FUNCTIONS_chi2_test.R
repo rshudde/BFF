@@ -1,8 +1,8 @@
-# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
-# source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
-# library(gsl)
+source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
+library(gsl)
 
 ################# chih2 functions if r is an integer and equal to 1
 G_val_r1 = function(tau2, chi2_stat, df)
@@ -217,7 +217,6 @@ backend_chi2 = function(r,
 #' chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, pearsons = FALSE, save = FALSE)
 #' chi2.test.BFF(chi2_stat=2.5, n = 50, df = 49, maximize = TRUE)
 #' chi2.test.BFF(chi2_stat=2.5, n = 50,  df = 49, maximize = TRUE, tau2 = 0.5)
-
 #' chi2.test.BFF(chi2_stat=2.5, n = 50,  df = 49, maximize = TRUE, tau2 = c(0.5, 0.8))
 #' chi2BFF$BFF_max_RMSE  # maximum BFF value
 #' chi2BFF$max_RMSE      # effect size which maximizes the BFF
