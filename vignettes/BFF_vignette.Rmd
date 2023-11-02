@@ -17,15 +17,11 @@ vignette: >
 library(BFF)
 library(BSDA)
 ```
+
 # The following examples will show how the BFF package calculates Bayes factors based on test statistics
 
-## tau2 values recommended by authos
-insert latex code i'll send it to you
-- section on plotting
--section on general usage (like maximization, setting tau, etc)
-- examples for each test
-
 ## z - test
+
 ```{r z-statistics}
 # generating some data
 n = 100
@@ -41,6 +37,7 @@ z_score_two = z.test(x = data_one, y = data_two, sigma.x = 1, sigma.y = 1)$stati
 ```
 
 Calculating BFF using z.test.BFF
+
 ```{r calculating BFF for z test}
 # default r and tau2
 z_BFF_one = z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE) #one sample z-test
@@ -62,6 +59,7 @@ z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = 
 ```
 
 Maximizing r for each specified tau2 using z.test.BFF
+
 ```{r maximing r for z test}
 # default tau2
 z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, maximize = TRUE) #one sample z-test
@@ -77,6 +75,7 @@ z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = 
 ```
 
 Plotting with z.test.BFF
+
 ```{r plotting for z test}
 # saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
 z.test.BFF(z_stat = z_score_one, n = 100, save = TRUE) #one sample z-test
@@ -91,8 +90,8 @@ z.test.BFF(z_stat = z_score_one, n = 100, save = TRUE, xlab = "RMSE", ylab = "Lo
 z_BFF_two = z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves") #two sample z-test
 ```
 
-
 ## t - test
+
 ```{r t-statistics}
 # generating some data
 n = 100
@@ -110,6 +109,7 @@ t_df_two = 197.9
 ```
 
 Calculating BFF using t.test.BFF
+
 ```{r calculating BFF for t test}
 # default r and tau2
 t_BFF_one = t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE) #one sample t-test
@@ -131,6 +131,7 @@ t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2
 ```
 
 Maximizing r for each specified tau2 using t.test.BFF
+
 ```{r maximing r for t test}
 # default tau2
 t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, maximize = TRUE) #one sample t-test
@@ -146,6 +147,7 @@ t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2
 ```
 
 Plotting with t.test.BFF
+
 ```{r plotting for t test}
 # saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
 t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = TRUE) #one sample t-test
@@ -160,8 +162,8 @@ t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = TRUE, xlab = "RM
 t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves") #two sample t-test
 ```
 
-
 ## chi^2 - test
+
 ```{r chi2-test}
 # generate some data
 x <- matrix(c(12, 5, 7, 7), ncol = 2)
@@ -171,6 +173,7 @@ chi2_stat = chisq.test(x)$statistic
 ```
 
 Calculating BFF using chi2.test.BFF
+
 ```{r calculating BFF for chi2 test}
 # default r and tau2
 chi2_BFF_pear = chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE) #Pearson's chi2 test
@@ -192,6 +195,7 @@ chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FAL
 ```
 
 Maximizing r for each specified tau2 using chi2.test.BFF
+
 ```{r maximing r for chi2 test}
 # default tau2
 chi2_BFF_pear = chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, maximize = TRUE) #Pearson's chi2 test
@@ -207,6 +211,7 @@ chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FAL
 ```
 
 Plotting with chi2.test.BFF
+
 ```{r plotting for chi2 test}
 # saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
 chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = TRUE) #Pearson's chi2 test
@@ -222,6 +227,7 @@ chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = TRUE, pearsons = FALS
 ```
 
 ## F - test
+
 ```{r f statistics}
 # generate some data
 n = 100
@@ -234,8 +240,8 @@ anova_model = anova(model1)
 F_stat = anova_model$`F value`[1]
 ```
 
-
 Calculating BFF using f.test.BFF
+
 ```{r calculating BFF for f test}
 # default r and tau2
 F_BFF_one = f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = FALSE)
@@ -252,6 +258,7 @@ f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n 
 ```
 
 Maximizing r for each specified tau2 using f.test.BFF
+
 ```{r maximing r for f test}
 # default tau2
 f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = FALSE, maximize = TRUE)
@@ -264,6 +271,7 @@ f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n 
 ```
 
 Plotting with f.test.BFF
+
 ```{r plotting for f test}
 # saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
 f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = TRUE)
@@ -276,7 +284,80 @@ f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n 
 f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves")
 ```
 
+## Default choices of tau2 for common statistical tests
 
+```{=latex}
+\begin{table}[h]
 
+\caption{Default choices of $\tau_{\omega,r}$}
 
+\label{parset}
 
+%
+
+\begin{tabular}{lccc} \hline \hline
+
+{\bf Test }& Statistic  & Standardized Effect ($\omega$) & $\tau^2_{\omega,r}$     \\ \hline \hline
+
+{1-sample z} & {$\frac{\sqrt{n}\bar{x}}{\sigma}$} &  $\frac{\mu}{\sigma}$ & $ \frac{n\omega^2}{2r}$
+
+           \\  \hline
+
+{1-sample t} & {$\frac{\sqrt{n}\bar{x}}{s}$} &  $\frac{\mu}{\sigma}$ & $ \frac{n\omega^2}{2r}$
+
+           \\  \hline
+
+{2-sample z}
+
+                & $\frac{\sqrt{n_1 n_2}(\bar{x}_1-\bar{x}_2)}{\sigma\sqrt{n_1+n_2}} $ & $\frac{\mu_1-\mu_2}{\sigma}$
+
+         & $\frac{n_1 n_2\omega^2}{2r(n_1+n_2)}$ \\
+
+\hline
+
+{2-sample t}
+
+                & $\frac{\sqrt{n_1 n_2}(\bar{x}_1-\bar{x}_2)}{s\sqrt{n_1+n_2}} $ & $\frac{\mu_1-\mu_2}{\sigma}$ 
+
+         & $\frac{n_1 n_2\omega^2}{2r(n_1+n_2)}$ \\
+
+\hline
+
+Multinomial/Poisson &
+
+          \multirow{2}{*}{$\chi^2_{\nu} = \sum\limits_{i=1}^k \frac{(n_i-nf_i(\hat{\theta}))^2}{nf_i(\hat{\theta})}$} &
+
+          \multirow{2}{*}{{ $ \left( \frac{p_{i}-f_i(\theta)}{\sqrt{f_i(\theta)}} \right)_{k\times 1} $} }&
+
+          \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{2(\frac{k}{2}+r-1)}$} \\
+
+& & &   \\ \hline
+
+Linear model& \multirow{2}{*}{$F_{k,n-p} = \frac{(RSS_0-RSS_1)/k}{[(RSS_1)/(n-p)]}$} &
+
+           \multirow{2}{*}{$\frac{\mathbf{L}^{-1}(\mathbf{A}\boldsymbol{\beta}-\mathbf{a})}{\sigma}$} &
+
+           \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{4(\frac{k}{2}+r-1)}$}
+
+                \\
+
+                \\ \hline
+
+Likelihood Ratio &
+
+       \multirow{2}{*}{$ \chi^2_{k} = -2\log\left[\frac{l(\theta_{r0},\hat{\theta_{s}})}{l(\hat{\theta})} \right]$} &
+
+       \multirow{2}{*}{${\bf L}^{-1}(\theta_{r}-\theta_{r0}) $ } &
+
+      \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{2(\frac{k}{2}+r-1)}$}   \\
+
+&  \\ 
+
+     \hline
+
+\end{tabular}
+
+%
+
+\end{table}
+```
