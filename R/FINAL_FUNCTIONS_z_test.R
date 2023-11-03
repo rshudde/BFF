@@ -1,8 +1,8 @@
-rm(list = ls())
-source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
-source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
+# rm(list = ls())
+# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+# source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
 ################# Z functions if r is an integer and equal to 1
 z_val_r1 = function(tau2, z_stat)
 {
@@ -103,7 +103,6 @@ backend_z = function(r,
                      tau2 = NULL)
 
 {
-
   # same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
@@ -121,7 +120,6 @@ backend_z = function(r,
       if (!user_supplied_tau2)
         tau2 = get_one_sample_tau2(n = n, w = effect_size)
     } else {
-
       if (!user_supplied_tau2)
         tau2 = get_two_sample_tau2(n1 = n1, n2 = n2, w = effect_size)
     }
@@ -138,10 +136,12 @@ backend_z = function(r,
                                      tau2 = tau2)
     } else {
       if (!user_supplied_tau2)
-        tau2 = get_two_sample_tau2(n1 = n1,
-                                   n2 = n2,
-                                   w = effect_size,
-                                   r = r)
+        tau2 = get_two_sample_tau2(
+          n1 = n1,
+          n2 = n2,
+          w = effect_size,
+          r = r
+        )
       log_vals = log_Z_frac(z = z_stat,
                             r = r,
                             tau2 = tau2)
@@ -250,8 +250,18 @@ z.test.BFF = function(z_stat,
 
   #####  call results
   r1 = FALSE
-  if (r == 1) r1 = TRUE
-  results = backend_z(z_stat = z_stat, n = n, one_sample = one_sample, r = r, tau2 = tau2, r1 = r1, n1 = n1, n2 = n2)
+  if (r == 1)
+    r1 = TRUE
+  results = backend_z(
+    z_stat = z_stat,
+    n = n,
+    one_sample = one_sample,
+    r = r,
+    tau2 = tau2,
+    r1 = r1,
+    n1 = n1,
+    n2 = n2
+  )
 
   #####  plotting if tau2 is not specified
   if (!user_supplied_tau2 && !maximize) {
@@ -274,12 +284,25 @@ z.test.BFF = function(z_stat,
   ##### optimzation logic
   if (maximize)
   {
-    if (is.null(tau2)) tau2 = seq(0, 1, 0.1)
+    if (is.null(tau2))
+      tau2 = seq(0, 1, 0.1)
     optimal_r = vector(length = length(tau2))
     count = 1
     for (i in tau2)
     {
-      optimal_r[count] = optimize(backend_z, c(1, 20), tol = 0.001, z_stat = z_stat, n = n, n1 = n1, n2 = n2, one_sample = one_sample, r1 = FALSE, tau2 = i, maximum = TRUE)$maximum
+      optimal_r[count] = optimize(
+        backend_z,
+        c(1, 20),
+        tol = 0.001,
+        z_stat = z_stat,
+        n = n,
+        n1 = n1,
+        n2 = n2,
+        one_sample = one_sample,
+        r1 = FALSE,
+        tau2 = i,
+        maximum = TRUE
+      )$maximum
       count = count + 1
     }
     maximized_values = as.data.frame(cbind(tau2, optimal_r))
@@ -293,19 +316,20 @@ z.test.BFF = function(z_stat,
   max_RMSE = effect_size[idx_max]
 
   if (maximize) {
-    print("The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value.")
+    print(
+      "The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value."
+    )
     to_return = maximized_values
   } else if (user_supplied_tau2) {
     to_return = list(BFF = BFF,
                      tau2 = tau2)
   } else {
     to_return = list(
-      BFF = BFF,
+      log_BFF = BFF,
       effect_size = effect_size,
-      BFF_max_RMSE = BFF_max_RMSE,
+      log_BFF_max_RMSE = BFF_max_RMSE,
       max_RMSE = max_RMSE
     )
-
   }
   return(to_return)
 

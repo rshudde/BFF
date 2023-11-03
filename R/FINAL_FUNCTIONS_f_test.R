@@ -1,8 +1,8 @@
-source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
-source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
-library(gsl)
+# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+# source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
+# library(gsl)
 
 ################# F functions if r is an integer and equal to 1
 f_val_r1 = function(tau2, f_stat, df1, df2)
@@ -135,57 +135,57 @@ backend_f = function(r,
   # same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
-user_supplied_tau2 = TRUE
-if (is.null(tau2))
-  user_supplied_tau2 = FALSE
+  user_supplied_tau2 = TRUE
+  if (is.null(tau2))
+    user_supplied_tau2 = FALSE
 
-r1 = r1
-frac_r = !r1
+  r1 = r1
+  frac_r = !r1
 
-log_vals = rep(0, length(effect_size))
-if (r1) {
-  if (!user_supplied_tau2)
-    tau2 = get_linear_tau2(n = n, k = df1, w = effect_size)
-  log_vals = unlist(lapply(
-    tau2,
-    f_val_r1,
-    f_stat = f_stat,
-    df1 = df1,
-    df2 = df2
-  ))
-}
+  log_vals = rep(0, length(effect_size))
+  if (r1) {
+    if (!user_supplied_tau2)
+      tau2 = get_linear_tau2(n = n, k = df1, w = effect_size)
+    log_vals = unlist(lapply(
+      tau2,
+      f_val_r1,
+      f_stat = f_stat,
+      df1 = df1,
+      df2 = df2
+    ))
+  }
 
-if (frac_r) {
-  if (!user_supplied_tau2)
-    tau2 = get_linear_tau2(n = n,
-                           k = df1,
-                           w = effect_size,
-                           r = r)
+  if (frac_r) {
+    if (!user_supplied_tau2)
+      tau2 = get_linear_tau2(n = n,
+                             k = df1,
+                             w = effect_size,
+                             r = r)
 
-  log_vals = unlist(lapply(
-    tau2,
-    log_F_frac,
-    f = f_stat,
-    k = df1,
-    m = df2,
-    r = r
-  ))
-}
+    log_vals = unlist(lapply(
+      tau2,
+      log_F_frac,
+      f = f_stat,
+      k = df1,
+      m = df2,
+      r = r
+    ))
+  }
 
-# stuff to return
-BFF = log_vals
+  # stuff to return
+  BFF = log_vals
 
-# check the results are finite
-if (!all(is.finite(BFF)))
-{
-  stop(
-    "Values entered produced non-finite numbers.
+  # check the results are finite
+  if (!all(is.finite(BFF)))
+  {
+    stop(
+      "Values entered produced non-finite numbers.
       The most likely scenario is the evidence was so strongly in favor of the
       alternative that there was numeric overflow. Please contact the maintainer for more information."
-  )
-}
+    )
+  }
 
-return(BFF)
+  return(BFF)
 }
 
 
@@ -264,8 +264,17 @@ f.test.BFF = function(f_stat,
 
   #####  call results
   r1 = FALSE
-  if (r == 1) r1 = TRUE
-  results = backend_f(f_stat = f_stat, n = n, df1 = df1, df2 = df2, r = r, tau2 = tau2, r1 = r1)
+  if (r == 1)
+    r1 = TRUE
+  results = backend_f(
+    f_stat = f_stat,
+    n = n,
+    df1 = df1,
+    df2 = df2,
+    r = r,
+    tau2 = tau2,
+    r1 = r1
+  )
 
   #####  plotting if tau2 is not specified
   if (!user_supplied_tau2 && !maximize) {
@@ -287,12 +296,24 @@ f.test.BFF = function(f_stat,
   ##### optimzation logic
   if (maximize)
   {
-    if (is.null(tau2)) tau2 = seq(0, 1, 0.1)
+    if (is.null(tau2))
+      tau2 = seq(0, 1, 0.1)
     optimal_r = vector(length = length(tau2))
     count = 1
     for (i in tau2)
     {
-      optimal_r[count] = optimize(backend_f, c(1, 20), tol = 0.001, f_stat = f_stat, n = n, df1 = df1, df2 = df2, r1 = FALSE, tau2 = i, maximum = TRUE)$maximum
+      optimal_r[count] = optimize(
+        backend_f,
+        c(1, 20),
+        tol = 0.001,
+        f_stat = f_stat,
+        n = n,
+        df1 = df1,
+        df2 = df2,
+        r1 = FALSE,
+        tau2 = i,
+        maximum = TRUE
+      )$maximum
       count = count + 1
     }
     maximized_values = as.data.frame(cbind(tau2, optimal_r))
@@ -307,16 +328,18 @@ f.test.BFF = function(f_stat,
   max_RMSE = effect_size[idx_max]
 
   if (maximize) {
-    print("The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value.")
+    print(
+      "The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value."
+    )
     to_return = maximized_values
   } else if (user_supplied_tau2) {
     to_return = list(BFF = BFF,
                      tau2 = tau2)
   } else {
     to_return = list(
-      BFF = BFF,
+      log_BFF = BFF,
       effect_size = effect_size,
-      BFF_max_RMSE = BFF_max_RMSE,
+      log_BFF_max_RMSE = BFF_max_RMSE,
       max_RMSE = max_RMSE
     )
 

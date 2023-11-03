@@ -150,8 +150,6 @@ backend_t = function(r,
                      tau2 = NULL)
 
 {
-
-
   # same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
@@ -190,10 +188,12 @@ backend_t = function(r,
       ))
     } else {
       if (!user_supplied_tau2)
-        tau2 = get_two_sample_tau2(n1 = n1,
-                                   n2 = n2,
-                                   w = effect_size,
-                                   r = r)
+        tau2 = get_two_sample_tau2(
+          n1 = n1,
+          n2 = n2,
+          w = effect_size,
+          r = r
+        )
 
       log_vals = unlist(lapply(
         tau2,
@@ -312,8 +312,19 @@ t.test.BFF = function(t_stat,
 
   #####  call results
   r1 = FALSE
-  if (r == 1) r1 = TRUE
-  results = backend_t(t_stat = t_stat, n = n, df = df, r = r, n1 = n1, n2 = n2, tau2 = tau2, r1 = r1, one_sample = one_sample)
+  if (r == 1)
+    r1 = TRUE
+  results = backend_t(
+    t_stat = t_stat,
+    n = n,
+    df = df,
+    r = r,
+    n1 = n1,
+    n2 = n2,
+    tau2 = tau2,
+    r1 = r1,
+    one_sample = one_sample
+  )
 
   #####  plotting if tau2 is not specified
   if (!user_supplied_tau2 && !maximize) {
@@ -335,12 +346,26 @@ t.test.BFF = function(t_stat,
   ##### optimzation logic
   if (maximize)
   {
-    if (is.null(tau2)) tau2 = seq(0, 1, 0.1)
+    if (is.null(tau2))
+      tau2 = seq(0, 1, 0.1)
     optimal_r = vector(length = length(tau2))
     count = 1
     for (i in tau2)
     {
-      optimal_r[count] = optimize(backend_t, c(1, 20), tol = 0.001, t_stat = t_stat, n = n, n1 = n1, n2 = n2, df = df, one_sample = one_sample, r1 = FALSE, tau2 = i, maximum = TRUE)$maximum
+      optimal_r[count] = optimize(
+        backend_t,
+        c(1, 20),
+        tol = 0.001,
+        t_stat = t_stat,
+        n = n,
+        n1 = n1,
+        n2 = n2,
+        df = df,
+        one_sample = one_sample,
+        r1 = FALSE,
+        tau2 = i,
+        maximum = TRUE
+      )$maximum
       count = count + 1
     }
     maximized_values = as.data.frame(cbind(tau2, optimal_r))
@@ -355,16 +380,18 @@ t.test.BFF = function(t_stat,
   max_RMSE = effect_size[idx_max]
 
   if (maximize) {
-    print("The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value.")
+    print(
+      "The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value."
+    )
     to_return = maximized_values
   } else if (user_supplied_tau2) {
     to_return = list(BFF = BFF,
                      tau2 = tau2)
   } else {
     to_return = list(
-      BFF = BFF,
+      log_BFF = BFF,
       effect_size = effect_size,
-      BFF_max_RMSE = BFF_max_RMSE,
+      log_BFF_max_RMSE = BFF_max_RMSE,
       max_RMSE = max_RMSE
     )
 

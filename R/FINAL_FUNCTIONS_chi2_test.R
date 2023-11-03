@@ -1,8 +1,8 @@
-source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
-source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
-library(gsl)
+# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+# source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
+# library(gsl)
 
 ################# chih2 functions if r is an integer and equal to 1
 G_val_r1 = function(tau2, chi2_stat, df)
@@ -104,7 +104,6 @@ backend_chi2 = function(r,
                         tau2 = NULL)
 
 {
-
   # same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
@@ -248,8 +247,17 @@ chi2.test.BFF = function(chi2_stat,
 
   #####  call results
   r1 = FALSE
-  if (r == 1) r1 = TRUE
-  results = backend_chi2(chi2_stat = chi2_stat, n = n, pearsons = pearsons, r = r, tau2 = tau2, r1 = r1, df = df)
+  if (r == 1)
+    r1 = TRUE
+  results = backend_chi2(
+    chi2_stat = chi2_stat,
+    n = n,
+    pearsons = pearsons,
+    r = r,
+    tau2 = tau2,
+    r1 = r1,
+    df = df
+  )
 
   #####  plotting if tau2 is not specified
   if (!user_supplied_tau2 && !maximize) {
@@ -272,12 +280,24 @@ chi2.test.BFF = function(chi2_stat,
   ##### optimzation logic
   if (maximize)
   {
-    if (is.null(tau2)) tau2 = seq(0, 1, 0.1)
+    if (is.null(tau2))
+      tau2 = seq(0, 1, 0.1)
     optimal_r = vector(length = length(tau2))
     count = 1
     for (i in tau2)
     {
-      optimal_r[count] = optimize(backend_chi2, c(1, 20), tol = 0.001, chi2_stat = chi2_stat, n = n, df = df, pearsons = pearsons, r1 = FALSE, tau2 = i, maximum = TRUE)$maximum
+      optimal_r[count] = optimize(
+        backend_chi2,
+        c(1, 20),
+        tol = 0.001,
+        chi2_stat = chi2_stat,
+        n = n,
+        df = df,
+        pearsons = pearsons,
+        r1 = FALSE,
+        tau2 = i,
+        maximum = TRUE
+      )$maximum
       count = count + 1
     }
     maximized_values = as.data.frame(cbind(tau2, optimal_r))
@@ -291,16 +311,18 @@ chi2.test.BFF = function(chi2_stat,
   max_RMSE = effect_size[idx_max]
 
   if (maximize) {
-    print("The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value.")
+    print(
+      "The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value."
+    )
     to_return = maximized_values
   } else if (user_supplied_tau2) {
     to_return = list(BFF = BFF,
                      tau2 = tau2)
   } else {
     to_return = list(
-      BFF = BFF,
+      log_BFF = BFF,
       effect_size = effect_size,
-      BFF_max_RMSE = BFF_max_RMSE,
+      log_BFF_max_RMSE = BFF_max_RMSE,
       max_RMSE = max_RMSE
     )
 
