@@ -18,6 +18,35 @@ library(BFF)
 library(BSDA)
 ```
 
+Bayes factors are an alterntive to p-values for evaluating hypothesis tests. However, unlike p-values, bayes factors are able to provide evidence for a null hypothesis. Bayes factors also have a clear interpretation: a larger bayes factor shows more evidence for a hypothesis, as opposed to p-values (can anyone tell the difference between 0.05 and 0.06?). Bayes factors have in the past had limited acceptance due to computational issues and difficulty in selecting a prior. Recent work (see 1Bayes factor functions for reporting outcomes of hypothesis tests,' 2023 and 'On the use of non-local prior densities in Bayesian hypothesis tests,' 2010) introduced the idea of using non-local priors to calculate Bayes factors. This package implements "Bayes Factor Functions" (or BFFS). In contrast to a single bayes factor, BFFs express Bayes factors as a function of the prior densities used to
+define the alternative hypotheses. 
+
+Interpreting bayes factors is usuall done on the log scale (also called the weight of evidence, or WoE) On this scale, a positive bayes factor represents evidence for the alternative hypothesis. A negative bayes factor represents evidence for the null hypothesis. As a rule of thumb, the following table can be used to interpret a bayes factor. However, these are just guidlines and some fields may require higher or lower thresholds of evidence.
+
+```{=latex}
+\begin{table}[!ht]
+\centering
+\begin{tabular}{c|c} \hline\hline
+     WoE & Interpretation \\ \hline
+     (-1, 1) & No strong evidence for either $H_0$ or $H_1$ \\
+     (1, 3) & Positive evidence for $H_1$ \\
+     (-1, -3) & Positive evidence for $H_0$ \\
+     (3, 5) & Strong evidence for $H_1$ \\
+     (-3, -5) & Strong evidence for $H_0$ \\
+     (5, $\infty$) & Very strong evidence for $H_1$ \\
+     (-5, -$\infty$) & Very strong evidence for $H_0$ \\ \hline
+\end{tabular}
+\caption{Common interpretations of the Weight of Evidence}
+\label{thresholds}
+\end{table}
+```
+
+This package provides the bayes factor values for different effect sizes from 0 to 1. A small effect size is usually considered from  0.2 to 0.5,, medium effect sizes from 0.5 to 0.8, and large effect sizes as greater than 0.8. 
+
+Using this package is very similar to using the familiar t, z, chi^2, and F tests in R. You will need the same information - the test statistic, degrees of freedom, and sample size. A graph is produced that shows the BFF curve over the different effect sizes. 
+
+For evaludating evidence from multiple studies (see 'Bayes factor functions', 2023 (arxiv)), the parameter 'r' can also be set. The default value for r is 1, but 'r' can be suggested that maximizes the bayes factor at each tau by setting the 'maximization' argument in each test to "TRUE." 
+
 # The following examples will show how the BFF package calculates Bayes factors based on test statistics
 
 ## z - test
@@ -58,37 +87,6 @@ z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, r = 2.5) #one sample z-t
 z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, r = 2.5) #two sample z-test, continuous r (fractional moments)
 ```
 
-Maximizing r for each specified tau2 using z.test.BFF
-
-```{r maximing r for z test}
-# default tau2
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, maximize = TRUE) #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, maximize = TRUE) #two sample z-test
-
-# user specified tau2
-#single tau2
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #two sample z- test
-# vector of tau2 values
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #two sample z-test
-```
-
-Plotting with z.test.BFF
-
-```{r plotting for z test}
-# saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
-z.test.BFF(z_stat = z_score_one, n = 100, save = TRUE) #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE) #two sample z-test
-
-# saving the plot as a pdf with user specified name. Stored in working directory.
-z.test.BFF(z_stat = z_score_one, n = 100, save = TRUE, savename = "z-BFF-one.pdf") #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, savename = "z-BFF-two.pdf") #two sample z-test
- 
-# customizing x-axis labels, y-axis labels and main title
-z.test.BFF(z_stat = z_score_one, n = 100, save = TRUE, xlab = "RMSE", ylab = "Logarithm of Bayes Factor", main = "BFF curves") #one sample z-test
-z_BFF_two = z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves") #two sample z-test
-```
 
 ## t - test
 
@@ -130,38 +128,6 @@ t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, r = 2.5) 
 t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, r = 2.5) #two sample t-test, continuous r (fractional moments)
 ```
 
-Maximizing r for each specified tau2 using t.test.BFF
-
-```{r maximing r for t test}
-# default tau2
-t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, maximize = TRUE) #one sample t-test
-t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, maximize = TRUE) #two sample t-test
-
-# user specified tau2
-#single tau2
-t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #one sample t-test
-t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #two sample t-test
-# vector of tau2 values
-t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #one sample t-test
-t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #two sample t-test
-```
-
-Plotting with t.test.BFF
-
-```{r plotting for t test}
-# saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
-t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = TRUE) #one sample t-test
-t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = TRUE) #two sample t-test
-
-# saving the plot as a pdf with user specified name. Stored in working directory.
-t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = TRUE, savename = "t-BFF-one.pdf") #one sample t-test
-t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = TRUE, savename = "t-BFF-two.pdf") #two sample t-test
- 
-# customizing x-axis labels, y-axis labels and main title
-t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = TRUE, xlab = "RMSE", ylab = "Logarithm of Bayes Factor", main = "BFF curves") #one sample t-test
-t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves") #two sample t-test
-```
-
 ## chi^2 - test
 
 ```{r chi2-test}
@@ -192,38 +158,6 @@ chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, r = 2) #Pearso
 chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, r = 2) #Likelihood ratio chi2 test, integer r >1  (higher order moments) 
 chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, r = 2.5) #Pearson's chi2 test, continuous r (fractional moments) 
 chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, r = 2.5) #Likelihood ratio chi2 test, continuous r (fractional moments) 
-```
-
-Maximizing r for each specified tau2 using chi2.test.BFF
-
-```{r maximing r for chi2 test}
-# default tau2
-chi2_BFF_pear = chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, maximize = TRUE) #Pearson's chi2 test
-chi2_BFF_lrt = chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, maximize = TRUE) #Likelihood ratio chi2 test
-
-# user specified tau2
-# single tau2
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, tau2 = 0.5, maximize = TRUE) #Pearson's chi2 test
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, tau2 = 0.5, maximize = TRUE) #Likelihood ratio chi2 test
-# vector of tau2 values
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #Pearson's chi2 test
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #Likelihood ratio chi2 test
-```
-
-Plotting with chi2.test.BFF
-
-```{r plotting for chi2 test}
-# saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = TRUE) #Pearson's chi2 test
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = TRUE, pearsons = FALSE) #Likelihood ratio chi2 test
-
-# saving the plot as a pdf with user specified name. Stored in working directory.
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = TRUE, savename = "chi2-BFF-pear.pdf") #Pearson's chi2 test
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = TRUE, pearsons = FALSE, savename = "chi2-BFF-lrt.pdf") #Likelihood ratio chi2 test
- 
-# customizing x-axis labels, y-axis labels and main title
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = TRUE, xlab = "RMSE", ylab = "Logarithm of Bayes Factor", main = "BFF curves") #Pearson's chi2 test
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = TRUE, pearsons = FALSE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves") #Likelihood ratio chi2 test
 ```
 
 ## F - test
@@ -257,31 +191,36 @@ f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n 
 f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, r = 2.5, save = FALSE) #continuous r (fractional moments)
 ```
 
-Maximizing r for each specified tau2 using f.test.BFF
+## Maximizing r for each specified tau2 (the same maximization parameter applies to all tests, examples are using the z test)
 
-```{r maximing r for f test}
+```{r maximing r for z test}
 # default tau2
-f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = FALSE, maximize = TRUE)
+z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, maximize = TRUE) #one sample z-test
+z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, maximize = TRUE) #two sample z-test
 
 # user specified tau2
-# single tau2
-f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = 0.5, save = FALSE, maximize = TRUE)
+#single tau2
+z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #one sample z-test
+z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #two sample z- test
 # vector of tau2 values
-f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = c(0.5, 0.8), save = FALSE, maximize = TRUE)
+z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #one sample z-test
+z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #two sample z-test
 ```
 
-Plotting with f.test.BFF
+Plotting (the same maximization parameter applies to all tests, examples are using the z test)
 
-```{r plotting for f test}
+```{r plotting for z test}
 # saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
-f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = TRUE)
+z.test.BFF(z_stat = z_score_one, n = 100, save = TRUE) #one sample z-test
+z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE) #two sample z-test
 
 # saving the plot as a pdf with user specified name. Stored in working directory.
-f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = TRUE, savename = "f-BFF-plot.pdf")
+z.test.BFF(z_stat = z_score_one, n = 100, save = TRUE, savename = "z-BFF-one.pdf") #one sample z-test
+z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, savename = "z-BFF-two.pdf") #two sample z-test
  
 # customizing x-axis labels, y-axis labels and main title
-f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = TRUE, xlab = "RMSE", ylab = "Logarithm of Bayes Factor", main = "BFF curves")
-f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves")
+z.test.BFF(z_stat = z_score_one, n = 100, save = TRUE, xlab = "RMSE", ylab = "Logarithm of Bayes Factor", main = "BFF curves") #one sample z-test
+z_BFF_two = z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves") #two sample z-test
 ```
 
 ## Default choices of tau2 for common statistical tests
