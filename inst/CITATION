@@ -1,0 +1,29 @@
+citHeader("To cite BFF in publications use:")
+
+bibentry(
+  bibtype = "Manual",
+  title   = "BFF: {An} {R} package to calculate Bayes Factor Functions",
+  author  =     c(person(given = "Rachael",
+           family = "Shudde",
+           role = c("aut", "cre"),
+           email = "rachael.shudde@gmail.com"),
+           person(given = "Saptati",
+           family = "Datta",
+           role = c("aut"),
+           email = "saptati@tamu.edu"),
+           person(given = "Riana",
+           family = "Guha",
+           role = c("aut"),
+           email = "riana.guha@tamu.edu"),
+           person(given = "Sandy", family = "Pramanik",
+           role = c("aut"),
+           email = "sandy.pramanik@gmail.com"),
+           person(given = "Valen",
+           family = "Johnson",
+           role = c("aut"),
+           email = "vejohnson@exchange.tamu.edu")),
+  year    = "2023",
+  note    = "R package version 3.0.1",
+  url     = "https://github.com/rshudde/BFF"
+)
+

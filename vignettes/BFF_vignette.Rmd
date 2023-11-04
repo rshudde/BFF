@@ -66,26 +66,26 @@ z_score_two = z.test(x = data_one, y = data_two, sigma.x = 1, sigma.y = 1)$stati
 
 ```
 
-Calculating BFF using z.test.BFF
+Calculating BFF using z_test_BFF
 
 ```{r calculating BFF for z test}
 # default r and tau2
-z_BFF_one = z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE) #one sample z-test
-z_BFF_two = z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE) #two sample z-test
+z_BFF_one = z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE) #one sample z-test
+z_BFF_two = z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE) #two sample z-test
   
 # default r and user specified tau2
 # single tau2
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = 0.5) #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = 0.5) #two sample z-test
+z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = 0.5) #one sample z-test
+z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = 0.5) #two sample z-test
 # vector of tau2 values
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8)) #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = c(0.5, 0.8)) #two sample z-test
+z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8)) #one sample z-test
+z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = c(0.5, 0.8)) #two sample z-test
   
 # user specified r and default tau2
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, r = 2) #one sample z-test, integer r >1  (higher order moments) 
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, r = 2) #two sample z-test, integer r >1  (higher order moments) 
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, r = 2.5) #one sample z-test, continuous r (fractional moments)
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, r = 2.5) #two sample z-test, continuous r (fractional moments)
+z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, r = 2) #one sample z-test, integer r >1  (higher order moments) 
+z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, r = 2) #two sample z-test, integer r >1  (higher order moments) 
+z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, r = 2.5) #one sample z-test, continuous r (fractional moments)
+z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, r = 2.5) #two sample z-test, continuous r (fractional moments)
 ```
 
 
@@ -107,26 +107,26 @@ t_df_two = 197.9
 
 ```
 
-Calculating BFF using t.test.BFF
+Calculating BFF using t_test_BFF
 
 ```{r calculating BFF for t test}
 # default r and tau2
-t_BFF_one = t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE) #one sample t-test
-t_BFF_two = t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE) #two sample t-test
+t_BFF_one = t_test_BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE) #one sample t-test
+t_BFF_two = t_test_BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE) #two sample t-test
   
 # default r and user specified tau2
 # single tau2
-t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, tau2 = 0.5) #one sample t-test
-t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, tau2 = 0.5) #two sample t-test 
+t_test_BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, tau2 = 0.5) #one sample t-test
+t_test_BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, tau2 = 0.5) #two sample t-test 
 # vector of tau2 values
-t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8)) #one sample t-test
-t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, tau2 = c(0.5, 0.8)) #two sample t-test 
+t_test_BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8)) #one sample t-test
+t_test_BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, tau2 = c(0.5, 0.8)) #two sample t-test 
   
 # user specified r and default tau2
-t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, r = 2) #one sample t-test, integer r >1  (higher order moments) 
-t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, r = 2) #two sample t-test, integer r >1  (higher order moments) 
-t.test.BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, r = 2.5) #one sample t-test, continuous r (fractional moments)
-t.test.BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, r = 2.5) #two sample t-test, continuous r (fractional moments)
+t_test_BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, r = 2) #one sample t-test, integer r >1  (higher order moments) 
+t_test_BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, r = 2) #two sample t-test, integer r >1  (higher order moments) 
+t_test_BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, r = 2.5) #one sample t-test, continuous r (fractional moments)
+t_test_BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, r = 2.5) #two sample t-test, continuous r (fractional moments)
 ```
 
 ## chi^2 - test
@@ -139,26 +139,26 @@ x <- matrix(c(12, 5, 7, 7), ncol = 2)
 chi2_stat = chisq.test(x)$statistic        
 ```
 
-Calculating BFF using chi2.test.BFF
+Calculating BFF using chi2_test_BFF
 
 ```{r calculating BFF for chi2 test}
 # default r and tau2
-chi2_BFF_pear = chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE) #Pearson's chi2 test
-chi2_BFF_lrt = chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE) #Likelihood ratio chi2 test
+chi2_BFF_pear = chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE) #Pearson's chi2 test
+chi2_BFF_lrt = chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE) #Likelihood ratio chi2 test
   
 # default r and user specified tau2
 # single tau2
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, tau2 = 0.5) #Pearson's chi2 test
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, tau2 = 0.5) #Likelihood ratio chi2 test
+chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, tau2 = 0.5) #Pearson's chi2 test
+chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, tau2 = 0.5) #Likelihood ratio chi2 test
 # vector of tau2 values
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, tau2 = c(0.5, 0.8)) #Pearson's chi2 test
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, tau2 = c(0.5, 0.8)) #Likelihood ratio chi2 test
+chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, tau2 = c(0.5, 0.8)) #Pearson's chi2 test
+chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, tau2 = c(0.5, 0.8)) #Likelihood ratio chi2 test
   
 # user specified r and default tau2
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, r = 2) #Pearson's chi2 test, integer r >1  (higher order moments) 
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, r = 2) #Likelihood ratio chi2 test, integer r >1  (higher order moments) 
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, r = 2.5) #Pearson's chi2 test, continuous r (fractional moments) 
-chi2.test.BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, r = 2.5) #Likelihood ratio chi2 test, continuous r (fractional moments) 
+chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, r = 2) #Pearson's chi2 test, integer r >1  (higher order moments) 
+chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, r = 2) #Likelihood ratio chi2 test, integer r >1  (higher order moments) 
+chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, r = 2.5) #Pearson's chi2 test, continuous r (fractional moments) 
+chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, r = 2.5) #Likelihood ratio chi2 test, continuous r (fractional moments) 
 ```
 
 ## F - test
@@ -175,37 +175,37 @@ anova_model = anova(model1)
 F_stat = anova_model$`F value`[1]
 ```
 
-Calculating BFF using f.test.BFF
+Calculating BFF using f_test_BFF
 
 ```{r calculating BFF for f test}
 # default r and tau2
-F_BFF_one = f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = FALSE)
+F_BFF_one = f_test_BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = FALSE)
 
 # default r and user specified tau2
 # single tau2
-f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = 0.5, save = FALSE)
+f_test_BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = 0.5, save = FALSE)
 # vector of tau2 values
-f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = c(0.5, 0.8), save = FALSE)
+f_test_BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = c(0.5, 0.8), save = FALSE)
   
 # user specified r and default tau2
-f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, r = 2, save = FALSE) #integer r >1  (higher order moments) 
-f.test.BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, r = 2.5, save = FALSE) #continuous r (fractional moments)
+f_test_BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, r = 2, save = FALSE) #integer r >1  (higher order moments) 
+f_test_BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, r = 2.5, save = FALSE) #continuous r (fractional moments)
 ```
 
 ## Maximizing r for each specified tau2 (the same maximization parameter applies to all tests, examples are using the z test)
 
 ```{r maximing r for z test}
 # default tau2
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, maximize = TRUE) #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, maximize = TRUE) #two sample z-test
+z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, maximize = TRUE) #one sample z-test
+z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, maximize = TRUE) #two sample z-test
 
 # user specified tau2
 #single tau2
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #two sample z- test
+z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #one sample z-test
+z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #two sample z- test
 # vector of tau2 values
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #two sample z-test
+z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #one sample z-test
+z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #two sample z-test
 ```
 
 Plotting (the same maximization parameter applies to all tests, examples are using the z test)
@@ -214,16 +214,16 @@ Plots can be saved by setting "save = TRUE." If plots are saved, they are saved 
 
 ```{r plotting for z test}
 # saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE) #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE) #two sample z-test
+z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE) #one sample z-test
+z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE) #two sample z-test
 
 # saving the plot as a pdf with user specified name. 
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, savename = "z-BFF-one.pdf") #one sample z-test
-z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, savename = "z-BFF-two.pdf") #two sample z-test
+z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, savename = "z-BFF-one.pdf") #one sample z-test
+z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, savename = "z-BFF-two.pdf") #two sample z-test
  
 # customizing x-axis labels, y-axis labels and main title
-z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, xlab = "RMSE", ylab = "Logarithm of Bayes Factor", main = "BFF curves") #one sample z-test
-z_BFF_two = z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves") #two sample z-test
+z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, xlab = "RMSE", ylab = "Logarithm of Bayes Factor", main = "BFF curves") #one sample z-test
+z_BFF_two = z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves") #two sample z-test
 ```
 
 ## Default choices of tau2 for common statistical tests
