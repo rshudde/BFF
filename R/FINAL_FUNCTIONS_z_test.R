@@ -168,9 +168,9 @@ backend_z = function(r,
 
 ################# Z function user interaction
 
-#' z.test.BFF
+#' z_test_BFF
 #'
-#' z.test.BFF constructs BFFs based on the z test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' z_test_BFF constructs BFFs based on the z test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
 #' Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
@@ -204,21 +204,21 @@ backend_z = function(r,
 #' @export
 #'
 #' @examples
-#' zBFF = z.test.BFF(z_stat = 2.5, n = 50, save = FALSE)
-#' z.test.BFF(z_stat = 2.5, n = 50, save = FALSE, tau2 = 0.5)
-#' z.test.BFF(z_stat = 2.5, n = 50, save = FALSE, tau2 = c(0.5, 0.8))
-#' z.test.BFF(z_stat = 2.5, n1 = 50, n2 = 35, one_sample = FALSE, save = FALSE) ##
-#' z.test.BFF(z_stat = 2.5, n = 50, r = 2, save = FALSE)
-#' z.test.BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE) ##
-#' z.test.BFF(z_stat = 2.5, n = 50, r = 2.5, save = FALSE)
-#' z.test.BFF(z_stat = 2.5, r = 2.5, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE) ##
-#' z.test.BFF(z_stat=2.5, n = 50, maximize = TRUE)
-#' z.test.BFF(z_stat=2.5, n = 50,  maximize = TRUE, tau2 = 0.5)
-#' z.test.BFF(z_stat=2.5, n = 50,  maximize = TRUE, tau2 = c(0.5, 0.8))
+#' zBFF = z_test_BFF(z_stat = 2.5, n = 50, save = FALSE)
+#' z_test_BFF(z_stat = 2.5, n = 50, save = FALSE, tau2 = 0.5)
+#' z_test_BFF(z_stat = 2.5, n = 50, save = FALSE, tau2 = c(0.5, 0.8))
+#' z_test_BFF(z_stat = 2.5, n1 = 50, n2 = 35, one_sample = FALSE, save = FALSE) ##
+#' z_test_BFF(z_stat = 2.5, n = 50, r = 2, save = FALSE)
+#' z_test_BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE) ##
+#' z_test_BFF(z_stat = 2.5, n = 50, r = 2.5, save = FALSE)
+#' z_test_BFF(z_stat = 2.5, r = 2.5, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE) ##
+#' z_test_BFF(z_stat=2.5, n = 50, maximize = TRUE)
+#' z_test_BFF(z_stat=2.5, n = 50,  maximize = TRUE, tau2 = 0.5)
+#' z_test_BFF(z_stat=2.5, n = 50,  maximize = TRUE, tau2 = c(0.5, 0.8))
 #' zBFF$BFF_max_RMSE   # maximum BFF value
 #' zBFF$max_RMSE       # effect size which maximizes the BFF value
 #'
-z.test.BFF = function(z_stat,
+z_test_BFF = function(z_stat,
                       n = NULL,
                       one_sample = TRUE,
                       n1 = NULL,

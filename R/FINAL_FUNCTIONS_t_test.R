@@ -224,9 +224,9 @@ backend_t = function(r,
 
 ################# T function user interaction
 
-#' t.test.BFF
+#' t_test_BFF
 #'
-#' t.test.BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' t_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
 #' Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
@@ -261,21 +261,21 @@ backend_t = function(r,
 #' @export
 #'
 #' @examples
-#' tBFF = t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE)
-#' t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = 0.5)
-#' t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = c(0.5, 0.2))
-#' t.test.BFF(t_stat = 2.5, n1 = 50, n2 = 40, df = 88, save = FALSE, one_sample = FALSE)
-#' t.test.BFF(t_stat = 2.5, n = 50, r = 2, df = 49, save = FALSE)
-#' t.test.BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save = FALSE)
-#' t.test.BFF(t_stat = 2.5, n = 50, r = 2.5, df = 49, save = FALSE)
-#' t.test.BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save=FALSE)
-#' t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE)
-#' t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = 0.5)
-#' t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = c(0.5, 0.8))
+#' tBFF = t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE)
+#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = 0.5)
+#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = c(0.5, 0.2))
+#' t_test_BFF(t_stat = 2.5, n1 = 50, n2 = 40, df = 88, save = FALSE, one_sample = FALSE)
+#' t_test_BFF(t_stat = 2.5, n = 50, r = 2, df = 49, save = FALSE)
+#' t_test_BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save = FALSE)
+#' t_test_BFF(t_stat = 2.5, n = 50, r = 2.5, df = 49, save = FALSE)
+#' t_test_BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save=FALSE)
+#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE)
+#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = 0.5)
+#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = c(0.5, 0.8))
 #' tBFF$BFF_max_RMSE   # maximum BFF value
 #' tBFF$max_RMSE       # effect size which maximizes the BFF value
 #'
-t.test.BFF = function(t_stat,
+t_test_BFF = function(t_stat,
                       n = NULL,
                       df = NULL,
                       one_sample = TRUE,

@@ -171,9 +171,9 @@ backend_chi2 = function(r,
 
 ################# T function user interaction
 
-#' chi2.test.BFF
+#' chi2_test_BFF
 #'
-#' chi2.test.BFF constructs BFFs based on the chi-squared test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' chi2_test_BFF constructs BFFs based on the chi-squared test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
 #' Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
@@ -206,20 +206,20 @@ backend_chi2 = function(r,
 #' @export
 #'
 #' @examples
-#' chi2BFF = chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE)
-#' chi2BFF = chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = 0.5)
-#' chi2BFF = chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = c(0.5, 0.8))
-#' chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, pearsons = FALSE, save = FALSE)
-#' chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, save = FALSE)
-#' chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, pearsons = FALSE, save = FALSE)
-#' chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, save = FALSE)
-#' chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, pearsons = FALSE, save = FALSE)
-#' chi2.test.BFF(chi2_stat=2.5, n = 50, df = 49, maximize = TRUE)
-#' chi2.test.BFF(chi2_stat=2.5, n = 50,  df = 49, maximize = TRUE, tau2 = 0.5)
-#' chi2.test.BFF(chi2_stat=2.5, n = 50,  df = 49, maximize = TRUE, tau2 = c(0.5, 0.8))
+#' chi2BFF = chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE)
+#' chi2BFF = chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = 0.5)
+#' chi2BFF = chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = c(0.5, 0.8))
+#' chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, pearsons = FALSE, save = FALSE)
+#' chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, save = FALSE)
+#' chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, pearsons = FALSE, save = FALSE)
+#' chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, save = FALSE)
+#' chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, pearsons = FALSE, save = FALSE)
+#' chi2_test_BFF(chi2_stat=2.5, n = 50, df = 49, maximize = TRUE)
+#' chi2_test_BFF(chi2_stat=2.5, n = 50,  df = 49, maximize = TRUE, tau2 = 0.5)
+#' chi2_test_BFF(chi2_stat=2.5, n = 50,  df = 49, maximize = TRUE, tau2 = c(0.5, 0.8))
 #' chi2BFF$BFF_max_RMSE  # maximum BFF value
 #' chi2BFF$max_RMSE      # effect size which maximizes the BFF
-chi2.test.BFF = function(chi2_stat,
+chi2_test_BFF = function(chi2_stat,
                          n = NULL,
                          df = NULL,
                          pearsons = TRUE,

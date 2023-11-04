@@ -191,9 +191,9 @@ backend_f = function(r,
 
 ################# F function user interaction
 
-#' f.test.BFF
+#' f_test_BFF
 #'
-#' f.test.BFF constructs BFFs based on the F test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' f_test_BFF constructs BFFs based on the F test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
 #' Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
@@ -226,18 +226,18 @@ backend_f = function(r,
 #' @export
 #'
 #' @examples
-#' fBFF = f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE)
-#' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = 0.5)
-#' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = c(0.5, 0.8))
-#' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2, save = FALSE)
-#' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2.5, save = FALSE)
-#' f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE)
-#' f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE, tau2 = 0.5)
-#' f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE, tau2 = c(0.5, 0.8))
+#' fBFF = f_test_BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE)
+#' f_test_BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = 0.5)
+#' f_test_BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = c(0.5, 0.8))
+#' f_test_BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2, save = FALSE)
+#' f_test_BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2.5, save = FALSE)
+#' f_test_BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE)
+#' f_test_BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE, tau2 = 0.5)
+#' f_test_BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE, tau2 = c(0.5, 0.8))
 #' fBFF$BFF_max_RMSE  # maximum BFF value
 #' fBFF$max_RMSE      # effect size which maximizes the BFF value
 #'
-f.test.BFF = function(f_stat,
+f_test_BFF = function(f_stat,
                       n,
                       df1,
                       df2,
