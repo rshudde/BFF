@@ -203,8 +203,8 @@ backend_f = function(r,
 #' @param df2 first degree of freedom
 #' @param n sample size
 #' @param savename optional, filename for saving the pdf of the final plot
-#' @param r r value
 #' @param maximize should the function be maximzied over all possible r values? Default is FALSE. Only set to TRUE if analyzing multiple studies
+#' @param r r value
 #' @param tau2 tau2 values (can be a single entry or a vector of values)
 #' @param save should a copy of the plot be saved?
 #' @param xlab optional, x label for plot
@@ -242,8 +242,8 @@ f.test.BFF = function(f_stat,
                       df1,
                       df2,
                       savename = NULL,
-                      r = 1,
                       maximize = FALSE,
+                      r = 1,
                       tau2 = NULL,
                       save = TRUE,
                       xlab = NULL,
