@@ -1,6 +1,7 @@
 ---
 title: "BFF"
 output: pdf_document
+extra_dependencies: ["multirow"]
 vignette: >
   %\VignetteIndexEntry{BFF_vignette}
   %\VignetteEngine{knitr::rmarkdown}
@@ -209,94 +210,60 @@ z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = 
 
 Plotting (the same maximization parameter applies to all tests, examples are using the z test)
 
+Plots can be saved by setting "save = TRUE." If plots are saved, they are saved in working directory.
+
 ```{r plotting for z test}
 # saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
-z.test.BFF(z_stat = z_score_one, n = 100, save = TRUE) #one sample z-test
+z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE) #one sample z-test
 z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE) #two sample z-test
 
-# saving the plot as a pdf with user specified name. Stored in working directory.
-z.test.BFF(z_stat = z_score_one, n = 100, save = TRUE, savename = "z-BFF-one.pdf") #one sample z-test
+# saving the plot as a pdf with user specified name. 
+z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, savename = "z-BFF-one.pdf") #one sample z-test
 z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, savename = "z-BFF-two.pdf") #two sample z-test
  
 # customizing x-axis labels, y-axis labels and main title
-z.test.BFF(z_stat = z_score_one, n = 100, save = TRUE, xlab = "RMSE", ylab = "Logarithm of Bayes Factor", main = "BFF curves") #one sample z-test
+z.test.BFF(z_stat = z_score_one, n = 100, save = FALSE, xlab = "RMSE", ylab = "Logarithm of Bayes Factor", main = "BFF curves") #one sample z-test
 z_BFF_two = z.test.BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves") #two sample z-test
 ```
 
 ## Default choices of tau2 for common statistical tests
 
-```{=latex}
-\begin{table}[h]
+<!-- \begin{table}[h] -->
+<!-- \caption{Default choices of $\tau_{\omega,r}$} -->
+<!-- \label{parset} -->
+<!-- % -->
+<!-- \begin{tabular}{lccc} \hline \hline -->
+<!-- {\bf Test }& Statistic  & Standardized Effect ($\omega$) & $\tau^2_{\omega,r}$     \\ \hline \hline -->
+<!-- {1-sample z} & {$\frac{\sqrt{n}\bar{x}}{\sigma}$} &  $\frac{\mu}{\sigma}$ & $ \frac{n\omega^2}{2r}$ -->
+<!--            \\   -->
+<!-- {1-sample t} & {$\frac{\sqrt{n}\bar{x}}{s}$} &  $\frac{\mu}{\sigma}$ & $ \frac{n\omega^2}{2r}$ -->
+<!--            \\   -->
+<!-- {2-sample z}  -->
+<!-- 	& $\frac{\sqrt{n_1 n_2}(\bar{x}_1-\bar{x}_2)}{\sigma\sqrt{n_1+n_2}} $ & $\frac{\mu_1-\mu_2}{\sigma}$  -->
+<!--          & $\frac{n_1 n_2\omega^2}{2r(n_1+n_2)}$ \\  -->
 
-\caption{Default choices of $\tau_{\omega,r}$}
+<!-- {2-sample t}  -->
+<!-- 	& $\frac{\sqrt{n_1 n_2}(\bar{x}_1-\bar{x}_2)}{s\sqrt{n_1+n_2}} $ & $\frac{\mu_1-\mu_2}{\sigma}$   -->
+<!--          & $\frac{n_1 n_2\omega^2}{2r(n_1+n_2)}$ \\  -->
 
-\label{parset}
+<!-- Multinomial/Poisson &  -->
+<!--           \multirow{2}{*}{$\chi^2_{\nu} = \sum\limits_{i=1}^k \frac{(n_i-nf_i(\hat{\theta}))^2}{nf_i(\hat{\theta})}$} & -->
+<!--           \multirow{2}{*}{{ $ \left( \frac{p_{i}-f_i(\theta)}{\sqrt{f_i(\theta)}} \right)_{k\times 1} $} }&  -->
+<!--           \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{2(\frac{k}{2}+r-1)}$} \\ -->
+<!--  & & &   \\ -->
+<!-- Linear model& \multirow{2}{*}{$F_{k,n-p} = \frac{(RSS_0-RSS_1)/k}{[(RSS_1)/(n-p)]}$} & -->
+<!--            \multirow{2}{*}{$\frac{\mathbf{L}^{-1}(\mathbf{A}\boldsymbol{\beta}-\mathbf{a})}{\sigma}$} &  -->
+<!--            \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{4(\frac{k}{2}+r-1)}$}  -->
+<!--                 \\ -->
+<!--                 \\  -->
+<!-- Likelihood Ratio &  -->
+<!--        \multirow{2}{*}{$ \chi^2_{k} = -2\log\left[\frac{l(\theta_{r0},\hat{\theta_{s}})}{l(\hat{\theta})} \right]$} & -->
+<!--        \multirow{2}{*}{${\bf L}^{-1}(\theta_{r}-\theta_{r0}) $ } &  -->
+<!--       \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{2(\frac{k}{2}+r-1)}$}   \\ -->
+<!--  &  \\   -->
+<!--      \hline -->
+<!-- \end{tabular} -->
+<!-- % -->
+<!-- \end{table} -->
 
-%
 
-\begin{tabular}{lccc} \hline \hline
-
-{\bf Test }& Statistic  & Standardized Effect ($\omega$) & $\tau^2_{\omega,r}$     \\ \hline \hline
-
-{1-sample z} & {$\frac{\sqrt{n}\bar{x}}{\sigma}$} &  $\frac{\mu}{\sigma}$ & $ \frac{n\omega^2}{2r}$
-
-           \\  \hline
-
-{1-sample t} & {$\frac{\sqrt{n}\bar{x}}{s}$} &  $\frac{\mu}{\sigma}$ & $ \frac{n\omega^2}{2r}$
-
-           \\  \hline
-
-{2-sample z}
-
-                & $\frac{\sqrt{n_1 n_2}(\bar{x}_1-\bar{x}_2)}{\sigma\sqrt{n_1+n_2}} $ & $\frac{\mu_1-\mu_2}{\sigma}$
-
-         & $\frac{n_1 n_2\omega^2}{2r(n_1+n_2)}$ \\
-
-\hline
-
-{2-sample t}
-
-                & $\frac{\sqrt{n_1 n_2}(\bar{x}_1-\bar{x}_2)}{s\sqrt{n_1+n_2}} $ & $\frac{\mu_1-\mu_2}{\sigma}$ 
-
-         & $\frac{n_1 n_2\omega^2}{2r(n_1+n_2)}$ \\
-
-\hline
-
-Multinomial/Poisson &
-
-          \multirow{2}{*}{$\chi^2_{\nu} = \sum\limits_{i=1}^k \frac{(n_i-nf_i(\hat{\theta}))^2}{nf_i(\hat{\theta})}$} &
-
-          \multirow{2}{*}{{ $ \left( \frac{p_{i}-f_i(\theta)}{\sqrt{f_i(\theta)}} \right)_{k\times 1} $} }&
-
-          \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{2(\frac{k}{2}+r-1)}$} \\
-
-& & &   \\ \hline
-
-Linear model& \multirow{2}{*}{$F_{k,n-p} = \frac{(RSS_0-RSS_1)/k}{[(RSS_1)/(n-p)]}$} &
-
-           \multirow{2}{*}{$\frac{\mathbf{L}^{-1}(\mathbf{A}\boldsymbol{\beta}-\mathbf{a})}{\sigma}$} &
-
-           \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{4(\frac{k}{2}+r-1)}$}
-
-                \\
-
-                \\ \hline
-
-Likelihood Ratio &
-
-       \multirow{2}{*}{$ \chi^2_{k} = -2\log\left[\frac{l(\theta_{r0},\hat{\theta_{s}})}{l(\hat{\theta})} \right]$} &
-
-       \multirow{2}{*}{${\bf L}^{-1}(\theta_{r}-\theta_{r0}) $ } &
-
-      \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{2(\frac{k}{2}+r-1)}$}   \\
-
-&  \\ 
-
-     \hline
-
-\end{tabular}
-
-%
-
-\end{table}
-```
