@@ -33,7 +33,7 @@ z.test.BFF(
 
 \item{savename}{optional, filename for saving the pdf of the final plot}
 
-\item{maximize}{Should the value of r be maximized? Default is FALSE. Only set to TRUE if using multiple studies}
+\item{maximize}{Should the value of r be maximized? Default is FALSE. Only set to TRUE if analyzing multiple studies}
 
 \item{r}{r value}
 
@@ -71,11 +71,14 @@ Plot saved to working directory unless a full path is specified in the 'savename
 zBFF = z.test.BFF(z_stat = 2.5, n = 50, save = FALSE)
 z.test.BFF(z_stat = 2.5, n = 50, save = FALSE, tau2 = 0.5)
 z.test.BFF(z_stat = 2.5, n = 50, save = FALSE, tau2 = c(0.5, 0.8))
-z.test.BFF(z_stat = 2.5, n1 = 50, n2 = 35, one_sample = FALSE, save = FALSE)
+z.test.BFF(z_stat = 2.5, n1 = 50, n2 = 35, one_sample = FALSE, save = FALSE) ##
 z.test.BFF(z_stat = 2.5, n = 50, r = 2, save = FALSE)
-z.test.BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE)
+z.test.BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE) ##
 z.test.BFF(z_stat = 2.5, n = 50, r = 2.5, save = FALSE)
-z.test.BFF(z_stat = 2.5, r = 2.5, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE)
+z.test.BFF(z_stat = 2.5, r = 2.5, n1 = 50, n2 = 30, one_sample = FALSE, save = FALSE) ##
+z.test.BFF(z_stat=2.5, n = 50, maximize = TRUE)
+z.test.BFF(z_stat=2.5, n = 50,  maximize = TRUE, tau2 = 0.5)
+z.test.BFF(z_stat=2.5, n = 50,  maximize = TRUE, tau2 = c(0.5, 0.8))
 zBFF$BFF_max_RMSE   # maximum BFF value
 zBFF$max_RMSE       # effect size which maximizes the BFF value
 

@@ -10,6 +10,7 @@ chi2.test.BFF(
   df = NULL,
   pearsons = TRUE,
   savename = NULL,
+  maximize = FALSE,
   r = 1,
   tau2 = NULL,
   save = TRUE,
@@ -28,6 +29,8 @@ chi2.test.BFF(
 \item{pearsons}{Is this a test of Pearson’s chi^2 test for goodness-of-fit? Default is TRUE. FALSE assumes a likelihood ratio test}
 
 \item{savename}{optional, filename for saving the pdf of the final plot}
+
+\item{maximize}{Should the value of r be maximized? Default is FALSE. Only set to TRUE if analyzing multiple studies}
 
 \item{r}{r value}
 
@@ -70,6 +73,9 @@ chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, save = FALSE)
 chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, pearsons = FALSE, save = FALSE)
 chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, save = FALSE)
 chi2.test.BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, pearsons = FALSE, save = FALSE)
+chi2.test.BFF(chi2_stat=2.5, n = 50, df = 49, maximize = TRUE)
+chi2.test.BFF(chi2_stat=2.5, n = 50,  df = 49, maximize = TRUE, tau2 = 0.5)
+chi2.test.BFF(chi2_stat=2.5, n = 50,  df = 49, maximize = TRUE, tau2 = c(0.5, 0.8))
 chi2BFF$BFF_max_RMSE  # maximum BFF value
 chi2BFF$max_RMSE      # effect size which maximizes the BFF
 }

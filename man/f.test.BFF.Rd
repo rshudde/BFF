@@ -10,6 +10,7 @@ f.test.BFF(
   df1,
   df2,
   savename = NULL,
+  maximize = FALSE,
   r = 1,
   tau2 = NULL,
   save = TRUE,
@@ -28,6 +29,8 @@ f.test.BFF(
 \item{df2}{first degree of freedom}
 
 \item{savename}{optional, filename for saving the pdf of the final plot}
+
+\item{maximize}{should the function be maximzied over all possible r values? Default is FALSE. Only set to TRUE if analyzing multiple studies}
 
 \item{r}{r value}
 
@@ -67,6 +70,9 @@ f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = 0.5)
 f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = c(0.5, 0.8))
 f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2, save = FALSE)
 f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2.5, save = FALSE)
+f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE)
+f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE, tau2 = 0.5)
+f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE, tau2 = c(0.5, 0.8))
 fBFF$BFF_max_RMSE  # maximum BFF value
 fBFF$max_RMSE      # effect size which maximizes the BFF value
 

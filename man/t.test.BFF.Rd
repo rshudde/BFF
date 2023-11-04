@@ -4,7 +4,7 @@
 \alias{t.test.BFF}
 \title{t.test.BFF}
 \usage{
-\method{t.test}{BFF}(
+\method{t}{test.BFF}(
   t_stat,
   n = NULL,
   df = NULL,
@@ -12,6 +12,7 @@
   n1 = NULL,
   n2 = NULL,
   savename = NULL,
+  maximize = FALSE,
   r = 1,
   tau2 = NULL,
   save = TRUE,
@@ -34,6 +35,8 @@
 \item{n2}{sample size of group two for two sample test}
 
 \item{savename}{optional, filename for saving the pdf of the final plot}
+
+\item{maximize}{should the function be maximzied over all possible r values? Default is FALSE. Only set to TRUE if analyzing multiple studies}
 
 \item{r}{r value}
 
@@ -76,6 +79,9 @@ t.test.BFF(t_stat = 2.5, n = 50, r = 2, df = 49, save = FALSE)
 t.test.BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save = FALSE)
 t.test.BFF(t_stat = 2.5, n = 50, r = 2.5, df = 49, save = FALSE)
 t.test.BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save=FALSE)
+t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE)
+t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = 0.5)
+t.test.BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = c(0.5, 0.8))
 tBFF$BFF_max_RMSE   # maximum BFF value
 tBFF$max_RMSE       # effect size which maximizes the BFF value
 
