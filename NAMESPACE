@@ -1,7 +1,7 @@
-export(z.test.BFF)
-export(t.test.BFF)
-export(chi2.test.BFF)
-export(f.test.BFF)
+export(z_test_BFF)
+export(t_test_BFF)
+export(chi2_test_BFF)
+export(f_test_BFF)
 
 
 importFrom("grDevices", "adjustcolor", "dev.off", "pdf")
