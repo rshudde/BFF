@@ -140,13 +140,12 @@ log_T_frac_onesided = function(tau2, t, v, r)
 ####################### backend implementation
 backend_t = function(r,
                      t_stat,
+                     df,
                      n = NULL,
-                     df = NULL,
                      one_sample = TRUE,
+                     one_sided = TRUE,
                      n1 = NULL,
                      n2 = NULL,
-                     savename = NULL,
-                     r1 = FALSE,
                      tau2 = NULL)
 
 {
@@ -157,52 +156,33 @@ backend_t = function(r,
   if (is.null(tau2))
     user_supplied_tau2 = FALSE
 
-  r1 = r1
-  frac_r = !r1
-
   log_vals = rep(0, length(effect_size))
 
-  if (r1) {
-    if (one_sample)
-    {
-      if (!user_supplied_tau2)
-        tau2 = get_one_sample_tau2(n = n, w = effect_size)
-    } else {
-      if (!user_supplied_tau2)
-        tau2 = get_two_sample_tau2(n1 = n1, n2 = n2, w = effect_size)
-    }
-    log_vals = unlist(lapply(tau2, t_val_r1, t_stat = t_stat, df = df))
-  }
+  if (one_sample && !user_supplied_tau2)
+  {
+    tau2 = get_one_sample_tau2(n = n, w = effect_size, r = r)
+  } else if (!one_sample && !user_supplied_tau2)
+    tau2 = get_two_sample_tau2(n1 = n1,
+                               n2 = n2,
+                               w = effect_size,
+                               r = r)
 
-  if (frac_r) {
-    if (one_sample)
-    {
-      if (!user_supplied_tau2)
-        tau2 = get_one_sample_tau2(n = n, w = effect_size, r = r)
-      log_vals = unlist(lapply(
-        tau2,
-        log_T_frac,
-        r = r,
-        v = df,
-        t = t_stat
-      ))
-    } else {
-      if (!user_supplied_tau2)
-        tau2 = get_two_sample_tau2(
-          n1 = n1,
-          n2 = n2,
-          w = effect_size,
-          r = r
-        )
-
-      log_vals = unlist(lapply(
-        tau2,
-        log_T_frac_onesided,
-        r = r,
-        v = df,
-        t = t_stat
-      ))
-    }
+  if (one_sided) {
+    log_vals = unlist(lapply(
+      tau2,
+      log_T_frac_onesided,
+      r = r,
+      v = df,
+      t = t_stat
+    ))
+  } else {
+    log_vals = unlist(lapply(
+      tau2,
+      log_T_frac,
+      r = r,
+      v = df,
+      t = t_stat
+    ))
   }
 
   # stuff to return
@@ -232,19 +212,12 @@ backend_t = function(r,
 #' Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
 #'
 #' @param t_stat T statistic
-#' @param df degrees of freedom
 #' @param n sample size (if one sample test)
-#' @param one_sample is test one sided? Default is TRUE
-#' @param n1 sample size of group one for two sample test
+#' @param one_sample is test one sided? Default is FALSE
+#' @param n1 sample size of group one for two sample test.
 #' @param n2 sample size of group two for two sample test
-#' @param savename optional, filename for saving the pdf of the final plot
-#' @param maximize should the function be maximzied over all possible r values? Default is FALSE. Only set to TRUE if analyzing multiple studies
 #' @param r r value
 #' @param tau2 tau2 values (can be a single entry or a vector of values)
-#' @param save should a copy of the plot be saved?
-#' @param xlab optional, x label for plot
-#' @param ylab optional, y label for plot
-#' @param main optional, main label for plot
 #'
 #' @return Returns Bayes factor function results
 #'  \tabular{ll}{
@@ -277,43 +250,87 @@ backend_t = function(r,
 #'
 t_test_BFF = function(t_stat,
                       n = NULL,
-                      df = NULL,
-                      one_sample = TRUE,
+                      one_sample = FALSE,
+                      alternative = "two.sided",
                       n1 = NULL,
                       n2 = NULL,
-                      savename = NULL,
-                      maximize = FALSE,
                       r = 1,
-                      tau2 = NULL,
-                      save = TRUE,
-                      xlab = NULL,
-                      ylab = NULL,
-                      main = NULL)
+                      tau2 = NULL)
 
 {
-  if (is.null(n) &
-      (is.null(n1) &
-       is.null(n2)))
-    stop("Either n or n1 and n2 is required")
 
-  if (is.null(df))
-    stop("df is required")
+  # check alternative
+  if (!alternative %in% c("two.sided", "less", "greater")) {
+    stop("The alternative must be either 'two.sided', 'less', or 'greater'")
+  }
+
+  if (r < 1) {
+    stop("r must be greater than 1")
+  }
+
+  # set and check the degrees of freedom
+  if (!is.null(n) && one_sample)
+  {
+    df = n-1
+  } else if (!is.null(n) && !one_sample) {
+    df = n- 2
+    n1 = n/2
+    n2 = n/2
+  } else if (!is.null(n) && !is.null) {
+    df = n - 2
+  }
+  if (df <= 1) {
+    stop("Degrees of freedom must be greater than 1. If using a two sample test, n must be greater
+         than 3, if using a one sample test, n must be greater than 2")
+  }
+
+  used_alternative = alternative
+  if (alternative == "less")
+  {
+    t_stat = -t_stat
+    used_alternative = "greater"
+  }
+
+
+  tau2_set = !is.null(tau2)
+
+  # should we maximize? If the t statistic is a vector and r is not provided, yes
+  maximize = length(t_stat) > 1 && is.null(r)
 
   #####  same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
 
-  ##### is tau2 supplied as an argument?
-  user_supplied_tau2 = TRUE
-  if (is.null(tau2))
+  ##### optimzation logic
+  if (maximize)
   {
-    user_supplied_tau2 = FALSE
+    r = 2
+    # if (is.null(tau2))
+    #   tau2 = seq(0, 1, 0.1)
+    # optimal_r = vector(length = length(tau2))
+    # count = 1
+    # for (i in tau2)
+    # {
+    #   optimal_r[count] = optimize(
+    #     backend_t,
+    #     c(1, 20),
+    #     tol = 0.001,
+    #     t_stat = t_stat,
+    #     n = n,
+    #     n1 = n1,
+    #     n2 = n2,
+    #     df = df,
+    #     one_sample = one_sample,
+    #     r1 = FALSE,
+    #     tau2 = i,
+    #     maximum = TRUE
+    #   )$maximum
+    #   count = count + 1
+    # }
+    # maximized_values = as.data.frame(cbind(tau2, optimal_r))
   }
 
-  #####  call results
-  r1 = FALSE
-  if (r == 1)
-    r1 = TRUE
+  ###### recalulate the BFF with the new combined R
   results = backend_t(
     t_stat = t_stat,
     n = n,
@@ -322,80 +339,67 @@ t_test_BFF = function(t_stat,
     n1 = n1,
     n2 = n2,
     tau2 = tau2,
-    r1 = r1,
-    one_sample = one_sample
+    one_sample = one_sample,
+    one_sided = used_alternative == "greater"
   )
-
-  #####  plotting if tau2 is not specified
-  if (!user_supplied_tau2 && !maximize) {
-    bff_plot = c()
-    bff_plot[[1]] = results
-
-    plot_BFF(
-      effect_size = effect_size,
-      BFF = bff_plot,
-      save = save,
-      savename = savename,
-      xlab = xlab,
-      ylab = ylab,
-      main = main,
-      r = r
-    )
-  }
-
-  ##### optimzation logic
-  if (maximize)
-  {
-    if (is.null(tau2))
-      tau2 = seq(0, 1, 0.1)
-    optimal_r = vector(length = length(tau2))
-    count = 1
-    for (i in tau2)
-    {
-      optimal_r[count] = optimize(
-        backend_t,
-        c(1, 20),
-        tol = 0.001,
-        t_stat = t_stat,
-        n = n,
-        n1 = n1,
-        n2 = n2,
-        df = df,
-        one_sample = one_sample,
-        r1 = FALSE,
-        tau2 = i,
-        maximum = TRUE
-      )$maximum
-      count = count + 1
-    }
-    maximized_values = as.data.frame(cbind(tau2, optimal_r))
-  }
-
 
   ###### return logic
   BFF = results
   effect_size = effect_size
-  idx_max = which.max(BFF)
+  idx_max = which.max(abs(BFF))
   BFF_max_RMSE = BFF[idx_max]
   max_RMSE = effect_size[idx_max]
 
-  if (maximize) {
-    print(
-      "The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value."
-    )
-    to_return = maximized_values
-  } else if (user_supplied_tau2) {
-    to_return = list(BFF = BFF,
-                     tau2 = tau2)
-  } else {
-    to_return = list(
-      log_BFF = BFF,
-      effect_size = effect_size,
-      log_BFF_max_RMSE = BFF_max_RMSE,
-      max_RMSE = max_RMSE
-    )
 
+  output = list(
+    log_bf = BFF_max_RMSE,
+    tau2 = max_RMSE,
+    tau2_set = tau2_set,
+    one_sample = one_sample,
+    alternative = alternative,
+    test_type = "t_test",
+    r = r
+  )
+
+  if (!tau2_set) {
+    output$BFF = list(log_bf = results, tau2 = effect_size)
   }
-  return(to_return)
+
+  class(output) = "BFF"
+  return(output)
+}
+
+print.BFF = function(x, ...) {
+  cat(paste0("\t\t", .test_type_name(x$test_type, x$one_sample)))
+  cat("\n\n")
+  cat(gettextf("%1$slog Bayes factor = %2$.2f\n", if(!x$tau2_set) "maximized " else "", x$log_bf))
+  cat(gettextf("%1$slog tau2 = %2$.2f\n", if(!x$tau2_set) "maximized " else "", x$tau2))
+  cat(paste0("alternative = ", x$alternative))
+}
+
+plot.BFF = function(x, xlab = NULL, ylab = NULL, main = NULL, ...) {
+  if (is.null(x$BFF)) stop("Bayes factor function can be plotted only if a specific tau2 is not user set")
+
+  plot_BFF(
+    effect_size = x$BFF$tau2,
+    BFF = x$BFF$log_bf,
+    xlab = xlab,
+    ylab = ylab,
+    main = main,
+    r = x$r
+  )
+}
+
+.test_type_name = function(test_type, one_sample) {
+  starting_strng = gettextf("Bayesian non-local %1$s %2$s",
+                            if(one_sample) "one-sample" else "two-sample",
+                            switch(test_type,
+                                "t_test" = "t test",
+                                "z_test" = "z test",
+                                "chi2_test" = "chi2 test",
+                                "f_test" = "f test"))
 
 }
+
+
+

@@ -268,7 +268,6 @@ idxInOrigSeq <- function(orig_seq) {
   return(indices)
 
 }
-  # library(gsl)
   Gauss2F1 <- function(a,b,c,x){
     if(x>=0 & x<1){
       to_return = hyperg_2F1(a,b,c,x)

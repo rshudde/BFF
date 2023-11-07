@@ -1,8 +1,9 @@
-# rm(list = ls())
-# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
-# source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
+rm(list = ls())
+source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
+source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
+source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
+
 ################# Z functions if r is an integer and equal to 1
 z_val_r1 = function(tau2, z_stat)
 {
@@ -217,7 +218,6 @@ backend_z = function(r,
 #' z_test_BFF(z_stat=2.5, n = 50,  maximize = TRUE, tau2 = c(0.5, 0.8))
 #' zBFF$BFF_max_RMSE   # maximum BFF value
 #' zBFF$max_RMSE       # effect size which maximizes the BFF value
-#'
 z_test_BFF = function(z_stat,
                       n = NULL,
                       one_sample = TRUE,
@@ -268,7 +268,7 @@ z_test_BFF = function(z_stat,
     bff_plot = c()
     bff_plot[[1]] = results
 
-    plot_BFF(
+    plot_obj = plot_BFF(
       effect_size = effect_size,
       BFF = bff_plot,
       save = save,
@@ -311,7 +311,7 @@ z_test_BFF = function(z_stat,
   ###### return logic
   BFF = results
   effect_size = effect_size
-  idx_max = which.max(BFF)
+  idx_max = which.max(abs(BFF))
   BFF_max_RMSE = BFF[idx_max]
   max_RMSE = effect_size[idx_max]
 
@@ -328,9 +328,12 @@ z_test_BFF = function(z_stat,
       log_BFF = BFF,
       effect_size = effect_size,
       log_BFF_max_RMSE = BFF_max_RMSE,
-      max_RMSE = max_RMSE
+      max_RMSE = max_RMSE,
+      plot = plot_obj
     )
   }
+
+  # print(plot_obj)
   return(to_return)
 
 

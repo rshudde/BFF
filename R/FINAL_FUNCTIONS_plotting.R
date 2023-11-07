@@ -6,12 +6,17 @@ substrRight <- function(x, n) {
 
 plot_BFF = function(effect_size,
                     BFF,
-                    save = FALSE,
-                    savename = NULL,
                     xlab = NULL,
                     ylab = NULL,
                     main = NULL,
                     r = NULL) {
+
+
+  # fix this
+  bff_plot = c()
+  bff_plot[[1]] = BFF
+  BFF = bff_plot
+
   num_lines = length(BFF)
   plot_legend_names = vector()
   count = 1
@@ -30,18 +35,18 @@ plot_BFF = function(effect_size,
   if (is.null(main))
     main = "BFF"
 
-  if (is.null(savename) && save) {
-    print("No savename argument given, plot saving as BFF_plot.pdf")
-    savename = "BFF_plot.pdf"
-  }
-  if (!is.null(savename) && !save) {
-    ## TODO string check for .pdf extension
-    check_pdf = substrRight(savename, 4)
-    if (check_pdf != ".pdf")
-      savename = paste(savename, ".pdf", sep = "")
-    save = TRUE
-    print(savename)
-  }
+  # if (is.null(savename) && save) {
+  #   print("No savename argument given, plot saving as BFF_plot.pdf")
+  #   savename = "BFF_plot.pdf"
+  # }
+  # if (!is.null(savename) && !save) {
+  #   ## TODO string check for .pdf extension
+  #   check_pdf = substrRight(savename, 4)
+  #   if (check_pdf != ".pdf")
+  #     savename = paste(savename, ".pdf", sep = "")
+  #   save = TRUE
+  #   print(savename)
+  # }
   #Making the plot
   data <- data.frame(effect_size = effect_size, BFF = BFF[[1]])
   p <- ggplot(data, aes(x = effect_size, y = BFF)) +
@@ -150,9 +155,9 @@ plot_BFF = function(effect_size,
 
   p <- p + theme(panel.grid = element_blank())
 
-  if (save) {
-    ggsave(savename, plot = p, device = "pdf")
-  }
+  # if (save) {
+  #   ggsave(savename, plot = p, device = "pdf")
+  # }
 
-  print(p)
+  return(p)
 }
