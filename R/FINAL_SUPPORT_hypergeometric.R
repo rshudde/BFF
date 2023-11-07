@@ -270,9 +270,9 @@ idxInOrigSeq <- function(orig_seq) {
 }
   Gauss2F1 <- function(a,b,c,x){
     if(x>=0 & x<1){
-      to_return = hyperg_2F1(a,b,c,x)
+      to_return = gsl::hyperg_2F1(a,b,c,x)
     }else{
-      to_return = hyperg_2F1(c-a,b,c,1-1/(1-x))/(1-x)^b
+      to_return = gsl::hyperg_2F1(c-a,b,c,1-1/(1-x))/(1-x)^b
     }
     return(to_return)
   }
