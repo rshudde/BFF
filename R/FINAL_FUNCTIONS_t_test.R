@@ -146,22 +146,27 @@ backend_t = function(r,
                      one_sided = TRUE,
                      n1 = NULL,
                      n2 = NULL,
-                     tau2 = NULL)
+                     omega = NULL)
 
 {
   # same effect sizes for all tests
-  effect_size = seq(0.01, 1, by = 0.01)
+  if (!is.null(omega))
+  {
+    effect_size = omega
+  } else {
+    effect_size = seq(0.01, 1, by = 0.01)
+  }
 
-  user_supplied_tau2 = TRUE
-  if (is.null(tau2))
-    user_supplied_tau2 = FALSE
+  user_supplied_omega = TRUE
+  if (is.null(omega))
+    user_supplied_omega = FALSE
 
   log_vals = rep(0, length(effect_size))
 
-  if (one_sample && !user_supplied_tau2)
+  if (one_sample)
   {
     tau2 = get_one_sample_tau2(n = n, w = effect_size, r = r)
-  } else if (!one_sample && !user_supplied_tau2)
+  } else if (!one_sample)
     tau2 = get_two_sample_tau2(n1 = n1,
                                n2 = n2,
                                w = effect_size,
@@ -255,7 +260,7 @@ t_test_BFF = function(t_stat,
                       n1 = NULL,
                       n2 = NULL,
                       r = 1,
-                      tau2 = NULL)
+                      omega = NULL)
 
 {
 
@@ -291,8 +296,7 @@ t_test_BFF = function(t_stat,
     used_alternative = "greater"
   }
 
-
-  tau2_set = !is.null(tau2)
+  omega_set = !is.null(omega)
 
   # should we maximize? If the t statistic is a vector and r is not provided, yes
   maximize = length(t_stat) > 1 && is.null(r)
@@ -338,7 +342,7 @@ t_test_BFF = function(t_stat,
     r = r,
     n1 = n1,
     n2 = n2,
-    tau2 = tau2,
+    omega = omega,
     one_sample = one_sample,
     one_sided = used_alternative == "greater"
   )
@@ -354,15 +358,15 @@ t_test_BFF = function(t_stat,
   output = list(
     log_bf = BFF_max_RMSE,
     tau2 = max_RMSE,
-    tau2_set = tau2_set,
+    omega_set = omega_set,
     one_sample = one_sample,
     alternative = alternative,
     test_type = "t_test",
     r = r
   )
 
-  if (!tau2_set) {
-    output$BFF = list(log_bf = results, tau2 = effect_size)
+  if (!omega_set) {
+    output$BFF = list(log_bf = results, omega = effect_size)
   }
 
   class(output) = "BFF"
@@ -372,8 +376,8 @@ t_test_BFF = function(t_stat,
 print.BFF = function(x, ...) {
   cat(paste0("\t\t", .test_type_name(x$test_type, x$one_sample)))
   cat("\n\n")
-  cat(gettextf("%1$slog Bayes factor = %2$.2f\n", if(!x$tau2_set) "maximized " else "", x$log_bf))
-  cat(gettextf("%1$slog tau2 = %2$.2f\n", if(!x$tau2_set) "maximized " else "", x$tau2))
+  cat(gettextf("%1$slog Bayes factor = %2$.2f\n", if(!x$omega_set) "maximized " else "", x$log_bf))
+  cat(gettextf("%1$slog tau2 = %2$.2f\n", if(!x$omega_set) "maximized " else "", x$tau2))
   cat(paste0("alternative = ", x$alternative))
 }
 
