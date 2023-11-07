@@ -358,7 +358,7 @@ t_test_BFF = function(t_stat,
 
   output = list(
     log_bf = BFF_max_RMSE,
-    tau2 = max_RMSE,
+    omega = max_RMSE,
     omega_set = omega_set,
     one_sample = one_sample,
     alternative = alternative,
