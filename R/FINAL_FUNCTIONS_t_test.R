@@ -385,7 +385,7 @@ plot.BFF = function(x, xlab = NULL, ylab = NULL, main = NULL, ...) {
   if (is.null(x$BFF)) stop("Bayes factor function can be plotted only if a specific tau2 is not user set")
 
   plot_BFF(
-    effect_size = x$BFF$tau2,
+    effect_size = x$BFF$omega,
     BFF = x$BFF$log_bf,
     xlab = xlab,
     ylab = ylab,
