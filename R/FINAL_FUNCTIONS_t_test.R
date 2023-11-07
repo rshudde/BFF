@@ -277,12 +277,13 @@ t_test_BFF = function(t_stat,
   if (!is.null(n) && one_sample)
   {
     df = n-1
+  } else if (!is.null(n1) && !is.null(n2)) {
+    df = n1 + n2 - 2
+    one_sample = FALSE
   } else if (!is.null(n) && !one_sample) {
-    df = n- 2
+    df = n - 2
     n1 = n/2
     n2 = n/2
-  } else if (!is.null(n) && !is.null) {
-    df = n - 2
   }
   if (df <= 1) {
     stop("Degrees of freedom must be greater than 1. If using a two sample test, n must be greater
