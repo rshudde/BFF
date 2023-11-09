@@ -81,5 +81,4 @@ z_test_BFF(z_stat=2.5, n = 50,  maximize = TRUE, tau2 = 0.5)
 z_test_BFF(z_stat=2.5, n = 50,  maximize = TRUE, tau2 = c(0.5, 0.8))
 zBFF$BFF_max_RMSE   # maximum BFF value
 zBFF$max_RMSE       # effect size which maximizes the BFF value
-
 }
