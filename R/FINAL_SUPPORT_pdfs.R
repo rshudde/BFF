@@ -93,14 +93,14 @@ post_pdf_t_1s <- function(t, tau2_w_r, r, df, lambda){
 # omega = effect_size[which.max(logbf)]
 # tau2_w_r = n*omega^2/2
 
-prior_1s_t = dnm_1s(x = t, tau2 = tau2_w_r, r = 1)
-posterior_t1_1s = post_pdf_t_1s(t = t, tau2_w_r = tau2_w_r, r = 1, df = df, lambda = 2)
-
-df = data.frame(x = t, prior = prior_1s_t, post = posterior_t1_1s)
-ggplot(df, aes(x = x))+
-  geom_line(aes(y = prior), color = "black")+
-  geom_line(aes(y = post), color = "blue")+
-  labs(x = expression(lambda))
+# prior_1s_t = dnm_1s(x = t, tau2 = tau2_w_r, r = 1)
+# posterior_t1_1s = post_pdf_t_1s(t = t, tau2_w_r = tau2_w_r, r = 1, df = df, lambda = 2)
+#
+# df = data.frame(x = t, prior = prior_1s_t, post = posterior_t1_1s)
+# ggplot(df, aes(x = x))+
+#   geom_line(aes(y = prior), color = "black")+
+#   geom_line(aes(y = post), color = "blue")+
+#   labs(x = expression(lambda))
 
 
 
@@ -165,13 +165,13 @@ post_pdf_t_2s <- function(t, tau2_w_r, r, df, lambda){
   return(posterior_t2)
 }
 
-
-prior_2s_t = dnm_2s(x = t, tau2 = tau2_w_r, r = 1)
-posterior_t_2s = post_pdf_t_2s(t = t, tau2_w_r = tau2_w_r, r = 1, df = df, lambda = 2)
-
-
-df = data.frame(x = t, prior = prior_2s_t, post = posterior_t_2s)
-ggplot(df, aes(x = x))+
-  geom_line(aes(y = prior), color = "black")+
-  geom_line(aes(y = post), color = "blue")+
-  labs(x = expression(lambda))
+#
+# prior_2s_t = dnm_2s(x = t, tau2 = tau2_w_r, r = 1)
+# posterior_t_2s = post_pdf_t_2s(t = t, tau2_w_r = tau2_w_r, r = 1, df = df, lambda = 2)
+#
+#
+# df = data.frame(x = t, prior = prior_2s_t, post = posterior_t_2s)
+# ggplot(df, aes(x = x))+
+#   geom_line(aes(y = prior), color = "black")+
+#   geom_line(aes(y = post), color = "blue")+
+#   labs(x = expression(lambda))
