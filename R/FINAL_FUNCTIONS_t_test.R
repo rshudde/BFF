@@ -363,7 +363,13 @@ t_test_BFF = function(t_stat,
     one_sample = one_sample,
     alternative = alternative,
     test_type = "t_test",
-    r = r
+    r = r,
+    input = list(
+      t_stat = t_stat,
+      df     = df,
+      n1     = n1,
+      n2     = n2
+    )
   )
 
   if (!omega_set) {
