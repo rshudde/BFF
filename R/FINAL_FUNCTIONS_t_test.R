@@ -222,7 +222,7 @@ backend_t = function(r,
 #' @param n1 sample size of group one for two sample test.
 #' @param n2 sample size of group two for two sample test
 #' @param r r value
-#' @param tau2 tau2 values (can be a single entry or a vector of values)
+#' @param omega omega values, corresponds to cohen's d term (can be a single entry or a vector of values)
 #'
 #' @return Returns Bayes factor function results
 #'  \tabular{ll}{
@@ -239,17 +239,17 @@ backend_t = function(r,
 #' @export
 #'
 #' @examples
-#' tBFF = t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE)
-#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = 0.5)
-#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = c(0.5, 0.2))
-#' t_test_BFF(t_stat = 2.5, n1 = 50, n2 = 40, df = 88, save = FALSE, one_sample = FALSE)
-#' t_test_BFF(t_stat = 2.5, n = 50, r = 2, df = 49, save = FALSE)
-#' t_test_BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save = FALSE)
-#' t_test_BFF(t_stat = 2.5, n = 50, r = 2.5, df = 49, save = FALSE)
-#' t_test_BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save=FALSE)
-#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE)
-#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = 0.5)
-#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = c(0.5, 0.8))
+#' tBFF = t_test_BFF(t_stat = 2.5, n = 50)
+#' t_test_BFF(t_stat = 2.5, n = 50, omega = 0.5)
+#' t_test_BFF(t_stat = 2.5, n = 50, omega = c(0.5, 0.2))
+#' t_test_BFF(t_stat = 2.5, n1 = 50, n2 = 40, one_sample = FALSE)
+#' t_test_BFF(t_stat = 2.5, n = 50, r = 2)
+#' t_test_BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE)
+#' t_test_BFF(t_stat = 2.5, n = 50, r = 2.5)
+#' t_test_BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
+#' t_test_BFF(t_stat = 2.5, n = 50, maximize = TRUE)
+#' t_test_BFF(t_stat = 2.5, n = 50, maximize = TRUE, tau2 = 0.5)
+#' t_test_BFF(t_stat = 2.5, n = 50, maximize = TRUE, tau2 = c(0.5, 0.8))
 #' tBFF$BFF_max_RMSE   # maximum BFF value
 #' tBFF$max_RMSE       # effect size which maximizes the BFF value
 #'
@@ -302,8 +302,12 @@ t_test_BFF = function(t_stat,
   # should we maximize? If the t statistic is a vector and r is not provided, yes
   maximize = length(t_stat) > 1 && is.null(r)
 
-  #####  same effect sizes for all tests
-  effect_size = seq(0.01, 1, by = 0.01)
+  ##### if the user supplies an omega, use that. Otherwise, do a list from 0 to 1
+  if (omega_set){
+    effect_size = omega
+  } else {
+    effect_size = seq(0.01, 1, by = 0.01)
+  }
 
 
   ##### optimzation logic
@@ -380,37 +384,7 @@ t_test_BFF = function(t_stat,
   return(output)
 }
 
-print.BFF = function(x, ...) {
-  cat(paste0("\t\t", .test_type_name(x$test_type, x$one_sample)))
-  cat("\n\n")
-  cat(gettextf("%1$slog Bayes factor = %2$.2f\n", if(!x$omega_set) "maximized " else "", x$log_bf))
-  cat(gettextf("%1$slog tau2 = %2$.2f\n", if(!x$omega_set) "maximized " else "", x$tau2))
-  cat(paste0("alternative = ", x$alternative))
-}
 
-plot.BFF = function(x, xlab = NULL, ylab = NULL, main = NULL, ...) {
-  if (is.null(x$BFF)) stop("Bayes factor function can be plotted only if a specific tau2 is not user set")
-
-  plot_BFF(
-    effect_size = x$BFF$omega,
-    BFF = x$BFF$log_bf,
-    xlab = xlab,
-    ylab = ylab,
-    main = main,
-    r = x$r
-  )
-}
-
-.test_type_name = function(test_type, one_sample) {
-  starting_strng = gettextf("Bayesian non-local %1$s %2$s",
-                            if(one_sample) "one-sample" else "two-sample",
-                            switch(test_type,
-                                "t_test" = "t test",
-                                "z_test" = "z test",
-                                "chi2_test" = "chi2 test",
-                                "f_test" = "f test"))
-
-}
 
 
 
