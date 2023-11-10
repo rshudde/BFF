@@ -358,11 +358,8 @@ t_test_BFF = function(t_stat,
     # set the "omega max" we are searching over. We are calling this omega
     # max because it is important to keep original value of omega for later
     if (is.null(omega)) {
-<<<<<<< HEAD
-      omega_max = seq(0, 1, 0.1)
-=======
+
       omega_max = seq(0, 1, 0.01)
->>>>>>> my-backup
     } else {
       omega_max = omega
     }
@@ -387,37 +384,7 @@ t_test_BFF = function(t_stat,
       count = count + 1
     }
     maximized_values = as.data.frame(cbind(omega_max, optimal_r))
-<<<<<<< HEAD
-    print(maximized_values)
 
-    # now set r - HOW?
-
-    # now calculate the bf
-    results = maximize_t(
-      t_stat = t_stat,
-      n = n,
-      df = df,
-      r = 1,
-      n1 = n1,
-      n2 = n2,
-      omega = omega,
-      one_sample = one_sample,
-      one_sided = used_alternative == "greater"
-    )
-  } else {
-    results = backend_t(
-      t_stat = t_stat,
-      n = n,
-      df = df,
-      r = r,
-      n1 = n1,
-      n2 = n2,
-      omega = omega,
-      one_sample = one_sample,
-      one_sided = used_alternative == "greater"
-    )
-  }
-=======
     # print(maximized_values)
 
     # now set r
@@ -439,8 +406,6 @@ t_test_BFF = function(t_stat,
         one_sided = used_alternative == "greater"
       )
     }
-
->>>>>>> my-backup
 
   ###### return logic
   BFF = results
