@@ -110,4 +110,9 @@ test_that("two-sample: basic functionality", {
   vdiffr::expect_doppelganger("t_test_BFF-two_sample-one_sided-BFF",                 plot(fit))
   vdiffr::expect_doppelganger("t_test_BFF-two_sample-one_sided-posterior",           posterior_plot(fit))
   vdiffr::expect_doppelganger("t_test_BFF-two_sample-one_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE))
+
+  # check that the data.frame plot output also works
+  no_plot_plot <- posterior_plot(fit, plot = FALSE, prior = TRUE)
+  testthat::expect_true(is.data.frame(no_plot_plot))
+  testthat::expect_equal(colnames(no_plot_plot), c("x", "prior", "posterior"))
 })
