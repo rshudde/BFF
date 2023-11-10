@@ -27,6 +27,8 @@
 #' @return either a ggplot2 object if \code{plot = TRUE} or a data.frame
 #' with prior and posterior densities if \code{plot = FALSE}
 #'
+#' @seealso [z_test_BFF()], [t_test_BFF()], [chi2_test_BFF()], [f_test_BFF()]
+#'
 #' @export
 posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
 

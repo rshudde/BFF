@@ -28,7 +28,7 @@ t_test_BFF(
 
 \item{r}{r value}
 
-\item{omega}{omega values, corresponds to cohen's d term (can be a single entry or a vector of values)}
+\item{tau2}{tau2 values (can be a single entry or a vector of values)}
 }
 \value{
 Returns Bayes factor function results
@@ -51,17 +51,17 @@ All results are on the log scale.
 Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
 }
 \examples{
-tBFF = t_test_BFF(t_stat = 2.5, n = 50)
-t_test_BFF(t_stat = 2.5, n = 50, omega = 0.5)
-t_test_BFF(t_stat = 2.5, n = 50, omega = c(0.5, 0.2))
-t_test_BFF(t_stat = 2.5, n1 = 50, n2 = 40, one_sample = FALSE)
-t_test_BFF(t_stat = 2.5, n = 50, r = 2)
-t_test_BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE)
-t_test_BFF(t_stat = 2.5, n = 50, r = 2.5)
-t_test_BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
-t_test_BFF(t_stat = 2.5, n = 50, maximize = TRUE)
-t_test_BFF(t_stat = 2.5, n = 50, maximize = TRUE, tau2 = 0.5)
-t_test_BFF(t_stat = 2.5, n = 50, maximize = TRUE, tau2 = c(0.5, 0.8))
+tBFF = t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE)
+t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = 0.5)
+t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = c(0.5, 0.2))
+t_test_BFF(t_stat = 2.5, n1 = 50, n2 = 40, df = 88, save = FALSE, one_sample = FALSE)
+t_test_BFF(t_stat = 2.5, n = 50, r = 2, df = 49, save = FALSE)
+t_test_BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save = FALSE)
+t_test_BFF(t_stat = 2.5, n = 50, r = 2.5, df = 49, save = FALSE)
+t_test_BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save=FALSE)
+t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE)
+t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = 0.5)
+t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = c(0.5, 0.8))
 tBFF$BFF_max_RMSE   # maximum BFF value
 tBFF$max_RMSE       # effect size which maximizes the BFF value
 

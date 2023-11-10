@@ -39,3 +39,6 @@ of an BFF object. If no specific omega was set
 when fitting the model, the omega resulting in
 maximum BF against the null hypothesis is selected.
 }
+\seealso{
+[z_test_BFF()], [t_test_BFF()], [chi2_test_BFF()], [f_test_BFF()]
+}
