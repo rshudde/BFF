@@ -207,6 +207,32 @@ backend_t = function(r,
   return(BFF)
 }
 
+maximize_t = function(r,
+                     t_stat,
+                     df,
+                     n = NULL,
+                     one_sample = TRUE,
+                     one_sided = TRUE,
+                     n1 = NULL,
+                     n2 = NULL,
+                     omega = NULL) {
+
+  logbf = dcauchy(r)/(1-pcauchy(1))
+  for (t in range(1, length(t_stat))) {
+    logbf = logbf + backend_t(r = r,
+                              t_stat = t_stat[t],
+                              df = df[t],
+                              n = n[t],
+                              one_sample = one_sample,
+                              one_sided = one_sided,
+                              n1 = n1[t],
+                              n2 = n2[t],
+                              omega = omega)
+  }
+
+  return(logbf)
+}
+
 ################# T function user interaction
 
 #' t_test_BFF
@@ -234,23 +260,23 @@ backend_t = function(r,
 #'    \tab \cr
 #'    \code{max_RMSE} \tab Effect size that maximizes BFF\cr
 #'    \tab \cr
-#'    \code{tau2} \tab tau^2 values tested\cr
+#'    \code{omega} \tab omega values tested, can be a single number or vector\cr
 #' }
 #' @export
 #'
 #' @examples
-#' tBFF = t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE)
-#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = 0.5)
-#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = c(0.5, 0.2))
-#' t_test_BFF(t_stat = 2.5, n1 = 50, n2 = 40, df = 88, save = FALSE, one_sample = FALSE)
-#' t_test_BFF(t_stat = 2.5, n = 50, r = 2, df = 49, save = FALSE)
-#' t_test_BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save = FALSE)
-#' t_test_BFF(t_stat = 2.5, n = 50, r = 2.5, df = 49, save = FALSE)
-#' t_test_BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30, df = 78, one_sample = FALSE, save=FALSE)
-#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE)
-#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = 0.5)
-#' t_test_BFF(t_stat = 2.5, n = 50, df = 49, save = FALSE, maximize = TRUE, tau2 = c(0.5, 0.8))
-#' tBFF$BFF_max_RMSE   # maximum BFF value
+#' tBFF = t_test_BFF(t_stat = 2.5, n = 50)
+#' t_test_BFF(t_stat = 2.5, n = 50, omega = 0.5)
+#' t_test_BFF(t_stat = 2.5, n = 50, omega = c(0.5, 0.2))
+#' t_test_BFF(t_stat = 2.5, n1 = 50, n2 = 40, one_sample = FALSE)
+#' t_test_BFF(t_stat = 2.5, n = 50, r = 2)
+#' t_test_BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE)
+#' t_test_BFF(t_stat = 2.5, n = 50, r = 2.5)
+#' t_test_BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
+#' t_test_BFF(t_stat = 2.5, n = 50)
+#' t_test_BFF(t_stat = 2.5, n = 50, omega = 0.5)
+#' t_test_BFF(t_stat = 2.5, n = 50, tau2 = c(0.5, 0.8))
+#' tBFF$BFF_max_RMSE   # maximum BFF omega
 #' tBFF$max_RMSE       # effect size which maximizes the BFF value
 #'
 t_test_BFF = function(t_stat,
@@ -259,7 +285,7 @@ t_test_BFF = function(t_stat,
                       alternative = "two.sided",
                       n1 = NULL,
                       n2 = NULL,
-                      r = 1,
+                      r = NULL,
                       omega = NULL)
 
 {
@@ -269,10 +295,27 @@ t_test_BFF = function(t_stat,
     stop("The alternative must be either 'two.sided', 'less', or 'greater'")
   }
 
-  if (r < 1) {
+  if (is.null(r) && length(t_stat) == 1) r = 1
+  if (!is.null(r) && r < 1) {
     stop("r must be greater than 1")
   }
 
+  # check that the correct lengths for everything is populated
+  if (length(t_stat > 1)) {
+    len_t = length(t_stat)
+
+    if (is.null(n)) {
+      if (length(n1) != len_t || length(n2) != len_t) {
+        stop("If providing a vector of t statistics, sample sizes must also be supplied as vectors of equal length")
+      }
+    } else {
+      if (length(n) != len_t) {
+        stop("If providing a vector of t statistics, sample size must also be supplied as a vector of equal length")
+      }
+    }
+  }
+
+  df = vector(length = length(t_stat))
   # set and check the degrees of freedom
   if (!is.null(n) && one_sample)
   {
@@ -285,9 +328,12 @@ t_test_BFF = function(t_stat,
     n1 = n/2
     n2 = n/2
   }
-  if (df <= 1) {
-    stop("Degrees of freedom must be greater than 1. If using a two sample test, n must be greater
+
+  for (k in df){
+    if (k <= 1) {
+      stop("Degrees of freedom must be greater than 1. If using a two sample test, n must be greater
          than 3, if using a one sample test, n must be greater than 2")
+    }
   }
 
   used_alternative = alternative
@@ -297,6 +343,7 @@ t_test_BFF = function(t_stat,
     used_alternative = "greater"
   }
 
+  # did user set
   omega_set = !is.null(omega)
 
   # should we maximize? If the t statistic is a vector and r is not provided, yes
@@ -305,56 +352,66 @@ t_test_BFF = function(t_stat,
   #####  same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
-
-  ##### optimzation logic
+  ##### optimization logic
   if (maximize)
   {
-    r = 2
-    # if (is.null(tau2))
-    #   tau2 = seq(0, 1, 0.1)
-    # optimal_r = vector(length = length(tau2))
-    # count = 1
-    # for (i in tau2)
-    # {
-    #   optimal_r[count] = optimize(
-    #     backend_t,
-    #     c(1, 20),
-    #     tol = 0.001,
-    #     t_stat = t_stat,
-    #     n = n,
-    #     n1 = n1,
-    #     n2 = n2,
-    #     df = df,
-    #     one_sample = one_sample,
-    #     r1 = FALSE,
-    #     tau2 = i,
-    #     maximum = TRUE
-    #   )$maximum
-    #   count = count + 1
-    # }
-    # maximized_values = as.data.frame(cbind(tau2, optimal_r))
+    # set the "omega max" we are searching over. We are calling this omega
+    # max because it is important to keep original value of omega for later
+    if (is.null(omega)) {
+      omega_max = seq(0, 1, 0.01)
+    } else {
+      omega_max = omega
+    }
+    optimal_r = vector(length = length(omega_max))
+    count = 1
+    for (i in omega_max)
+    {
+      optimal_r[count] = optimize(
+        maximize_t,
+        c(1, 20),
+        tol = 0.001,
+        t_stat = t_stat,
+        df = df,
+        n = n,
+        one_sample = one_sample,
+        one_sided = used_alternative == "greater",
+        n1 = n1,
+        n2 = n1,
+        omega = i,
+        maximum = TRUE
+      )$maximum
+      count = count + 1
+    }
+    maximized_values = as.data.frame(cbind(omega_max, optimal_r))
+    # print(maximized_values)
+
+    # now set r
+    r = optimal_r
+    print(r)
   }
 
-  ###### recalulate the BFF with the new combined R
-  results = backend_t(
-    t_stat = t_stat,
-    n = n,
-    df = df,
-    r = r,
-    n1 = n1,
-    n2 = n2,
-    omega = omega,
-    one_sample = one_sample,
-    one_sided = used_alternative == "greater"
-  )
+    for (i in range(length(r)))
+    {
+      results = backend_t(
+        t_stat = t_stat,
+        n = n,
+        df = df,
+        r = r[i],
+        n1 = n1,
+        n2 = n2,
+        omega = omega[i],
+        one_sample = one_sample,
+        one_sided = used_alternative == "greater"
+      )
+    }
+
 
   ###### return logic
   BFF = results
   effect_size = effect_size
-  idx_max = which.max(abs(BFF))
+  idx_max = which.max(BFF)
   BFF_max_RMSE = BFF[idx_max]
   max_RMSE = effect_size[idx_max]
-
 
   output = list(
     log_bf = BFF_max_RMSE,
@@ -363,7 +420,7 @@ t_test_BFF = function(t_stat,
     one_sample = one_sample,
     alternative = alternative,
     test_type = "t_test",
-    r = r,
+    r = r, # r that is maximized or set by user
     input = list(
       t_stat = t_stat,
       df     = df,
