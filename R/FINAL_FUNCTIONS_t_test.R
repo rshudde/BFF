@@ -248,7 +248,7 @@ maximize_t = function(r,
 #' @param n1 sample size of group one for two sample test.
 #' @param n2 sample size of group two for two sample test
 #' @param r r value
-#' @param omega omega values, corresponds to cohen's d term (can be a single entry or a vector of values)
+#' @param tau2 tau2 values (can be a single entry or a vector of values)
 #'
 #' @return Returns Bayes factor function results
 #'  \tabular{ll}{
@@ -349,12 +349,8 @@ t_test_BFF = function(t_stat,
   # should we maximize? If the t statistic is a vector and r is not provided, yes
   maximize = length(t_stat) > 1 && is.null(r)
 
-  ##### if the user supplies an omega, use that. Otherwise, do a list from 0 to 1
-  if (omega_set){
-    effect_size = omega
-  } else {
-    effect_size = seq(0.01, 1, by = 0.01)
-  }
+  #####  same effect sizes for all tests
+  effect_size = seq(0.01, 1, by = 0.01)
 
   ##### optimization logic
   if (maximize)
@@ -362,7 +358,11 @@ t_test_BFF = function(t_stat,
     # set the "omega max" we are searching over. We are calling this omega
     # max because it is important to keep original value of omega for later
     if (is.null(omega)) {
+<<<<<<< HEAD
       omega_max = seq(0, 1, 0.1)
+=======
+      omega_max = seq(0, 1, 0.01)
+>>>>>>> my-backup
     } else {
       omega_max = omega
     }
@@ -387,6 +387,7 @@ t_test_BFF = function(t_stat,
       count = count + 1
     }
     maximized_values = as.data.frame(cbind(omega_max, optimal_r))
+<<<<<<< HEAD
     print(maximized_values)
 
     # now set r - HOW?
@@ -416,6 +417,30 @@ t_test_BFF = function(t_stat,
       one_sided = used_alternative == "greater"
     )
   }
+=======
+    # print(maximized_values)
+
+    # now set r
+    r = optimal_r
+    print(r)
+  }
+
+    for (i in range(length(r)))
+    {
+      results = backend_t(
+        t_stat = t_stat,
+        n = n,
+        df = df,
+        r = r[i],
+        n1 = n1,
+        n2 = n2,
+        omega = omega[i],
+        one_sample = one_sample,
+        one_sided = used_alternative == "greater"
+      )
+    }
+
+>>>>>>> my-backup
 
   ###### return logic
   BFF = results
@@ -431,7 +456,7 @@ t_test_BFF = function(t_stat,
     one_sample = one_sample,
     alternative = alternative,
     test_type = "t_test",
-    r = r,
+    r = r, # r that is maximized or set by user
     input = list(
       t_stat = t_stat,
       df     = df,
@@ -447,7 +472,6 @@ t_test_BFF = function(t_stat,
   class(output) = "BFF"
   return(output)
 }
-
 
 
 

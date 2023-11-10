@@ -11,7 +11,7 @@ t_test_BFF(
   alternative = "two.sided",
   n1 = NULL,
   n2 = NULL,
-  r = 1,
+  r = NULL,
   omega = NULL
 )
 }
@@ -28,7 +28,7 @@ t_test_BFF(
 
 \item{r}{r value}
 
-\item{omega}{omega values, corresponds to cohen's d term (can be a single entry or a vector of values)}
+\item{tau2}{tau2 values (can be a single entry or a vector of values)}
 }
 \value{
 Returns Bayes factor function results
@@ -41,7 +41,7 @@ Returns Bayes factor function results
    \tab \cr
    \code{max_RMSE} \tab Effect size that maximizes BFF\cr
    \tab \cr
-   \code{tau2} \tab tau^2 values tested\cr
+   \code{omega} \tab omega values tested, can be a single number or vector\cr
 }
 }
 \description{
@@ -59,10 +59,10 @@ t_test_BFF(t_stat = 2.5, n = 50, r = 2)
 t_test_BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE)
 t_test_BFF(t_stat = 2.5, n = 50, r = 2.5)
 t_test_BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
-t_test_BFF(t_stat = 2.5, n = 50, maximize = TRUE)
-t_test_BFF(t_stat = 2.5, n = 50, maximize = TRUE, tau2 = 0.5)
-t_test_BFF(t_stat = 2.5, n = 50, maximize = TRUE, tau2 = c(0.5, 0.8))
-tBFF$BFF_max_RMSE   # maximum BFF value
+t_test_BFF(t_stat = 2.5, n = 50)
+t_test_BFF(t_stat = 2.5, n = 50, omega = 0.5)
+t_test_BFF(t_stat = 2.5, n = 50, tau2 = c(0.5, 0.8))
+tBFF$BFF_max_RMSE   # maximum BFF omega
 tBFF$max_RMSE       # effect size which maximizes the BFF value
 
 }

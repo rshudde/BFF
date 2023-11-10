@@ -2,7 +2,7 @@
 % Please edit documentation in R/BFF-package.R
 \docType{package}
 \name{BFF-package}
-\alias{BFF}x
+\alias{BFF}
 \alias{BFF-package}
 \title{BFF: Bayes Factor Functions}
 \description{

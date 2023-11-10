@@ -15,7 +15,6 @@
 #'
 #' @name nlnm
 #' @export dnlnm
-#' @examples
 NULL
 
 # this allows us to add other functions for the nlnm distribution

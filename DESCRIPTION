@@ -28,9 +28,10 @@ License: GPL (>= 2)
 Encoding: UTF-8
 Imports: BSDA, grDevices, graphics, hypergeo, ggplot2, Matrix, gsl, stats
 Suggests: 
-    testthat (>= 2.1.0),
+    testthat (>= 3.0.0),
     knitr,
     rmarkdown
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Depends: R (>= 2.10)
+Config/testthat/edition: 3
