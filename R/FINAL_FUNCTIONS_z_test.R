@@ -161,7 +161,7 @@ backend_z = function(r,
   return(BFF)
 }
 
-maximize_t = function(r,
+maximize_z = function(r,
                       z_stat,
                       df,
                       n = NULL,
@@ -300,7 +300,7 @@ z_test_BFF = function(z_stat,
     for (i in omega_max)
     {
       optimal_r[count] = optimize(
-        maximize_t,
+        maximize_z,
         c(1, 20),
         tol = 0.001,
         z_stat = z_stat,
@@ -319,7 +319,7 @@ z_test_BFF = function(z_stat,
     r = optimal_r
     results = vector()
     for (i in 1:length(optimal_r)) {
-      results[i] = maximize_t(
+      results[i] = maximize_z(
         r = optimal_r[i],
         z_stat = z_stat,
         n = n,
@@ -338,7 +338,7 @@ z_test_BFF = function(z_stat,
       r = r,
       n1 = n1,
       n2 = n2,
-      omega = omega_max,
+      omega = omega,
       one_sample = one_sample,
       one_sided = used_alternative == "greater"
     )

@@ -414,7 +414,7 @@ t_test_BFF = function(t_stat,
       r = r,
       n1 = n1,
       n2 = n2,
-      omega = omega_max,
+      omega = omega,
       one_sample = one_sample,
       one_sided = used_alternative == "greater"
     )
