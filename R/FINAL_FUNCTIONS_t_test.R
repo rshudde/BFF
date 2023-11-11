@@ -146,7 +146,8 @@ backend_t = function(r,
                      one_sided = TRUE,
                      n1 = NULL,
                      n2 = NULL,
-                     omega = NULL)
+                     omega = NULL,
+                     tau2 = NULL)
 
 {
   # same effect sizes for all tests
@@ -157,20 +158,24 @@ backend_t = function(r,
     effect_size = seq(0.01, 1, by = 0.01)
   }
 
-  user_supplied_omega = TRUE
-  if (is.null(omega))
-    user_supplied_omega = FALSE
+  # user_supplied_omega = TRUE
+  # if (is.null(omega))
+  #   user_supplied_omega = FALSE
 
   log_vals = rep(0, length(effect_size))
 
-  if (one_sample)
+  if (is.null(tau2))
   {
-    tau2 = get_one_sample_tau2(n = n, w = effect_size, r = r)
-  } else if (!one_sample)
-    tau2 = get_two_sample_tau2(n1 = n1,
-                               n2 = n2,
-                               w = effect_size,
-                               r = r)
+    if (one_sample)
+    {
+      tau2 = get_one_sample_tau2(n = n, w = effect_size, r = r)
+    } else if (!one_sample)
+      tau2 = get_two_sample_tau2(n1 = n1,
+                                 n2 = n2,
+                                 w = effect_size,
+                                 r = r)
+  }
+
 
   if (one_sided) {
     log_vals = unlist(lapply(
@@ -227,7 +232,8 @@ maximize_t = function(r,
                               one_sided = one_sided,
                               n1 = n1[t],
                               n2 = n2[t],
-                              omega = omega)
+                              omega = omega, # technically not used
+                              tau2 = omega^2*n[t])
   }
 
   return(logbf)
@@ -359,7 +365,7 @@ t_test_BFF = function(t_stat,
     # max because it is important to keep original value of omega for later
     if (is.null(omega)) {
 
-      omega_max = seq(0, 1, 0.01)
+      omega_max = effect_size
     } else {
       omega_max = omega
     }
@@ -385,27 +391,36 @@ t_test_BFF = function(t_stat,
     }
     maximized_values = as.data.frame(cbind(omega_max, optimal_r))
 
-    # print(maximized_values)
-
-    # now set r
     r = optimal_r
-    print(r)
-  }
-
-    for (i in range(length(r)))
-    {
-      results = backend_t(
+    results = vector()
+    for (i in 1:length(optimal_r)) {
+      results[i] = maximize_t(
+        r = optimal_r[i],
         t_stat = t_stat,
-        n = n,
         df = df,
-        r = r[i],
+        n = n,
+        one_sample = one_sample,
+        one_sided =  used_alternative == "greater",
         n1 = n1,
         n2 = n2,
-        omega = omega[i],
-        one_sample = one_sample,
-        one_sided = used_alternative == "greater"
+        omega = omega_max[i]
       )
     }
+
+  } else {
+    results = backend_t(
+      t_stat = t_stat,
+      n = n,
+      df = df,
+      r = r,
+      n1 = n1,
+      n2 = n2,
+      omega = omega_max,
+      one_sample = one_sample,
+      one_sided = used_alternative == "greater"
+    )
+  }
+
 
   ###### return logic
   BFF = results
@@ -429,7 +444,6 @@ t_test_BFF = function(t_stat,
       n2     = n2
     )
   )
-
   if (!omega_set) {
     output$BFF = list(log_bf = results, omega = effect_size)
   }
