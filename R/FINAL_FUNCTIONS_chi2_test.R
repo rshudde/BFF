@@ -184,6 +184,7 @@ maximize_chi2 = function(r,
 #'
 #' @param chi2_stat chi-square statistic
 #' @param n sample size (if one sample test)
+#' @param df degrees of freedom
 #' @param one_sample is test one sided? Default is FALSE
 #' @param LRT should LRT be performed? Default is FALSE
 #' @param r r value
@@ -316,7 +317,7 @@ chi2_test_BFF = function(chi2_stat,
     omega = max_RMSE,
     omega_set = omega_set,
     LRT = LRT,
-    test_type = "t_test",
+    test_type = "chi2_test",
     r = r, # r that is maximized or set by user
     input = list(
       chi2_stat = chi2_stat,
