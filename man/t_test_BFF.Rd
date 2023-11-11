@@ -48,7 +48,6 @@ Returns Bayes factor function results
 t_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 All results are on the log scale.
-Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
 }
 \examples{
 tBFF = t_test_BFF(t_stat = 2.5, n = 50)
