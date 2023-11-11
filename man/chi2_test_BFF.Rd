@@ -11,6 +11,8 @@ chi2_test_BFF(chi2_stat, n, df, LRT = FALSE, r = NULL, omega = NULL)
 
 \item{n}{sample size (if one sample test)}
 
+\item{df}{degrees of freedom}
+
 \item{LRT}{should LRT be performed? Default is FALSE}
 
 \item{r}{r value}
