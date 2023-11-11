@@ -96,61 +96,45 @@ log_G_frac = function(tau2, h, k, r)
 
 ####################### backend implementation
 backend_chi2 = function(r,
-                        chi2_stat,
-                        n = NULL,
-                        df = NULL,
-                        pearsons = TRUE,
-                        r1 = FALSE,
-                        tau2 = NULL)
+                     chi2_stat,
+                     df,
+                     n = NULL,
+                     LRT = FALSE,
+                     omega = NULL,
+                     tau2 = NULL)
 
 {
   # same effect sizes for all tests
-  effect_size = seq(0.01, 1, by = 0.01)
+  if (!is.null(omega))
+  {
+    effect_size = omega
+  } else {
+    effect_size = seq(0.01, 1, by = 0.01)
+  }
 
-  user_supplied_tau2 = TRUE
-  if (is.null(tau2))
-    user_supplied_tau2 = FALSE
-
-  r1 = r1
-  frac_r = !r1
-
+  # user_supplied_omega = TRUE
+  # if (is.null(omega))
+  #   user_supplied_omega = FALSE
 
   log_vals = rep(0, length(effect_size))
-  if (r1) {
-    if (pearsons) {
-      if (!user_supplied_tau2)
-        tau2 = get_count_tau2(n = n, k = df, w = effect_size)
-    } else {
-      if (!user_supplied_tau2)
-        tau2 = get_LRT_tau2(n = n, k = df, w = effect_size)
-    }
-    log_vals = unlist(lapply(tau2, G_val_r1, chi2_stat = chi2_stat, df = df))
-  }
 
-
-  if (frac_r) {
-    if (pearsons)
+  if (is.null(tau2))
+  {
+    if (LRT)
     {
-      if (!user_supplied_tau2)
-        tau2 = get_count_tau2(n = n,
-                              w = effect_size,
-                              k = df,
-                              r = r)
+      tau2 = get_count_tau2(n = n, k = df, w = effect_size)
     } else {
-      if (!user_supplied_tau2)
-        tau2 = get_LRT_tau2(n = n,
-                            w = effect_size,
-                            k = df,
-                            r = r)
+      tau2 = get_LRT_tau2(n = n, k = df, w = effect_size)
     }
-    log_vals = unlist(lapply(
-      tau2,
-      log_G_frac,
-      h = chi2_stat,
-      r = r,
-      k = df
-    ))
   }
+
+  log_vals = unlist(lapply(
+    tau2,
+    log_G_frac,
+    h = chi2_stat,
+    r = r,
+    k = df
+  ))
 
   # stuff to return
   BFF = log_vals
@@ -158,38 +142,52 @@ backend_chi2 = function(r,
   # check the results are finite
   if (!all(is.finite(BFF)))
   {
-    stop(
-      "Values entered produced non-finite numbers.
-      The most likely scenario is the evidence was so strongly in favor of the
-      alternative that there was numeric overflow. Please contact the maintainer for more information."
+    warning(
+      "Values entered produced non-finite numbers for some effect sizes.
+      The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow.
+      Only effect sizes with non-NaN values are kept in the plots.
+      Please contact the maintainer for more information."
     )
   }
 
   return(BFF)
 }
 
+maximize_chi2 = function(r,
+                      chi2_stat,
+                      df,
+                      n = NULL,
+                      LRT = FALSE,
+                      omega = NULL) {
+
+  logbf = dcauchy(r)/(1-pcauchy(1))
+  for (t in range(1, length(chi2_stat))) {
+    logbf = logbf + backend_chi2(r = r,
+                              chi2_stat = chi2_stat[t],
+                              df = df[t],
+                              n = n[t],
+                              LRT = LRT,
+                              omega = omega, # technically not used
+                              tau2 = omega^2*n[t])
+  }
+
+  return(logbf)
+}
 
 ################# T function user interaction
 
 #' chi2_test_BFF
 #'
-#' chi2_test_BFF constructs BFFs based on the chi-squared test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' chi2_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
-#' Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
 #'
-#' @param chi2_stat chi^2 statistic
-#' @param df degrees of freedom
-#' @param n sample size
-#' @param pearsons Is this a test of Pearson’s chi^2 test for goodness-of-fit? Default is TRUE. FALSE assumes a likelihood ratio test
-#' @param savename optional, filename for saving the pdf of the final plot
-#' @param maximize Should the value of r be maximized? Default is FALSE. Only set to TRUE if analyzing multiple studies
+#' @param chi2_stat chi-square statistic
+#' @param n sample size (if one sample test)
+#' @param one_sample is test one sided? Default is FALSE
+#' @param LRT should LRT be performed? Default is FALSE
 #' @param r r value
 #' @param tau2 tau2 values (can be a single entry or a vector of values)
-#' @param save should a copy of the plot be saved?
-#' @param xlab optional, x label for plot
-#' @param ylab optional, y label for plot
-#' @param main optional, main label for plot
 #'
 #' @return Returns Bayes factor function results
 #'  \tabular{ll}{
@@ -201,107 +199,110 @@ backend_chi2 = function(r,
 #'    \tab \cr
 #'    \code{max_RMSE} \tab Effect size that maximizes BFF\cr
 #'    \tab \cr
-#'    \code{tau2} \tab tau^2 values tested\cr
+#'    \code{omega} \tab omega values tested, can be a single number or vector\cr
 #' }
 #' @export
 #'
 #' @examples
-#' chi2BFF = chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE)
-#' chi2BFF = chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = 0.5)
-#' chi2BFF = chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, save = FALSE, tau2 = c(0.5, 0.8))
-#' chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, pearsons = FALSE, save = FALSE)
-#' chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, save = FALSE)
-#' chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2, pearsons = FALSE, save = FALSE)
-#' chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, save = FALSE)
-#' chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 49, r = 2.5, pearsons = FALSE, save = FALSE)
-#' chi2_test_BFF(chi2_stat=2.5, n = 50, df = 49, maximize = TRUE)
-#' chi2_test_BFF(chi2_stat=2.5, n = 50,  df = 49, maximize = TRUE, tau2 = 0.5)
-#' chi2_test_BFF(chi2_stat=2.5, n = 50,  df = 49, maximize = TRUE, tau2 = c(0.5, 0.8))
-#' chi2BFF$BFF_max_RMSE  # maximum BFF value
-#' chi2BFF$max_RMSE      # effect size which maximizes the BFF
+#' chi2BFF = chi2_test_BFF(chi2_stat = 2.5, n = 50, df = 48)
+#' chi2_test_BFF(chi2_stat = 2.5, n = 50, tau2 = c(0.5, 0.8))
+#' chi2BFF$BFF_max_RMSE   # maximum BFF omega
+#' chi2BFF$max_RMSE       # effect size which maximizes the BFF value
+#'
 chi2_test_BFF = function(chi2_stat,
-                         n = NULL,
-                         df = NULL,
-                         pearsons = TRUE,
-                         savename = NULL,
-                         maximize = FALSE,
-                         r = 1,
-                         tau2 = NULL,
-                         save = TRUE,
-                         xlab = NULL,
-                         ylab = NULL,
-                         main = NULL)
+                      n,
+                      df,
+                      LRT = FALSE,
+                      r = NULL,
+                      omega = NULL)
 
 {
-  if (is.null(df))
-    stop("df is required")
+
+  if (is.null(r) && length(chi2_stat) == 1) r = 1
+  if (!is.null(r) && r < 1) {
+    stop("r must be greater than 1")
+  }
+
+  # check that the correct lengths for everything is populated
+  if (length(chi2_stat > 1)) {
+    if (length(chi2_stat) != length(n)) {
+      stop("If providing a vector of t statistics, sample size must also be supplied as vectors of equal length")
+    }
+    if (length(chi2_stat) != length(df)) {
+      stop("If providing a vector of t statistics, degrees of freedom must also be supplied as vectors of equal length")
+    }
+  }
+
+  for (k in df){
+    if (k <= 1) {
+      stop("Degrees of freedom must be greater than 1. If using a two sample test, n must be greater
+         than 3, if using a one sample test, n must be greater than 2")
+    }
+  }
+
+  # did user set
+  omega_set = !is.null(omega)
+
+  # should we maximize? If the t statistic is a vector and r is not provided, yes
+  maximize = length(chi2_stat) > 1 && is.null(r)
+
   #####  same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
-  ##### is tau2 supplied as an argument?
-  user_supplied_tau2 = TRUE
-  if (is.null(tau2))
-  {
-    user_supplied_tau2 = FALSE
-  }
-
-  #####  call results
-  r1 = FALSE
-  if (r == 1)
-    r1 = TRUE
-  results = backend_chi2(
-    chi2_stat = chi2_stat,
-    n = n,
-    pearsons = pearsons,
-    r = r,
-    tau2 = tau2,
-    r1 = r1,
-    df = df
-  )
-
-  #####  plotting if tau2 is not specified
-  if (!user_supplied_tau2 && !maximize) {
-    bff_plot = c()
-    bff_plot[[1]] = results
-
-    plot_BFF(
-      effect_size = effect_size,
-      BFF = bff_plot,
-      save = save,
-      savename = savename,
-      xlab = xlab,
-      ylab = ylab,
-      main = main,
-      r = r
-    )
-  }
-
-
-  ##### optimzation logic
+  ##### optimization logic
   if (maximize)
   {
-    if (is.null(tau2))
-      tau2 = seq(0, 1, 0.1)
-    optimal_r = vector(length = length(tau2))
+    # set the "omega max" we are searching over. We are calling this omega
+    # max because it is important to keep original value of omega for later
+    if (is.null(omega)) {
+
+      omega_max = effect_size
+    } else {
+      omega_max = omega
+    }
+    optimal_r = vector(length = length(omega_max))
     count = 1
-    for (i in tau2)
+    for (i in omega_max)
     {
       optimal_r[count] = optimize(
-        backend_chi2,
+        maximize_chi2,
         c(1, 20),
         tol = 0.001,
         chi2_stat = chi2_stat,
-        n = n,
         df = df,
-        pearsons = pearsons,
-        r1 = FALSE,
-        tau2 = i,
+        n = n,
+        LRT = LRT,
+        omega = i,
         maximum = TRUE
       )$maximum
       count = count + 1
     }
-    maximized_values = as.data.frame(cbind(tau2, optimal_r))
+    maximized_values = as.data.frame(cbind(omega_max, optimal_r))
+
+    r = optimal_r
+    results = vector()
+    for (i in 1:length(optimal_r)) {
+      results[i] = maximize_chi2(
+        r = optimal_r[i],
+        chi2_stat = chi2_stat,
+        df = df,
+        n = n,
+        LRT = LRT,
+        omega = omega_max[i]
+      )
+    }
+
+  } else {
+    results = backend_chi2(
+      chi2_stat = chi2_stat,
+      n = n,
+      df = df,
+      r = r,
+      LRT = LRT,
+      omega = omega
+    )
   }
+
 
   ###### return logic
   BFF = results
@@ -310,24 +311,26 @@ chi2_test_BFF = function(chi2_stat,
   BFF_max_RMSE = BFF[idx_max]
   max_RMSE = effect_size[idx_max]
 
-  if (maximize) {
-    print(
-      "The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value."
+  output = list(
+    log_bf = BFF_max_RMSE,
+    omega = max_RMSE,
+    omega_set = omega_set,
+    LRT = LRT,
+    test_type = "t_test",
+    r = r, # r that is maximized or set by user
+    input = list(
+      chi2_stat = chi2_stat,
+      df     = df
     )
-    to_return = maximized_values
-  } else if (user_supplied_tau2) {
-    to_return = list(BFF = BFF,
-                     tau2 = tau2)
-  } else {
-    to_return = list(
-      log_BFF = BFF,
-      effect_size = effect_size,
-      log_BFF_max_RMSE = BFF_max_RMSE,
-      max_RMSE = max_RMSE
-    )
-
+  )
+  if (!omega_set) {
+    output$BFF = list(log_bf = results, omega = effect_size)
   }
-  return(to_return)
 
-
+  class(output) = "BFF"
+  return(output)
 }
+
+
+
+
