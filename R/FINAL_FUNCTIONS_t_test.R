@@ -355,7 +355,7 @@ t_test_BFF = function(t_stat,
   maximize = length(t_stat) > 1 && is.null(r)
 
   #####  same effect sizes for all tests
-  effect_size = seq(0.01, 1, by = 0.01)
+  omega_sequence = seq(0.01, 1, by = 0.01)
 
   ##### optimization logic
   if (maximize)
@@ -364,7 +364,7 @@ t_test_BFF = function(t_stat,
     # max because it is important to keep original value of omega for later
     if (is.null(omega)) {
 
-      omega_max = effect_size
+      omega_max = omega_sequence
     } else {
       omega_max = omega
     }
@@ -422,21 +422,26 @@ t_test_BFF = function(t_stat,
 
 
   ###### return logic
-  log_bf       <- c(0, results)
-  effect_size  <- c(0, effect_size)
-  idx_max      <- which.max(log_bf)
-  BFF_max_RMSE <- log_bf[idx_max]
-  max_RMSE     <- effect_size[idx_max]
+  if (!omega_set) {
+    log_bf         <- c(0, results)
+    omega_sequence <- c(0, omega_sequence)
+    idx_max        <- which.max(log_bf)
+    this_log_bf    <- log_bf[idx_max]
+    this_omega     <- omega_sequence[idx_max]
+  }else{
+    this_log_bf    <- results
+    this_omega     <- omega
+  }
 
   output = list(
-    log_bf = BFF_max_RMSE,
-    omega = max_RMSE,
-    omega_set = omega_set,
-    one_sample = one_sample,
-    alternative = alternative,
-    test_type = "t_test",
+    log_bf       = this_log_bf,
+    omega        = this_omega,
+    omega_set    = omega_set,
+    one_sample   = one_sample,
+    alternative  = alternative,
+    test_type    = "t_test",
     generic_test = FALSE,
-    r = r, # r that is maximized or set by user
+    r            = r, # r that is maximized or set by user
     input = list(
       t_stat = t_stat,
       df     = df,
@@ -445,7 +450,7 @@ t_test_BFF = function(t_stat,
     )
   )
   if (!omega_set) {
-    output$BFF = list(log_bf = log_bf, omega = effect_size)
+    output$BFF = list(log_bf = log_bf, omega = omega_sequence)
   }
 
   class(output) = "BFF"

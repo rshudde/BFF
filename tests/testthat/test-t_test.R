@@ -10,7 +10,7 @@ test_that("two-sample: basic functionality", {
 
   # check that the BF and omega is consistent
   testthat::expect_equal(fit$log_bf, 0.1172115, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.01)
+  testthat::expect_equal(fit$omega,  0.5)
 
   # test S3 methods
   testthat::expect_equal(
@@ -19,7 +19,7 @@ test_that("two-sample: basic functionality", {
     "\t\tBayesian non-local two-sample t test",
     ""                                        ,
     "log Bayes factor = 0.12"                 ,
-    "log tau2 = 0.01"                         ,
+    "log tau2 = 0.50"                         ,
     "alternative = two.sided"
     )
   )
