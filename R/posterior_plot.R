@@ -14,15 +14,15 @@
 #' posterior ordinates is returned instead.
 #' @param ... additional arguments to the plotting
 #' function. These include: \itemize{
-##'  \item{"x_limit"}{vector defining the plotting range,
-##'  defaults to \code{c(-3, 3)}.}
-##'  \item{"color"}{vector with color for the posterior and
-##'  prior line. Defaults to \code{c("black", "grey")}}
-##'  \item{"linetype"}{vector with linetype for the posterior and
-##'  prior line. Defaults to \code{c(2, 1)}}
-##'  \item{"linewidth"}{vector with linewidth for the posterior and
-##'  prior line. Defaults to \code{c(1, 1)}}
-##' }
+#'  \item{"x_limit"}{vector defining the plotting range,
+#'  defaults to \code{c(-3, 3)}.}
+#'  \item{"color"}{vector with color for the posterior and
+#'  prior line. Defaults to \code{c("black", "grey")}}
+#'  \item{"linetype"}{vector with linetype for the posterior and
+#'  prior line. Defaults to \code{c(2, 1)}}
+#'  \item{"linewidth"}{vector with linewidth for the posterior and
+#'  prior line. Defaults to \code{c(1, 1)}}
+#' }
 #'
 #' @return either a ggplot2 object if \code{plot = TRUE} or a data.frame
 #' with prior and posterior densities if \code{plot = FALSE}
@@ -68,12 +68,12 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
 
   # create plot otherwise
   out <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x)) +
-    ggplot2::geom_line(ggplot2::aes(y = prior),
+    ggplot2::geom_line(ggplot2::aes(y = posterior),
                        color = color[1], linetype = linetype[1], linewidth = linewidth[1]) +
-    ggplot2::labs(x = expression(lambda))
+    ggplot2::labs(x = expression(lambda), y = "Density")
 
   if(prior){
-    out <- out + ggplot2::geom_line(ggplot2::aes(y = posterior),
+    out <- out + ggplot2::geom_line(ggplot2::aes(y = prior),
                                     color = color[2], linetype = linetype[2], linewidth = linewidth[2])
   }
 
@@ -94,6 +94,10 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
   }else{
     tau2 <- get_two_sample_tau2(n1 = x$input$n1, n2 = x$input$n2, w = x$omega, r = r)
   }
+
+  # terminate if tau2 is equal to 0 -> BFF leads to omega 0 (e.g., opposite direction in one-sided test)
+  if(tau2 == 0)
+    stop("There is no non-local prior distribution that provides more evidence for the null hypothesis than the null prior distribution.")
 
   # compute prior and posterior
   lik.prior     <- .t_test.prior(x_seq, tau2, r, one_sample = x$one_sample, one_sided = x$alternative != "two.sided")
