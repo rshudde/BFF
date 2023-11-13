@@ -23,7 +23,7 @@ test_that("two-sample: basic functionality", {
     "alternative = two.sided"
     )
   )
-  testthat::expect_error(plot(fit), "Bayes factor function can be plotted only if a specific tau2 is not user set")
+  testthat::expect_error(plot(fit), "Bayes factor function can be plotted only if a specific omega/tau2 is not user set")
   vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior",           posterior_plot(fit))
   vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE))
 
@@ -64,8 +64,8 @@ test_that("two-sample: basic functionality", {
     n2 = 75)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, -2.9110396860185, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  1)
+  testthat::expect_equal(fit$log_bf, 0.03230874, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega,  0.05)
 
   # test S3 methods
   testthat::expect_equal(
@@ -73,8 +73,8 @@ test_that("two-sample: basic functionality", {
     c(
       "\t\tBayesian non-local two-sample t test",
       ""                                        ,
-      "maximized log Bayes factor = -2.91"      ,
-      "maximized log tau2 = 1.00"               ,
+      "maximized log Bayes factor = 0.03"       ,
+      "maximized log tau2 = 0.05"               ,
       "alternative = two.sided"
     )
   )
@@ -83,6 +83,11 @@ test_that("two-sample: basic functionality", {
   vdiffr::expect_doppelganger("t_test_BFF-two_sample-two_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE, color = c("red", "blue"), linetype = c(3,5),
                                                                                                     linewidth = c(2, 1), x_limit = c(-2, 2)))
 
+
+  # check that the data.frame plot output also works
+  no_plot_plot <- posterior_plot(fit, plot = FALSE, prior = TRUE)
+  testthat::expect_true(is.data.frame(no_plot_plot))
+  testthat::expect_equal(colnames(no_plot_plot), c("x", "prior", "posterior"))
 
   ### test unspecified omega -- BFF (one-sided, also set r)
   fit <- t_test_BFF(
@@ -93,8 +98,8 @@ test_that("two-sample: basic functionality", {
     n2 = 50)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, -6.84550574790367, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  1)
+  testthat::expect_equal(fit$log_bf, 0, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega,  0)
 
   # test S3 methods
   testthat::expect_equal(
@@ -102,17 +107,11 @@ test_that("two-sample: basic functionality", {
     c(
       "\t\tBayesian non-local two-sample t test",
       ""                                        ,
-      "maximized log Bayes factor = -6.85"      ,
-      "maximized log tau2 = 1.00"               ,
+      "maximized log Bayes factor = 0.00"       ,
+      "maximized log tau2 = 0.00"               ,
       "alternative = less"
     )
   )
-  vdiffr::expect_doppelganger("t_test_BFF-two_sample-one_sided-BFF",                 plot(fit))
-  vdiffr::expect_doppelganger("t_test_BFF-two_sample-one_sided-posterior",           posterior_plot(fit))
-  vdiffr::expect_doppelganger("t_test_BFF-two_sample-one_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE))
-
-  # check that the data.frame plot output also works
-  no_plot_plot <- posterior_plot(fit, plot = FALSE, prior = TRUE)
-  testthat::expect_true(is.data.frame(no_plot_plot))
-  testthat::expect_equal(colnames(no_plot_plot), c("x", "prior", "posterior"))
+  vdiffr::expect_doppelganger("t_test_BFF-two_sample-one_sided-BFF", plot(fit))
+  testthat::expect_error(posterior_plot(fit), "There is no non-local prior distribution")
 })

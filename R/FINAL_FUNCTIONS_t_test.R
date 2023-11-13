@@ -422,11 +422,11 @@ t_test_BFF = function(t_stat,
 
 
   ###### return logic
-  BFF = results
-  effect_size = effect_size
-  idx_max = which.max(BFF)
-  BFF_max_RMSE = BFF[idx_max]
-  max_RMSE = effect_size[idx_max]
+  log_bf       <- c(0, results)
+  effect_size  <- c(0, effect_size)
+  idx_max      <- which.max(log_bf)
+  BFF_max_RMSE <- log_bf[idx_max]
+  max_RMSE     <- effect_size[idx_max]
 
   output = list(
     log_bf = BFF_max_RMSE,
@@ -435,6 +435,7 @@ t_test_BFF = function(t_stat,
     one_sample = one_sample,
     alternative = alternative,
     test_type = "t_test",
+    generic_test = FALSE,
     r = r, # r that is maximized or set by user
     input = list(
       t_stat = t_stat,
@@ -444,7 +445,7 @@ t_test_BFF = function(t_stat,
     )
   )
   if (!omega_set) {
-    output$BFF = list(log_bf = results, omega = effect_size)
+    output$BFF = list(log_bf = log_bf, omega = effect_size)
   }
 
   class(output) = "BFF"
