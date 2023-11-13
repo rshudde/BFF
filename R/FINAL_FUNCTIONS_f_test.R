@@ -105,14 +105,14 @@ f_val_r1 = function(tau2, f_stat, df1, df2)
 # }
 
 ################# F functions if r is a fraction
-log_F_frac = function(tau2, f, k, m, r)
+log_F_frac = function(tau2, f_stat, k, m, r)
 {
   one = 1 / ((1 + tau2) ^ (k / 2 + r))
 
   a = k / 2 + r
   b = (k + m) / 2
   c = k / 2
-  d = k * f * tau2 / ((1 + tau2) * (m + k * f))
+  d = k * f_stat * tau2 / ((1 + tau2) * (m + k * f_stat))
 
   two = Gauss2F1(a, b, c, d)
 
@@ -126,51 +126,37 @@ log_F_frac = function(tau2, f, k, m, r)
 ####################### backend implementation
 backend_f = function(r,
                      f_stat,
-                     n,
                      df1,
                      df2,
-                     r1,
+                     n = NULL,
+                     omega = NULL,
                      tau2 = NULL)
+
 {
   # same effect sizes for all tests
-  effect_size = seq(0.01, 1, by = 0.01)
+  if (!is.null(omega))
+  {
+    effect_size = omega
+  } else {
+    effect_size = seq(0.01, 1, by = 0.01)
+  }
 
-  user_supplied_tau2 = TRUE
-  if (is.null(tau2))
-    user_supplied_tau2 = FALSE
-
-  r1 = r1
-  frac_r = !r1
+  # user_supplied_omega = TRUE
+  # if (is.null(omega))
+  #   user_supplied_omega = FALSE
 
   log_vals = rep(0, length(effect_size))
-  if (r1) {
-    if (!user_supplied_tau2)
-      tau2 = get_linear_tau2(n = n, k = df1, w = effect_size)
-    log_vals = unlist(lapply(
-      tau2,
-      f_val_r1,
-      f_stat = f_stat,
-      df1 = df1,
-      df2 = df2
-    ))
-  }
 
-  if (frac_r) {
-    if (!user_supplied_tau2)
-      tau2 = get_linear_tau2(n = n,
-                             k = df1,
-                             w = effect_size,
-                             r = r)
+  tau2 = get_linear_tau2(n = n, w = effect_size, k = df1, r = r)
 
-    log_vals = unlist(lapply(
-      tau2,
-      log_F_frac,
-      f = f_stat,
-      k = df1,
-      m = df2,
-      r = r
-    ))
-  }
+  log_vals = unlist(lapply(
+    tau2,
+    log_F_frac,
+    f_stat = f_stat,
+    r = r,
+    k = df1,
+    m = df2
+  ))
 
   # stuff to return
   BFF = log_vals
@@ -178,38 +164,52 @@ backend_f = function(r,
   # check the results are finite
   if (!all(is.finite(BFF)))
   {
-    stop(
-      "Values entered produced non-finite numbers.
-      The most likely scenario is the evidence was so strongly in favor of the
-      alternative that there was numeric overflow. Please contact the maintainer for more information."
+    warning(
+      "Values entered produced non-finite numbers for some effect sizes.
+      The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow.
+      Only effect sizes with non-NaN values are kept in the plots.
+      Please contact the maintainer for more information."
     )
   }
 
   return(BFF)
 }
 
+maximize_f = function(r,
+                      f_stat,
+                      df1,
+                      df2,
+                      n = NULL,
+                      omega = NULL) {
 
-################# F function user interaction
+  logbf = dcauchy(r)/(1-pcauchy(1))
+  for (t in range(1, length(f_stat))) {
+    logbf = logbf + backend_f(r = r,
+                              f_stat = f_stat[t],
+                              n = n[t],
+                              df1 = df1[t],
+                              df2 = df2[t],
+                              omega = omega, # technically not used
+                              tau2 = omega^2*n[t])
+  }
 
-#' f_test.BFF
+  return(logbf)
+}
+
+################# T function user interaction
+
+#' f_test_BFF
 #'
-#' f_test.BFF constructs BFFs based on the F test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' f_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
-#' Plot saved to working directory unless a full path is specified in the 'savename' variable of the function.
 #'
-#' @param f_stat F statistic
-#' @param df1 first degree of freedom
-#' @param df2 first degree of freedom
-#' @param n sample size
-#' @param savename optional, filename for saving the pdf of the final plot
-#' @param maximize should the function be maximzied over all possible r values? Default is FALSE. Only set to TRUE if analyzing multiple studies
+#' @param f_stat T statistic
+#' @param n sample size (if one sample test)
+#' @param df1 sample size of group one for two sample test.
+#' @param df2 sample size of group two for two sample test
 #' @param r r value
 #' @param tau2 tau2 values (can be a single entry or a vector of values)
-#' @param save should a copy of the plot be saved?
-#' @param xlab optional, x label for plot
-#' @param ylab optional, y label for plot
-#' @param main optional, main label for plot
 #'
 #' @return Returns Bayes factor function results
 #'  \tabular{ll}{
@@ -221,102 +221,105 @@ backend_f = function(r,
 #'    \tab \cr
 #'    \code{max_RMSE} \tab Effect size that maximizes BFF\cr
 #'    \tab \cr
-#'    \code{tau2} \tab tau^2 values tested\cr
+#'    \code{omega} \tab omega values tested, can be a single number or vector\cr
 #' }
 #' @export
 #'
 #' @examples
-#' fBFF = f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE)
-#' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = 0.5)
-#' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, save = FALSE, tau2 = c(0.5, 0.8))
-#' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2, save = FALSE)
-#' f.test.BFF(f_stat = 2.5, n = 50, df1 = 20, df2 = 48, r = 2.5, save = FALSE)
-#' f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE)
-#' f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE, tau2 = 0.5)
-#' f.test.BFF(f_stat=2.5, n = 50, df1 = 20, df2 = 48, maximize = TRUE, tau2 = c(0.5, 0.8))
-#' fBFF$BFF_max_RMSE  # maximum BFF value
-#' fBFF$max_RMSE      # effect size which maximizes the BFF value
+#' fBFF = f_test_BFF(f_stat = 2.5, n = 50, df1 = 25, df2 = 48)
+#' fBFF$BFF_max_RMSE   # maximum BFF omega
+#' fBFF$max_RMSE       # effect size which maximizes the BFF value
 #'
-f_test.BFF = function(f_stat,
+f_test_BFF = function(f_stat,
                       n,
                       df1,
                       df2,
-                      savename = NULL,
-                      maximize = FALSE,
-                      r = 1,
-                      tau2 = NULL,
-                      save = TRUE,
-                      xlab = NULL,
-                      ylab = NULL,
-                      main = NULL)
+                      r = NULL,
+                      omega = NULL)
 
 {
+
+  if (is.null(r) && length(f_stat) == 1) r = 1
+  if (!is.null(r) && r < 1) {
+    stop("r must be greater than 1")
+  }
+
+  # check that the correct lengths for everything is populated
+  if (length(f_stat > 1)) {
+    len_t = length(f_stat)
+
+    if (is.null(n)) {
+      if (length(df1) != len_t || length(df1) != len_t) {
+        stop("If providing a vector of t statistics, degrees of freedom must also be supplied as vectors of equal length")
+      }
+    } else {
+      if (length(n) != len_t) {
+        stop("If providing a vector of t statistics, sample size must also be supplied as a vector of equal length")
+      }
+    }
+  }
+
+  # did user set
+  omega_set = !is.null(omega)
+
+  # should we maximize? If the t statistic is a vector and r is not provided, yes
+  maximize = length(f_stat) > 1 && is.null(r)
+
   #####  same effect sizes for all tests
   effect_size = seq(0.01, 1, by = 0.01)
 
-
-  ##### is tau2 supplied as an argument?
-  user_supplied_tau2 = TRUE
-  if (is.null(tau2))
-  {
-    user_supplied_tau2 = FALSE
-  }
-
-  #####  call results
-  r1 = FALSE
-  if (r == 1)
-    r1 = TRUE
-  results = backend_f(
-    f_stat = f_stat,
-    n = n,
-    df1 = df1,
-    df2 = df2,
-    r = r,
-    tau2 = tau2,
-    r1 = r1
-  )
-
-  #####  plotting if tau2 is not specified
-  if (!user_supplied_tau2 && !maximize) {
-    bff_plot = c()
-    bff_plot[[1]] = results
-
-    plot_BFF(
-      effect_size = effect_size,
-      BFF = bff_plot,
-      save = save,
-      savename = savename,
-      xlab = xlab,
-      ylab = ylab,
-      main = main,
-      r = r
-    )
-  }
-
-  ##### optimzation logic
+  ##### optimization logic
   if (maximize)
   {
-    if (is.null(tau2))
-      tau2 = seq(0, 1, 0.1)
-    optimal_r = vector(length = length(tau2))
+    # set the "omega max" we are searching over. We are calling this omega
+    # max because it is important to keep original value of omega for later
+    if (is.null(omega)) {
+
+      omega_max = effect_size
+    } else {
+      omega_max = omega
+    }
+    optimal_r = vector(length = length(omega_max))
     count = 1
-    for (i in tau2)
+    for (i in omega_max)
     {
       optimal_r[count] = optimize(
-        backend_f,
+        maximize_f,
         c(1, 20),
         tol = 0.001,
         f_stat = f_stat,
-        n = n,
         df1 = df1,
         df2 = df2,
-        r1 = FALSE,
-        tau2 = i,
+        n = n,
+        omega = i,
         maximum = TRUE
       )$maximum
       count = count + 1
     }
-    maximized_values = as.data.frame(cbind(tau2, optimal_r))
+    maximized_values = as.data.frame(cbind(omega_max, optimal_r))
+
+    r = optimal_r
+    results = vector()
+    for (i in 1:length(optimal_r)) {
+      results[i] = maximize_f(
+        r = optimal_r[i],
+        f_stat = f_stat,
+        df1 = df1,
+        df2 = df2,
+        n = n,
+        omega = omega_max[i]
+      )
+    }
+
+  } else {
+    results = backend_f(
+      f_stat = f_stat,
+      n = n,
+      df1 = df1,
+      df2 = df2,
+      r = r,
+      omega = omega
+    )
   }
 
 
@@ -327,23 +330,26 @@ f_test.BFF = function(f_stat,
   BFF_max_RMSE = BFF[idx_max]
   max_RMSE = effect_size[idx_max]
 
-  if (maximize) {
-    print(
-      "The maximum r value for each specified tau2 is given. Re-run the test with the desired r to generate plots and get the BFF value."
+  output = list(
+    log_bf = BFF_max_RMSE,
+    omega = max_RMSE,
+    omega_set = omega_set,
+    test_type = "f_test",
+    r = r, # r that is maximized or set by user
+    input = list(
+      f_stat = f_stat,
+      df1     = df1,
+      df2 = df2
     )
-    to_return = maximized_values
-  } else if (user_supplied_tau2) {
-    to_return = list(BFF = BFF,
-                     tau2 = tau2)
-  } else {
-    to_return = list(
-      log_BFF = BFF,
-      effect_size = effect_size,
-      log_BFF_max_RMSE = BFF_max_RMSE,
-      max_RMSE = max_RMSE
-    )
-
+  )
+  if (!omega_set) {
+    output$BFF = list(log_bf = results, omega = effect_size)
   }
-  return(to_return)
 
+  class(output) = "BFF"
+  return(output)
 }
+
+
+
+
