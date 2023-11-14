@@ -47,7 +47,7 @@ By setting r > 1, we use higher-order moments for replicated studies. Fractional
 All results are on the log scale.
 }
 \examples{
-zBFF = corr_test_BFF(z_stat = 2.5, n = 50)
+corrBFF = corr_test_BFF(z_stat = 2.5, n = 50)
 corr_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
 corr_test_BFF(z_stat = 2.5, n = 50, omega = c(0.5, 0.2))
 corr_test_BFF(z_stat = 2.5, n1 = 50, n2 = 40, one_sample = FALSE)
@@ -58,7 +58,7 @@ corr_test_BFF(z_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
 corr_test_BFF(z_stat = 2.5, n = 50)
 corr_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
 corr_test_BFF(z_stat = 2.5, n = 50, tau2 = c(0.5, 0.8))
-zBFF$BFF_max_RMSE   # maximum BFF omega
-zBFF$max_RMSE       # effect size which maximizes the BFF value
+corrBFF$BFF_max_RMSE   # maximum BFF omega
+corrBFF$max_RMSE       # effect size which maximizes the BFF value
 
 }
