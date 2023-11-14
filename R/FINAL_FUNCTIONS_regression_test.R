@@ -203,7 +203,7 @@ backend_reg = function(r,
   return(BFF)
 }
 
-maximize_t = function(r,
+maximize_reg = function(r,
                       t_stat,
                       df,
                       n,
@@ -330,7 +330,7 @@ regression_test_BFF = function(t_stat,
     for (i in omega_max)
     {
       optimal_r[count] = optimize(
-        maximize_t,
+        maximize_reg,
         c(1, 20),
         tol = 0.001,
         t_stat = t_stat,
@@ -348,7 +348,7 @@ regression_test_BFF = function(t_stat,
     r = optimal_r
     results = vector()
     for (i in 1:length(optimal_r)) {
-      results[i] = maximize_t(
+      results[i] = maximize_reg(
         r = optimal_r[i],
         t_stat = t_stat,
         df = df,
