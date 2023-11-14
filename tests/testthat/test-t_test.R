@@ -16,10 +16,10 @@ test_that("two-sample: basic functionality", {
   testthat::expect_equal(
     capture_output_lines(fit, print = TRUE, width = 100),
     c(
-    "\t\tBayesian non-local two-sample t test",
+    "\tBayesian non-local two-sample t test"  ,
     ""                                        ,
     "log Bayes factor = 0.12"                 ,
-    "log tau2 = 0.50"                         ,
+    "omega = 0.50 (Cohen's d)"                ,
     "alternative = two.sided"
     )
   )
@@ -45,10 +45,10 @@ test_that("two-sample: basic functionality", {
   testthat::expect_equal(
     capture_output_lines(fit, print = TRUE, width = 100),
     c(
-      "\t\tBayesian non-local two-sample t test",
+      "\tBayesian non-local two-sample t test"  ,
       ""                                        ,
       "log Bayes factor = 0.50"                 ,
-      "log tau2 = 0.50"                         ,
+      "omega = 0.50 (Cohen's d)"                ,
       "alternative = greater"
     )
   )
@@ -71,10 +71,10 @@ test_that("two-sample: basic functionality", {
   testthat::expect_equal(
     capture_output_lines(fit, print = TRUE, width = 100),
     c(
-      "\t\tBayesian non-local two-sample t test",
+      "\tBayesian non-local two-sample t test"  ,
       ""                                        ,
       "maximized log Bayes factor = 0.03"       ,
-      "maximized log tau2 = 0.05"               ,
+      "maximized omega = 0.05 (Cohen's d)"      ,
       "alternative = two.sided"
     )
   )
@@ -105,10 +105,10 @@ test_that("two-sample: basic functionality", {
   testthat::expect_equal(
     capture_output_lines(summary(fit), print = TRUE, width = 100),
     c(
-      "\t\tBayesian non-local two-sample t test",
+      "\tBayesian non-local two-sample t test",
       ""                                        ,
       "maximized log Bayes factor = 0.00"       ,
-      "maximized log tau2 = 0.00"               ,
+      "maximized omega = 0.00 (Cohen's d)"      ,
       "alternative = less"
     )
   )
