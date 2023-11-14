@@ -50,6 +50,14 @@ get_corr_tau2 = function(n, w, r = 1)
   return(to_return)
 }
 
+get_regression_tau2 = function(n, k, w, r = 1)
+{
+  top = (n-k-1)*w^2
+  bottom = (2*r)
+  to_return = top / bottom
+  return(to_return)
+}
+
 ################## for fractional cases
 # get_wbar = function(w, k)
 # {
