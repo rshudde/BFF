@@ -51,7 +51,7 @@ plot.BFF = function(x, plot = TRUE,  ...) {
   title <- if(is.null(dots[["title"]])) "Bayes Factor Function"                else dots[["title"]]
   ylab  <- if(is.null(dots[["ylab"]]))  "Bayes Factor Against Null Hypothesis" else dots[["ylab"]]
   xlab  <- if(is.null(dots[["xlab"]])){
-    if(x$generic_test) expression(tau^2) else expression(paste("RMSE ", tilde(omega)))
+    if(x$generic_test) expression(tau^2) else .test_effect_size_name(x$test_type)
   }else dots[["xlab"]]
   add_segments <- if(is.null(dots[["add_segments"]])) TRUE else dots[["add_segments"]]
 
