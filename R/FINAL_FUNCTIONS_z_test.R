@@ -345,29 +345,37 @@ z_test_BFF = function(z_stat,
   }
 
   ###### return logic
-  BFF = results
-  effect_size = effect_size
-  idx_max = which.max(BFF)
-  BFF_max_RMSE = BFF[idx_max]
-  max_RMSE = effect_size[idx_max]
+  if (!omega_set) {
+    log_bf         <- c(0, results)
+    omega_sequence <- c(0, omega_sequence)
+    idx_max        <- which.max(log_bf)
+    this_log_bf    <- log_bf[idx_max]
+    this_omega     <- omega_sequence[idx_max]
+  }else{
+    this_log_bf    <- results
+    this_omega     <- omega
+  }
 
   output = list(
-    log_bf = BFF_max_RMSE,
-    omega = max_RMSE,
-    omega_set = omega_set,
-    one_sample = one_sample,
-    alternative = alternative,
-    test_type = "z_test",
-    r = r, # r that is maximized or set by user
+    log_bf       = this_log_bf,
+    omega        = this_omega,
+    omega_set    = omega_set,
+    one_sample   = one_sample,
+    alternative  = alternative,
+    test_type    = "t_test",
+    generic_test = FALSE,
+    r            = r, # r that is maximized or set by user
     input = list(
-      z_stat = z_stat,
+      t_stat = t_stat,
+      df     = df,
       n1     = n1,
       n2     = n2
     )
   )
   if (!omega_set) {
-    output$BFF = list(log_bf = results, omega = effect_size)
+    output$BFF = list(log_bf = log_bf, omega = omega_sequence)
   }
+
 
   class(output) = "BFF"
   return(output)
