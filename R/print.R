@@ -35,6 +35,8 @@ print.BFF = function(x, ...) {
                                    "t_test"    = "t test",
                                    "z_test"    = "z test",
                                    "chi2_test" = "chi2 test",
-                                   "f_test"    = "f test"))
+                                   "f_test"    = "f test",
+                                   "regression_test" = "regression test",
+                                   "correlation_test" = "correlation_test"))
 
 }
