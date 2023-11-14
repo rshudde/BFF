@@ -104,26 +104,26 @@ backend_z = function(r,
   # same effect sizes for all tests
   if (!is.null(omega))
   {
-    effect_size = omega
+    omega_sequence = omega
   } else {
-    effect_size = seq(0.01, 1, by = 0.01)
+    omega_sequence = seq(0.01, 1, by = 0.01)
   }
 
   # user_supplied_omega = TRUE
   # if (is.null(omega))
   #   user_supplied_omega = FALSE
 
-  log_vals = rep(0, length(effect_size))
+  log_vals = rep(0, length(omega_sequence))
 
   if (is.null(tau2))
   {
     if (one_sample)
     {
-      tau2 = get_one_sample_tau2(n = n, w = effect_size, r = r)
+      tau2 = get_one_sample_tau2(n = n, w = omega_sequence, r = r)
     } else if (!one_sample)
       tau2 = get_two_sample_tau2(n1 = n1,
                                  n2 = n2,
-                                 w = effect_size,
+                                 w = omega_sequence,
                                  r = r)
   }
 
@@ -207,7 +207,7 @@ maximize_z = function(r,
 #'  \tabular{ll}{
 #'    \code{BFF} \tab The log of the Bayes Factor Function values \cr
 #'    \tab \cr
-#'    \code{effect_size} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
+#'    \code{omega_sequence} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
 #'    \tab \cr
 #'    \code{BFF_max_RMSE} \tab Maximum BFF value \cr
 #'    \tab \cr
@@ -282,7 +282,8 @@ z_test_BFF = function(z_stat,
   maximize = length(z_stat) > 1 && is.null(r)
 
   #####  same effect sizes for all tests
-  effect_size = seq(0.01, 1, by = 0.01)
+  omega_sequence = seq(0.01, 1, by = 0.01)
+
 
   ##### optimization logic
   if (maximize)
@@ -291,7 +292,7 @@ z_test_BFF = function(z_stat,
     # max because it is important to keep original value of omega for later
     if (is.null(omega)) {
 
-      omega_max = effect_size
+      omega_max = omega_sequence
     } else {
       omega_max = omega
     }
@@ -332,7 +333,7 @@ z_test_BFF = function(z_stat,
     }
 
   } else {
-    results = backend_t(
+    results = backend_z(
       z_stat = z_stat,
       n = n,
       r = r,
@@ -366,7 +367,7 @@ z_test_BFF = function(z_stat,
     generic_test = FALSE,
     r            = r, # r that is maximized or set by user
     input = list(
-      t_stat = t_stat,
+      z_stat = z_stat,
       df     = df,
       n1     = n1,
       n2     = n2

@@ -35,7 +35,7 @@ Returns Bayes factor function results
  \tabular{ll}{
    \code{BFF} \tab The log of the Bayes Factor Function values \cr
    \tab \cr
-   \code{effect_size} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
+   \code{omega_sequence} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
    \tab \cr
    \code{BFF_max_RMSE} \tab Maximum BFF value \cr
    \tab \cr
