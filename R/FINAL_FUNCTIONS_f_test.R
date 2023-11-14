@@ -1,9 +1,3 @@
-# source("~/Desktop/Research/BFF/R/FINAL_SUPPORT_hypergeometric.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_tau2.R")
-# source("~/Desktop/Research/BFF/R/FINAL_FUNCTIONS_plotting.R")
-# source("~/Desktop/Research/BFF/R/FINAL_support_functions.R")
-# library(gsl)
-
 ################# F functions if r is an integer and equal to 1
 f_val_r1 = function(tau2, f_stat, df1, df2)
 {
