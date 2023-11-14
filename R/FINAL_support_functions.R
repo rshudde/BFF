@@ -21,11 +21,12 @@ plot.BFF = function(x, xlab = NULL, ylab = NULL, main = NULL, ...) {
 }
 
 .test_type_name = function(test_type, one_sample) {
-  starting_strng = gettextf("Bayesian non-local %1$s %2$s",
-                            if(one_sample) "one-sample" else "two-sample",
+  starting_strng = gettextf("Bayesian non-local %1$s%2$s",
+                            if(!is.null(one_sample)){if(one_sample) "one-sample " else "two-sample "} else "",
                             switch(test_type,
-                                   "t_test" = "t test",
-                                   "z_test" = "z test",
+                                   "t_test"    = "t test",
+                                   "z_test"    = "z test",
+                                   "cor_test"  = "corelation test",
                                    "chi2_test" = "chi2 test",
                                    "f_test" = "f test"))
 

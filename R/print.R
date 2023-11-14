@@ -28,9 +28,9 @@ print.BFF = function(x, ...) {
   cat(paste0("alternative = ", x$alternative))
 }
 
-.test_type_name = function(test_type, one_sample) {
-  starting_strng = gettextf("Bayesian non-local %1$s %2$s",
-                            if(one_sample) "one-sample" else "two-sample",
+.test_type_name = function(test_type = NULL, one_sample = NULL) {
+  starting_strng = gettextf("Bayesian non-local %1$s%2$s",
+                            if(!is.null(one_sample)) {if(one_sample) "one-sample " else "two-sample "} else "",
                             switch(test_type,
                                    "t_test"    = "t test",
                                    "z_test"    = "z test",

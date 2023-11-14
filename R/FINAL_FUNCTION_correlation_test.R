@@ -90,7 +90,7 @@ log_Z_frac_onesided = function(tau2, z, r)
 
 
 ####################### backend implementation
-backend_z = function(r,
+backend_cor = function(r,
                      z_stat,
                      n = NULL,
                      one_sided = TRUE,
@@ -151,23 +151,19 @@ backend_z = function(r,
   return(BFF)
 }
 
-maximize_z = function(r,
+maximize_cor = function(r,
                       z_stat,
                       df,
                       n = NULL,
                       one_sided = TRUE,
-                      n1 = NULL,
-                      n2 = NULL,
                       omega = NULL) {
 
   logbf = dcauchy(r)/(1-pcauchy(1))
   for (t in range(1, length(z_stat))) {
-    logbf = logbf + backend_z(r = r,
+    logbf = logbf + backend_cor(r = r,
                               z_stat = z_stat[t],
                               n = n[t],
                               one_sided = one_sided,
-                              n1 = n1[t],
-                              n2 = n2[t],
                               omega = omega, # technically not used
                               tau2 = omega^2*n[t])
   }
@@ -177,16 +173,14 @@ maximize_z = function(r,
 
 ################# T function user interaction
 
-#' corr_test_BFF
+#' cor_test_BFF
 #'
-#' corr_test_BFF constructs BFFs based on the z test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' cor_test_BFF constructs BFFs based on the z test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
 #'
 #' @param z_stat Z statistic
 #' @param n sample size (if one sample test)
-#' @param n1 sample size of group one for two sample test.
-#' @param n2 sample size of group two for two sample test
 #' @param r r value
 #' @param tau2 tau2 values (can be a single entry or a vector of values)
 #'
@@ -205,25 +199,23 @@ maximize_z = function(r,
 #' @export
 #'
 #' @examples
-#' corrBFF = corr_test_BFF(z_stat = 2.5, n = 50)
-#' corr_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
-#' corr_test_BFF(z_stat = 2.5, n = 50, omega = c(0.5, 0.2))
-#' corr_test_BFF(z_stat = 2.5, n1 = 50, n2 = 40, one_sample = FALSE)
-#' corr_test_BFF(z_stat = 2.5, n = 50, r = 2)
-#' corr_test_BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE)
-#' corr_test_BFF(z_stat = 2.5, n = 50, r = 2.5)
-#' corr_test_BFF(z_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
-#' corr_test_BFF(z_stat = 2.5, n = 50)
-#' corr_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
-#' corr_test_BFF(z_stat = 2.5, n = 50, tau2 = c(0.5, 0.8))
+#' corrBFF = cor_test_BFF(z_stat = 2.5, n = 50)
+#' cor_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
+#' cor_test_BFF(z_stat = 2.5, n = 50, omega = c(0.5, 0.2))
+#' cor_test_BFF(z_stat = 2.5, n1 = 50, n2 = 40, one_sample = FALSE)
+#' cor_test_BFF(z_stat = 2.5, n = 50, r = 2)
+#' cor_test_BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE)
+#' cor_test_BFF(z_stat = 2.5, n = 50, r = 2.5)
+#' cor_test_BFF(z_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
+#' cor_test_BFF(z_stat = 2.5, n = 50)
+#' cor_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
+#' cor_test_BFF(z_stat = 2.5, n = 50, tau2 = c(0.5, 0.8))
 #' corrBFF$BFF_max_RMSE   # maximum BFF omega
 #' corrBFF$max_RMSE       # effect size which maximizes the BFF value
 #'
-corr_test_BFF = function(z_stat,
+cor_test_BFF = function(z_stat,
                       n = NULL,
                       alternative = "two.sided",
-                      n1 = NULL,
-                      n2 = NULL,
                       r = NULL,
                       omega = NULL)
 
@@ -286,7 +278,7 @@ corr_test_BFF = function(z_stat,
     for (i in omega_max)
     {
       optimal_r[count] = optimize(
-        maximize_z,
+        maximize_cor,
         c(1, 20),
         tol = 0.001,
         z_stat = z_stat,
@@ -302,7 +294,7 @@ corr_test_BFF = function(z_stat,
     r = optimal_r
     results = vector()
     for (i in 1:length(optimal_r)) {
-      results[i] = maximize_z(
+      results[i] = maximize_cor(
         r = optimal_r[i],
         z_stat = z_stat,
         n = n,
@@ -312,7 +304,7 @@ corr_test_BFF = function(z_stat,
     }
 
   } else {
-    results = backend_z(
+    results = backend_cor(
       z_stat = z_stat,
       n = n,
       r = r,
