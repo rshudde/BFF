@@ -63,35 +63,36 @@ dnlnm <- function(x, tau2, r, log = FALSE){
   if(one_sample){
     stop("TODO")
   }else{
-    lik <- dnlnm((((sqrt(2*n1*n2))/(sqrt(n1+n2))) * effect_size), tau2, r)*((sqrt(2*n1*n2))/(sqrt(n1+n2)))
+    lik = dnlnm((((sqrt(2*n1*n2))/(sqrt(n1+n2))) * effect_size), tau2, r)*((sqrt(2*n1*n2))/(sqrt(n1+n2)))
   }
   return(lik)
 }
 
-.t_test.posterior <- function(t, tau2, r, t_stat, df, one_sample = FALSE, one_sided = FALSE){
+.t_test.posterior <- function(t_stat, tau2, r, df, effect_size, n = NULL, n1 = NULL, n2 = NULL, one_sample = FALSE, one_sided = FALSE){
 
   if(one_sided){
   lik_prior = .t_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n = n, one_sample = one_sample, one_sided = one_sided)
-  m0 = .m0.t_test1(t = t, df = df)
-  I1 = .I1.t_test1(tau2 = tau2, r = r, df = df, t = t)
-  I2 = .I2.t_test1(tau2 = tau2, r = r, df = df, t = t)
+  m0 = .m0.t_test1(t = t_stat, df = df)
+  I1 = .I1.t_test1(tau2 = tau2, r = r, df = df, t = t_stat)
+  I2 = .I2.t_test1(tau2 = tau2, r = r, df = df, t = t_stat)
   m1 = 2*m0*(I1 + I2)
-  post_lik = ((.dt.t_test1(t = t, df = df, n = n, effect_size = effect_size) * lik_prior)/m1)
-  return(post_lik)
+  post_lik = ((.dt.t_test1(t = t_stat, df = df, n = n, effect_size = effect_size) * lik_prior)/m1)
 }
 
   if(one_sample){
     stop("TODO")
   }else{
     lik_prior = .t_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n1 = n1, n2 = n2, one_sample = one_sample, one_sided = one_sided)
-    m0 = .m0.t_test2(t = t, df = df)
-    I1 = .I1.t_test2(tau2 = tau2, r = r, df = df, t = t)
-    I2 = .I2.t_test2(tau2 = tau2, r = r, df = df, t = t)
+    m0 = .m0.t_test2(t = t_stat, df = df)
+    I1 = .I1.t_test2(tau2 = tau2, r = r, df = df, t = t_stat)
+    I2 = .I2.t_test2(tau2 = tau2, r = r, df = df, t = t_stat)
     m1 = m0*(I1 + I2)
-    post_lik = ((.dt.t_test2(t = t, df = df, n1 = n1, n2 = n2, effect_size = effect_size) * lik_prior)/m1)
-    return(post_lik)
+    post_lik = ((.dt.t_test2(t = t_stat, df = df, n1 = n1, n2 = n2, effect_size = effect_size) * lik_prior)/m1)
   }
+
+return(post_lik)
 }
+
 ### helper functions for one-sided t-test (i.e., t_test1)
 # likelihood
 .dt.t_test1 <- function(t, df, n, effect_size){
