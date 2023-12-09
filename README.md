@@ -21,8 +21,6 @@ The R package 'BFF' is available from CRAN, use the commands below to install th
 # Plain installation
 devtools::install_github("rshudde/BFF") # BFF package
 
-# For installation with vignette
-devtools::install_github("rshudde/BFF", build_vignettes = TRUE)
 ```
 
 Example
