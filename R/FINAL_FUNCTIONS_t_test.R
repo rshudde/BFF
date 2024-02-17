@@ -104,7 +104,7 @@ log_T_frac = function(tau2, t, v, r)
   cc = 3 / 2
   second_hypergeo = Gauss2F1(aa, bb, cc, y ^ 2)
 
-  to_return = c * (first_hypergeo + y * gamma_term * second_hypergeo)
+  to_return = c * (first_hypergeo + 2*y * gamma_term * second_hypergeo)
   to_return = log(to_return)
 
   return(to_return)
