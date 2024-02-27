@@ -22,26 +22,31 @@ t_test_BFF(
 
 \item{one_sample}{is test one sided? Default is FALSE}
 
-\item{n1}{sample size of group one for two sample test.}
+\item{alternative}{the alternative. options are "two.sided" or "less" or "greater"}
 
-\item{n2}{sample size of group two for two sample test}
+\item{n1}{sample size of group one for two sample test. Must be provided if one_sample = FALSE}
+
+\item{n2}{sample size of group two for two sample test. Must be provided if one_sample = FALSE}
 
 \item{r}{r value}
 
-\item{tau2}{tau2 values (can be a single entry or a vector of values)}
+\item{omega}{omega values (can be a single entry or a vector of values)}
 }
 \value{
 Returns Bayes factor function results
  \tabular{ll}{
-   \code{BFF} \tab The log of the Bayes Factor Function values \cr
+   \code{BFF} \tab The object containing the log_bf (log bayes factor values) and corresponding omega values \cr
    \tab \cr
-   \code{effect_size} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
+   \code{log_bf} \tab maximized bayes factor\cr
    \tab \cr
-   \code{BFF_max_RMSE} \tab Maximum BFF value \cr
+   \code{omega_set} \tab omega value corresponding to maximized bayes factor\cr
    \tab \cr
-   \code{max_RMSE} \tab Effect size that maximizes BFF\cr
+   \code{omega_set} \tab was an omega value provided?\cr
    \tab \cr
-   \code{omega} \tab omega values tested, can be a single number or vector\cr
+   \code{alternative} \tab user provided alternative \cr
+   \tab \cr
+   \code{f} \tab final t value if maximized, or input r value if provided \cr
+   \tab \cr
 }
 }
 \description{
@@ -50,18 +55,7 @@ By setting r > 1, we use higher-order moments for replicated studies. Fractional
 All results are on the log scale.
 }
 \examples{
-tBFF = t_test_BFF(t_stat = 2.5, n = 50)
-t_test_BFF(t_stat = 2.5, n = 50, omega = 0.5)
-t_test_BFF(t_stat = 2.5, n = 50, omega = c(0.5, 0.2))
-t_test_BFF(t_stat = 2.5, n1 = 50, n2 = 40, one_sample = FALSE)
-t_test_BFF(t_stat = 2.5, n = 50, r = 2)
-t_test_BFF(t_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE)
-t_test_BFF(t_stat = 2.5, n = 50, r = 2.5)
-t_test_BFF(t_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
-t_test_BFF(t_stat = 2.5, n = 50)
-t_test_BFF(t_stat = 2.5, n = 50, omega = 0.5)
-t_test_BFF(t_stat = 2.5, n = 50, tau2 = c(0.5, 0.8))
-tBFF$BFF_max_RMSE   # maximum BFF omega
-tBFF$max_RMSE       # effect size which maximizes the BFF value
-
+tBFF = t_test_BFF(t_stat = 2.5, n = 50, one_sample = TRUE)
+tBFF
+plot(tBFF)
 }
