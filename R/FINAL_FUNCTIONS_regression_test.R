@@ -256,8 +256,8 @@ maximize_t = function(r,
 #'
 #' @examples
 #' regBFF = regression_test_BFF(t_stat = 2.5, n = 50, k = 3)
-#' regBFF$BFF_max_RMSE   # maximum BFF omega
-#' regBFF$max_RMSE       # effect size which maximizes the BFF value
+#' regBFF
+#' plot(regBFF)
 #'
 regression_test_BFF = function(t_stat,
                       n,
