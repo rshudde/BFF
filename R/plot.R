@@ -88,6 +88,12 @@ plot.BFF = function(x, plot = TRUE,  ...) {
 
   # add log labels to Bayes factors
   y_ticks  <- sort(do.call(c, lapply(c(3,10),function(x) x*10^(0:nchar(ceiling(exp(max(abs(df$log_BF)))/(10*x)))))))
+  # y_ticks1  <- sort(do.call(c, lapply(c(2,10),function(x) x*10^(0:nchar(ceiling(max(abs(df$log_BF)))/(10*x))))))
+  #
+  # print(max(abs(df$log_BF)))
+  # print(df$log_BF)
+  # print(y_ticks)
+  # print(y_ticks1)
   y_labels <- c(
     paste0("1:",rev(y_ticks)),
     1,
@@ -112,10 +118,16 @@ plot.BFF = function(x, plot = TRUE,  ...) {
 .get_effect_size_cutpoints <- function(test_type){
   switch(test_type,
          "t_test"    = c(0.1, 0.35, 0.65),
-         "z_test"    = c(0.1, 0.35, 0.65))
+         "z_test"    = c(0.1, 0.35, 0.65),
+         "chi2_test" = c(0.1, 0.35, 0.65),
+         "regression_test" = c(0.1, 0.35, 0.65),
+         "f_test"    = c(0.1, 0.35, 0.65))
 }
 .get_effect_size_range    <-  function(test_type){
   switch(test_type,
          "t_test"    = c(0.0, 1.0),
-         "z_test"    = c(0.0, 1.0))
+         "z_test"    = c(0.0, 1.0),
+         "chi2_test" = c(0.0, 1.0),
+         "regression_test" = c(0.0, 1.0),
+         "f_test"    = c(0.0, 1.0))
 }
