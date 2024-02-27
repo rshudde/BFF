@@ -90,7 +90,7 @@ log_Z_frac_onesided = function(tau2, z, r)
 
 
 ####################### backend implementation
-backend_z = function(r,
+backend_z_corr = function(r,
                      z_stat,
                      n = NULL,
                      one_sided = TRUE,
@@ -160,9 +160,9 @@ maximize_z = function(r,
                       n2 = NULL,
                       omega = NULL) {
 
-  logbf = dcauchy(r)/(1-pcauchy(1))
+  logbf = stats::dcauchy(r)/(1-stats::pcauchy(1))
   for (t in range(1, length(z_stat))) {
-    logbf = logbf + backend_z(r = r,
+    logbf = logbf + backend_z_corr(r = r,
                               z_stat = z_stat[t],
                               n = n[t],
                               one_sided = one_sided,
@@ -202,23 +202,22 @@ maximize_z = function(r,
 #'    \tab \cr
 #'    \code{omega} \tab omega values tested, can be a single number or vector\cr
 #' }
-#' @export
-#'
-#' @examples
-#' corrBFF = corr_test_BFF(z_stat = 2.5, n = 50)
-#' corr_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
-#' corr_test_BFF(z_stat = 2.5, n = 50, omega = c(0.5, 0.2))
-#' corr_test_BFF(z_stat = 2.5, n1 = 50, n2 = 40, one_sample = FALSE)
-#' corr_test_BFF(z_stat = 2.5, n = 50, r = 2)
-#' corr_test_BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE)
-#' corr_test_BFF(z_stat = 2.5, n = 50, r = 2.5)
-#' corr_test_BFF(z_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
-#' corr_test_BFF(z_stat = 2.5, n = 50)
-#' corr_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
-#' corr_test_BFF(z_stat = 2.5, n = 50, tau2 = c(0.5, 0.8))
-#' corrBFF$BFF_max_RMSE   # maximum BFF omega
-#' corrBFF$max_RMSE       # effect size which maximizes the BFF value
-#'
+
+# @examples
+# corrBFF = corr_test_BFF(z_stat = 2.5, n = 50)
+# corr_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
+# corr_test_BFF(z_stat = 2.5, n = 50, omega = c(0.5, 0.2))
+# corr_test_BFF(z_stat = 2.5, n1 = 50, n2 = 40, one_sample = FALSE)
+# corr_test_BFF(z_stat = 2.5, n = 50, r = 2)
+# corr_test_BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE)
+# corr_test_BFF(z_stat = 2.5, n = 50, r = 2.5)
+# corr_test_BFF(z_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
+# corr_test_BFF(z_stat = 2.5, n = 50)
+# corr_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
+# corr_test_BFF(z_stat = 2.5, n = 50, tau2 = c(0.5, 0.8))
+# corrBFF$BFF_max_RMSE   # maximum BFF omega
+# corrBFF$max_RMSE       # effect size which maximizes the BFF value
+
 corr_test_BFF = function(z_stat,
                       n = NULL,
                       alternative = "two.sided",
@@ -285,7 +284,7 @@ corr_test_BFF = function(z_stat,
     count = 1
     for (i in omega_max)
     {
-      optimal_r[count] = optimize(
+      optimal_r[count] = stats::optimize(
         maximize_z,
         c(1, 20),
         tol = 0.001,

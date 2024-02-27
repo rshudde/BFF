@@ -182,7 +182,7 @@ maximize_f = function(r,
                       n = NULL,
                       omega = NULL) {
 
-  logbf = dcauchy(r)/(1-pcauchy(1))
+  logbf = stats::dcauchy(r)/(1-stats::pcauchy(1))
   for (t in range(1, length(f_stat))) {
     logbf = logbf + backend_f(r = r,
                               f_stat = f_stat[t],
@@ -209,26 +209,29 @@ maximize_f = function(r,
 #' @param df1 sample size of group one for two sample test.
 #' @param df2 sample size of group two for two sample test
 #' @param r r value
-#' @param tau2 tau2 values (can be a single entry or a vector of values)
+#' @param omega omega values (can be a single entry or a vector of values)
 #'
 #' @return Returns Bayes factor function results
 #'  \tabular{ll}{
-#'    \code{BFF} \tab The log of the Bayes Factor Function values \cr
+#'    \code{BFF} \tab The object containing the log_bf (log bayes factor values) and corresponding omega values \cr
 #'    \tab \cr
-#'    \code{effect_size} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
+#'    \code{log_bf} \tab maximized bayes factor\cr
 #'    \tab \cr
-#'    \code{BFF_max_RMSE} \tab Maximum BFF value \cr
+#'    \code{omega_set} \tab omega value corresponding to maximized bayes factor\cr
 #'    \tab \cr
-#'    \code{max_RMSE} \tab Effect size that maximizes BFF\cr
+#'    \code{omega_set} \tab was an omega value provided?\cr
 #'    \tab \cr
-#'    \code{omega} \tab omega values tested, can be a single number or vector\cr
+#'    \code{alternative} \tab user provided alternative \cr
+#'    \tab \cr
+#'    \code{f} \tab final t value if maximized, or input r value if provided \cr
+#'    \tab \cr
 #' }
 #' @export
 #'
 #' @examples
 #' fBFF = f_test_BFF(f_stat = 2.5, n = 50, df1 = 25, df2 = 48)
-#' fBFF$BFF_max_RMSE   # maximum BFF omega
-#' fBFF$max_RMSE       # effect size which maximizes the BFF value
+#' fBFF
+#' plot(fBFF)
 #'
 f_test_BFF = function(f_stat,
                       n,
@@ -283,7 +286,7 @@ f_test_BFF = function(f_stat,
     count = 1
     for (i in omega_max)
     {
-      optimal_r[count] = optimize(
+      optimal_r[count] = stats::optimize(
         maximize_f,
         c(1, 20),
         tol = 0.001,
@@ -335,6 +338,7 @@ f_test_BFF = function(f_stat,
     omega = max_RMSE,
     omega_set = omega_set,
     test_type = "f_test",
+    generic_test = FALSE,
     r = r, # r that is maximized or set by user
     input = list(
       f_stat = f_stat,
