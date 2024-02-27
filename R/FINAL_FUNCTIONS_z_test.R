@@ -92,11 +92,11 @@ log_Z_frac_onesided = function(tau2, z, r)
 ####################### backend implementation
 backend_z = function(r,
                      z_stat,
+                     n1 = NULL,
+                     n2 = NULL,
                      n = NULL,
                      one_sample = TRUE,
                      one_sided = TRUE,
-                     n1 = NULL,
-                     n2 = NULL,
                      omega = NULL,
                      tau2 = NULL)
 
@@ -171,7 +171,7 @@ maximize_z = function(r,
                       n2 = NULL,
                       omega = NULL) {
 
-  logbf = dcauchy(r)/(1-pcauchy(1))
+  logbf = stats::dcauchy(r)/(1-stats::pcauchy(1))
   for (t in range(1, length(z_stat))) {
     logbf = logbf + backend_z(r = r,
                               z_stat = z_stat[t],
@@ -198,39 +198,34 @@ maximize_z = function(r,
 #' @param z_stat Z statistic
 #' @param n sample size (if one sample test)
 #' @param one_sample is test one sided? Default is FALSE
-#' @param n1 sample size of group one for two sample test.
-#' @param n2 sample size of group two for two sample test
+#' @param alternative the alternative. options are "two.sided" or "less" or "greater"
+#' @param n1 sample size of group one for two sample test. Must be provided if one_sample = FALSE
+#' @param n2 sample size of group two for two sample test. Must be provided if one_sample = FALSE
 #' @param r r value
-#' @param tau2 tau2 values (can be a single entry or a vector of values)
+#' @param omega omega values (can be a single entry or a vector of values)
 #'
 #' @return Returns Bayes factor function results
 #'  \tabular{ll}{
-#'    \code{BFF} \tab The log of the Bayes Factor Function values \cr
+#'    \code{BFF} \tab The object containing the log_bf (log bayes factor values) and corresponding omega values \cr
 #'    \tab \cr
-#'    \code{omega_sequence} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
+#'    \code{log_bf} \tab maximized bayes factor\cr
 #'    \tab \cr
-#'    \code{BFF_max_RMSE} \tab Maximum BFF value \cr
+#'    \code{omega_set} \tab omega value corresponding to maximized bayes factor\cr
 #'    \tab \cr
-#'    \code{max_RMSE} \tab Effect size that maximizes BFF\cr
+#'    \code{omega_set} \tab was an omega value provided?\cr
 #'    \tab \cr
-#'    \code{omega} \tab omega values tested, can be a single number or vector\cr
+#'    \code{alternative} \tab user provided alternative \cr
+#'    \tab \cr
+#'    \code{f} \tab final r value if maximized, or input r value if provided \cr
+#'    \tab \cr
 #' }
 #' @export
 #'
 #' @examples
-#' zBFF = z_test_BFF(z_stat = 2.5, n = 50)
-#' z_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
-#' z_test_BFF(z_stat = 2.5, n = 50, omega = c(0.5, 0.2))
-#' z_test_BFF(z_stat = 2.5, n1 = 50, n2 = 40, one_sample = FALSE)
-#' z_test_BFF(z_stat = 2.5, n = 50, r = 2)
-#' z_test_BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE)
-#' z_test_BFF(z_stat = 2.5, n = 50, r = 2.5)
-#' z_test_BFF(z_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
-#' z_test_BFF(z_stat = 2.5, n = 50)
-#' z_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
-#' z_test_BFF(z_stat = 2.5, n = 50, tau2 = c(0.5, 0.8))
-#' zBFF$BFF_max_RMSE   # maximum BFF omega
-#' zBFF$max_RMSE       # effect size which maximizes the BFF value
+#' zBFF = z_test_BFF(z_stat = 2.5, n = 50, one_sample = TRUE)
+#' zBFF
+#' plot(zBFF)
+#' zBFF$BFF$log_bf # view the logbf values
 #'
 z_test_BFF = function(z_stat,
                       n = NULL,
@@ -248,6 +243,7 @@ z_test_BFF = function(z_stat,
     stop("The alternative must be either 'two.sided', 'less', or 'greater'")
   }
 
+  # check r
   if (is.null(r) && length(z_stat) == 1) r = 1
   if (!is.null(r) && r < 1) {
     stop("r must be greater than 1")
@@ -266,6 +262,11 @@ z_test_BFF = function(z_stat,
         stop("If providing a vector of t statistics, sample size must also be supplied as a vector of equal length")
       }
     }
+  }
+
+  # check if one_sample is FALSE that n1 and n2 are provided
+  if ((!one_sample) && (is.null(n1) || is.null(n1))) {
+    stop("if one_sample is FALSE, both n1 and n2 must be provided")
   }
 
   used_alternative = alternative
@@ -300,7 +301,7 @@ z_test_BFF = function(z_stat,
     count = 1
     for (i in omega_max)
     {
-      optimal_r[count] = optimize(
+      optimal_r[count] = stats::optimize(
         maximize_z,
         c(1, 20),
         tol = 0.001,
@@ -342,7 +343,7 @@ z_test_BFF = function(z_stat,
       omega = omega,
       one_sample = one_sample,
       one_sided = used_alternative == "greater"
-    )
+      )
   }
 
   ###### return logic
