@@ -17,20 +17,23 @@ f_test_BFF(f_stat, n, df1, df2, r = NULL, omega = NULL)
 
 \item{r}{r value}
 
-\item{tau2}{tau2 values (can be a single entry or a vector of values)}
+\item{omega}{omega values (can be a single entry or a vector of values)}
 }
 \value{
 Returns Bayes factor function results
  \tabular{ll}{
-   \code{BFF} \tab The log of the Bayes Factor Function values \cr
+   \code{BFF} \tab The object containing the log_bf (log bayes factor values) and corresponding omega values \cr
    \tab \cr
-   \code{effect_size} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
+   \code{log_bf} \tab maximized bayes factor\cr
    \tab \cr
-   \code{BFF_max_RMSE} \tab Maximum BFF value \cr
+   \code{omega_set} \tab omega value corresponding to maximized bayes factor\cr
    \tab \cr
-   \code{max_RMSE} \tab Effect size that maximizes BFF\cr
+   \code{omega_set} \tab was an omega value provided?\cr
    \tab \cr
-   \code{omega} \tab omega values tested, can be a single number or vector\cr
+   \code{alternative} \tab user provided alternative \cr
+   \tab \cr
+   \code{f} \tab final t value if maximized, or input r value if provided \cr
+   \tab \cr
 }
 }
 \description{
@@ -40,7 +43,7 @@ All results are on the log scale.
 }
 \examples{
 fBFF = f_test_BFF(f_stat = 2.5, n = 50, df1 = 25, df2 = 48)
-fBFF$BFF_max_RMSE   # maximum BFF omega
-fBFF$max_RMSE       # effect size which maximizes the BFF value
+fBFF
+plot(fBFF)
 
 }
