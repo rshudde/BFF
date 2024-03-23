@@ -444,6 +444,7 @@ t_test_BFF = function(t_stat,
     input = list(
       t_stat = t_stat,
       df     = df,
+      n      = n,
       n1     = n1,
       n2     = n2
     )
