@@ -370,6 +370,7 @@ z_test_BFF = function(z_stat,
     input = list(
       z_stat = z_stat,
       df     = df,
+      n      = n,
       n1     = n1,
       n2     = n2
     )
