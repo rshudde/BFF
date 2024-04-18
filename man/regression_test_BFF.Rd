@@ -20,9 +20,11 @@ regression_test_BFF(
 
 \item{k}{number of predictors}
 
+\item{alternative}{is the alternative a one.sided or two.sided test? default is two.sided}
+
 \item{r}{r value}
 
-\item{tau2}{tau2 values (can be a single entry or a vector of values)}
+\item{omega}{omega values (can be a single entry or a vector of values)}
 }
 \value{
 Returns Bayes factor function results

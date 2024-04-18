@@ -163,7 +163,6 @@ backend_z = function(r,
 
 maximize_z = function(r,
                       z_stat,
-                      df,
                       n = NULL,
                       one_sample = TRUE,
                       one_sided = TRUE,
@@ -369,7 +368,7 @@ z_test_BFF = function(z_stat,
     r            = r, # r that is maximized or set by user
     input = list(
       z_stat = z_stat,
-      df     = df,
+      df     = NULL, # no df in a z test
       n1     = n1,
       n2     = n2
     )

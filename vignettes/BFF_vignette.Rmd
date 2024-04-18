@@ -60,9 +60,9 @@ data_two = rnorm(n = n, mean = 0.1, sd = 1)
 
 # calculating test statistics using z.test
 # one-sample z-test
-z_score_one = z.test(x = data_one, sigma.x = 1)$statistic
+# z_score_one = BSDA::z.test(x = data_one, sigma.x = 1)$statistic
 # two-sample z-test
-z_score_two = z.test(x = data_one, y = data_two, sigma.x = 1, sigma.y = 1)$statistic
+# z_score_two = BSDA::z.test(x = data_one, y = data_two, sigma.x = 1, sigma.y = 1)$statistic
 
 ```
 

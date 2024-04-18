@@ -31,6 +31,7 @@ plot.BFF = function(x, plot = TRUE,  ...) {
     stop("Bayes factor function can be plotted only if a specific omega/tau2 is not user set")
 
   # extract the BFF object (deal with generic/specific effect sizes)
+  log_BF = NULL
   if(x$generic_test){
     df <- data.frame(
       x      = x$BFF$tau2,

@@ -222,7 +222,7 @@ maximize_t = function(r,
                      n2 = NULL,
                      omega = NULL) {
 
-  logbf = dcauchy(r)/(1-pcauchy(1))
+  logbf = stats::dcauchy(r)/(1-stats::pcauchy(1))
   for (t in range(1, length(t_stat))) {
     logbf = logbf + backend_t(r = r,
                               t_stat = t_stat[t],
@@ -371,7 +371,7 @@ t_test_BFF = function(t_stat,
     count = 1
     for (i in omega_max)
     {
-      optimal_r[count] = optimize(
+      optimal_r[count] = stats::optimize(
         maximize_t,
         c(1, 20),
         tol = 0.001,

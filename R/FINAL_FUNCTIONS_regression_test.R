@@ -203,7 +203,7 @@ backend_reg = function(r,
   return(BFF)
 }
 
-maximize_t = function(r,
+maximize_t_reg = function(r,
                       t_stat,
                       df,
                       n,
@@ -211,7 +211,7 @@ maximize_t = function(r,
                       one_sided = TRUE,
                       omega = NULL) {
 
-  logbf = dcauchy(r)/(1-pcauchy(1))
+  logbf = stats::dcauchy(r)/(1-stats::pcauchy(1))
   for (t in range(1, length(t_stat))) {
     logbf = logbf + backend_reg(r = r,
                               t_stat = t_stat[t],
@@ -235,10 +235,11 @@ maximize_t = function(r,
 #' All results are on the log scale.
 #'
 #' @param t_stat T statistic
+#' @param alternative is the alternative a one.sided or two.sided test? default is two.sided
+#' @param omega omega values (can be a single entry or a vector of values)
 #' @param n sample size (if one sample test)
 #' @param k number of predictors
 #' @param r r value
-#' @param tau2 tau2 values (can be a single entry or a vector of values)
 #'
 #' @return Returns Bayes factor function results
 #'  \tabular{ll}{
@@ -329,8 +330,8 @@ regression_test_BFF = function(t_stat,
     count = 1
     for (i in omega_max)
     {
-      optimal_r[count] = optimize(
-        maximize_t,
+      optimal_r[count] = stats::optimize(
+        maximize_t_reg,
         c(1, 20),
         tol = 0.001,
         t_stat = t_stat,
@@ -348,13 +349,13 @@ regression_test_BFF = function(t_stat,
     r = optimal_r
     results = vector()
     for (i in 1:length(optimal_r)) {
-      results[i] = maximize_t(
+      results[i] = maximize_t_reg(
         r = optimal_r[i],
         t_stat = t_stat,
         df = df,
         n = n,
         k = k,
-        one_sidedkused_alternative == "greater",
+        one_sided = used_alternative == "greater",
         omega = omega_max[i]
       )
     }

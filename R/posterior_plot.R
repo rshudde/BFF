@@ -104,6 +104,7 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
   lik.posterior <- .t_test.posterior(x_seq, tau2, r, t_stat, df, one_sample = x$one_sample, one_sided = x$alternative != "two.sided")
 
   # create data.frame with values
+  posterior = NULL
   df <- data.frame(
     x         = x_seq,
     prior     = lik.prior,
