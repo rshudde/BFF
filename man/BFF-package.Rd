@@ -13,6 +13,7 @@ Bayes factors represent the ratio of probabilities assigned to data by competing
 
 Authors:
 \itemize{
+  \item Frantisek Bartos \email{f.bartos96@gmail.com}
   \item Saptati Datta \email{saptati@tamu.edu}
   \item Riana Guha \email{riana.guha@tamu.edu}
   \item Sandy Pramanik \email{sandy.pramanik@gmail.com}
