@@ -4,6 +4,10 @@ S3method(plot,BFF)
 S3method(print,BFF)
 S3method(summary,BFF)
 export(chi2_test_BFF)
+<<<<<<< HEAD
+=======
+export(cor_test_BFF)
+>>>>>>> master
 export(dnlnm)
 export(f_test_BFF)
 export(is.BFF)

@@ -20,6 +20,7 @@ summary.BFF <- function(object, ...){
 #'
 #' @seealso [z_test_BFF()], [t_test_BFF()], [chi2_test_BFF()], [f_test_BFF()]
 #' @export
+<<<<<<< HEAD
 print.BFF = function(x, ...) {
     cat(paste0("\t\t", .test_type_name(x$test_type, x$one_sample)))
     cat("\n\n")
@@ -40,12 +41,38 @@ print.BFF = function(x, ...) {
     }
   }
   starting_strng = gettextf("Bayesian non-local %1$s %2$s", sided,
+=======
+print.BFF <- function(x, ...) {
+  cat(paste0("\t", .test_type_name(x$test_type, x$one_sample)))
+  cat("\n\n")
+  cat(gettextf("%1$slog Bayes factor = %2$.2f\n", if(!x$omega_set) "maximized " else "", x$log_bf))
+  if(x$generic_test){
+    cat(gettextf("%1$s tau2 = %2$.2f\n", if(!x$omega_set) "maximized " else "", x$omega))
+  }else{
+    cat(gettextf("%1$somega = %2$.2f (%3$s)\n", if(!x$omega_set) "maximized " else "", x$omega, .test_effect_size_name(x$test_type)))
+  }
+  cat(paste0("alternative = ", x$alternative))
+}
+
+.test_type_name <- function(test_type, one_sample) {
+  starting_strng = gettextf("Bayesian non-local %1$s%2$s",
+                            if(!is.null(one_sample)) {if(one_sample) "one-sample " else "two-sample "} else "",
+>>>>>>> master
                             switch(test_type,
-                                   "t_test"    = "t test",
-                                   "z_test"    = "z test",
-                                   "chi2_test" = "chi2 test",
-                                   "f_test"    = "f test",
-                                   "regression_test" = "regression test",
+                                   "t_test"           = "t test",
+                                   "z_test"           = "z test",
+                                   "chi2_test"        = "chi2 test",
+                                   "f_test"           = "f test",
+                                   "regression_test"  = "regression test",
                                    "correlation_test" = "correlation_test"))
 
+}
+.test_effect_size_name <- function(test_type){
+  switch(test_type,
+         "t_test"           = "Cohen's d",
+         "z_test"           = "Cohen's d",
+         "chi2_test"        = "???",
+         "f_test"           = "???",
+         "regression_test"  = "partial correlation coefficient",
+         "correlation_test" = "correlation coefficient")
 }

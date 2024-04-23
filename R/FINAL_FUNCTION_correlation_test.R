@@ -90,12 +90,9 @@ log_Z_frac_onesided = function(tau2, z, r)
 
 
 ####################### backend implementation
-backend_z = function(r,
+backend_cor = function(r,
                      z_stat,
-                     n1 = NULL,
-                     n2 = NULL,
                      n = NULL,
-                     one_sample = TRUE,
                      one_sided = TRUE,
                      omega = NULL,
                      tau2 = NULL)
@@ -117,14 +114,7 @@ backend_z = function(r,
 
   if (is.null(tau2))
   {
-    if (one_sample)
-    {
-      tau2 = get_one_sample_tau2(n = n, w = omega_sequence, r = r)
-    } else if (!one_sample)
-      tau2 = get_two_sample_tau2(n1 = n1,
-                                 n2 = n2,
-                                 w = omega_sequence,
-                                 r = r)
+    tau2 = get_corr_tau2(n = n, w = omega_sequence, r = 1)
   }
 
 
@@ -161,24 +151,19 @@ backend_z = function(r,
   return(BFF)
 }
 
-maximize_z = function(r,
+maximize_cor = function(r,
                       z_stat,
+                      df,
                       n = NULL,
-                      one_sample = TRUE,
                       one_sided = TRUE,
-                      n1 = NULL,
-                      n2 = NULL,
                       omega = NULL) {
 
-  logbf = stats::dcauchy(r)/(1-stats::pcauchy(1))
+  logbf = dcauchy(r)/(1-pcauchy(1))
   for (t in range(1, length(z_stat))) {
-    logbf = logbf + backend_z(r = r,
+    logbf = logbf + backend_cor(r = r,
                               z_stat = z_stat[t],
                               n = n[t],
-                              one_sample = one_sample,
                               one_sided = one_sided,
-                              n1 = n1[t],
-                              n2 = n2[t],
                               omega = omega, # technically not used
                               tau2 = omega^2*n[t])
   }
@@ -188,50 +173,49 @@ maximize_z = function(r,
 
 ################# T function user interaction
 
-#' z_test_BFF
+#' cor_test_BFF
 #'
-#' z_test_BFF constructs BFFs based on the z test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' cor_test_BFF constructs BFFs based on the z test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
 #'
 #' @param z_stat Z statistic
 #' @param n sample size (if one sample test)
-#' @param one_sample is test one sided? Default is FALSE
-#' @param alternative the alternative. options are "two.sided" or "less" or "greater"
-#' @param n1 sample size of group one for two sample test. Must be provided if one_sample = FALSE
-#' @param n2 sample size of group two for two sample test. Must be provided if one_sample = FALSE
 #' @param r r value
-#' @param omega omega values (can be a single entry or a vector of values)
+#' @param tau2 tau2 values (can be a single entry or a vector of values)
 #'
 #' @return Returns Bayes factor function results
 #'  \tabular{ll}{
-#'    \code{BFF} \tab The object containing the log_bf (log bayes factor values) and corresponding omega values \cr
+#'    \code{BFF} \tab The log of the Bayes Factor Function values \cr
 #'    \tab \cr
-#'    \code{log_bf} \tab maximized bayes factor\cr
+#'    \code{omega_sequence} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
 #'    \tab \cr
-#'    \code{omega_set} \tab omega value corresponding to maximized bayes factor\cr
+#'    \code{BFF_max_RMSE} \tab Maximum BFF value \cr
 #'    \tab \cr
-#'    \code{omega_set} \tab was an omega value provided?\cr
+#'    \code{max_RMSE} \tab Effect size that maximizes BFF\cr
 #'    \tab \cr
-#'    \code{alternative} \tab user provided alternative \cr
-#'    \tab \cr
-#'    \code{f} \tab final r value if maximized, or input r value if provided \cr
-#'    \tab \cr
+#'    \code{omega} \tab omega values tested, can be a single number or vector\cr
 #' }
 #' @export
 #'
 #' @examples
-#' zBFF = z_test_BFF(z_stat = 2.5, n = 50, one_sample = TRUE)
-#' zBFF
-#' plot(zBFF)
-#' zBFF$BFF$log_bf # view the logbf values
+#' corrBFF = cor_test_BFF(z_stat = 2.5, n = 50)
+#' cor_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
+#' cor_test_BFF(z_stat = 2.5, n = 50, omega = c(0.5, 0.2))
+#' cor_test_BFF(z_stat = 2.5, n1 = 50, n2 = 40, one_sample = FALSE)
+#' cor_test_BFF(z_stat = 2.5, n = 50, r = 2)
+#' cor_test_BFF(z_stat = 2.5, r = 2, n1 = 50, n2 = 30, one_sample = FALSE)
+#' cor_test_BFF(z_stat = 2.5, n = 50, r = 2.5)
+#' cor_test_BFF(z_stat=2.5, r = 2.5, n1 = 50, n2 = 30,  one_sample = FALSE)
+#' cor_test_BFF(z_stat = 2.5, n = 50)
+#' cor_test_BFF(z_stat = 2.5, n = 50, omega = 0.5)
+#' cor_test_BFF(z_stat = 2.5, n = 50, tau2 = c(0.5, 0.8))
+#' corrBFF$BFF_max_RMSE   # maximum BFF omega
+#' corrBFF$max_RMSE       # effect size which maximizes the BFF value
 #'
-z_test_BFF = function(z_stat,
+cor_test_BFF = function(z_stat,
                       n = NULL,
-                      one_sample = FALSE,
                       alternative = "two.sided",
-                      n1 = NULL,
-                      n2 = NULL,
                       r = NULL,
                       omega = NULL)
 
@@ -242,7 +226,6 @@ z_test_BFF = function(z_stat,
     stop("The alternative must be either 'two.sided', 'less', or 'greater'")
   }
 
-  # check r
   if (is.null(r) && length(z_stat) == 1) r = 1
   if (!is.null(r) && r < 1) {
     stop("r must be greater than 1")
@@ -251,21 +234,9 @@ z_test_BFF = function(z_stat,
   # check that the correct lengths for everything is populated
   if (length(z_stat > 1)) {
     len_t = length(z_stat)
-
-    if (is.null(n)) {
-      if (length(n1) != len_t || length(n2) != len_t) {
-        stop("If providing a vector of t statistics, sample sizes must also be supplied as vectors of equal length")
-      }
-    } else {
-      if (length(n) != len_t) {
-        stop("If providing a vector of t statistics, sample size must also be supplied as a vector of equal length")
-      }
+    if (length(n) != len_t) {
+      stop("If providing a vector of t statistics, sample size must also be supplied as a vector of equal length")
     }
-  }
-
-  # check if one_sample is FALSE that n1 and n2 are provided
-  if ((!one_sample) && (is.null(n1) || is.null(n1))) {
-    stop("if one_sample is FALSE, both n1 and n2 must be provided")
   }
 
   used_alternative = alternative
@@ -284,6 +255,12 @@ z_test_BFF = function(z_stat,
   #####  same effect sizes for all tests
   omega_sequence = seq(0.01, 1, by = 0.01)
 
+  ##### Fisher's z transformation
+  if (omega_set) {
+    omega = 0.5*log((1+omega)/(1-omega))
+  } else {
+    omega_sequence = 0.5*log((1+omega_sequence)/(1-omega_sequence))
+  }
 
   ##### optimization logic
   if (maximize)
@@ -300,16 +277,13 @@ z_test_BFF = function(z_stat,
     count = 1
     for (i in omega_max)
     {
-      optimal_r[count] = stats::optimize(
-        maximize_z,
+      optimal_r[count] = optimize(
+        maximize_cor,
         c(1, 20),
         tol = 0.001,
         z_stat = z_stat,
         n = n,
-        one_sample = one_sample,
         one_sided = used_alternative == "greater",
-        n1 = n1,
-        n2 = n1,
         omega = i,
         maximum = TRUE
       )$maximum
@@ -320,29 +294,23 @@ z_test_BFF = function(z_stat,
     r = optimal_r
     results = vector()
     for (i in 1:length(optimal_r)) {
-      results[i] = maximize_z(
+      results[i] = maximize_cor(
         r = optimal_r[i],
         z_stat = z_stat,
         n = n,
-        one_sample = one_sample,
         one_sided =  used_alternative == "greater",
-        n1 = n1,
-        n2 = n2,
         omega = omega_max[i]
       )
     }
 
   } else {
-    results = backend_z(
+    results = backend_cor(
       z_stat = z_stat,
       n = n,
       r = r,
-      n1 = n1,
-      n2 = n2,
       omega = omega,
-      one_sample = one_sample,
       one_sided = used_alternative == "greater"
-      )
+    )
   }
 
   ###### return logic
@@ -361,16 +329,13 @@ z_test_BFF = function(z_stat,
     log_bf       = this_log_bf,
     omega        = this_omega,
     omega_set    = omega_set,
-    one_sample   = one_sample,
     alternative  = alternative,
-    test_type    = "z_test",
+    test_type    = "correlation_test",
     generic_test = FALSE,
     r            = r, # r that is maximized or set by user
     input = list(
       z_stat = z_stat,
-      df     = NULL, # no df in a z test
-      n1     = n1,
-      n2     = n2
+      df     = df
     )
   )
   if (!omega_set) {
