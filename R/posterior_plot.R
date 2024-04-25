@@ -67,14 +67,25 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
   }
 
   # create plot otherwise
-  out <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x)) +
-    ggplot2::geom_line(ggplot2::aes(y = posterior),
-                       color = color[1], linetype = linetype[1], linewidth = linewidth[1]) +
-    ggplot2::labs(x = if(x$generic_test) expression(tau^2) else .test_effect_size_name(x$test_type), y = "Density")
+  out <- ggplot2::ggplot(
+    data      = plot_data,
+    mapping   = ggplot2::aes(x = .data[["x"]])
+  ) + ggplot2::geom_line(
+    mapping   = ggplot2::aes(y = .data[["posterior"]]),
+    color     = color[1],
+    linetype  = linetype[1],
+    linewidth = linewidth[1]
+  ) + ggplot2::labs(
+    x = if(x$generic_test) expression(tau^2) else .test_effect_size_name(x$test_type),
+    y = "Density")
 
   if(prior){
-    out <- out + ggplot2::geom_line(ggplot2::aes(y = prior),
-                                    color = color[2], linetype = linetype[2], linewidth = linewidth[2])
+    out <- out + ggplot2::geom_line(
+      mapping   = ggplot2::aes(y = .data[["prior"]]),
+      color     = color[2],
+      linetype  = linetype[2],
+      linewidth = linewidth[2]
+    )
   }
 
   return(out)
