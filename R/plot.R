@@ -115,7 +115,6 @@ plot.BFF = function(x, plot = TRUE,  ...) {
   return(out)
 }
 
-# TODO: different effect size cut points need to be added for different tests/effect sizes
 .get_effect_size_cutpoints <- function(test_type){
   switch(test_type,
          "t_test"    = c(0.2, 0.5, 0.8), # https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2013.00863/full
