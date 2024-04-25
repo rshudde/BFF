@@ -14,21 +14,48 @@ test_that("two-sample: basic functionality", {
 
   # test S3 methods
   testthat::expect_equal(
-    capture_output_lines(fit, print = TRUE, width = 100),
+    testthat::capture_output_lines(fit, print = TRUE, width = 100),
     c(
     "\tBayesian non-local two-sample t test"  ,
     ""                                        ,
-<<<<<<< HEAD
     "log Bayes factor = 0.40"                 ,
-    "log tau2 = 0.50"                         ,
-=======
-    "log Bayes factor = 0.12"                 ,
     "omega = 0.50 (Cohen's d)"                ,
->>>>>>> master
     "alternative = two.sided"
     )
   )
   testthat::expect_error(plot(fit), "Bayes factor function can be plotted only if a specific omega/tau2 is not user set")
+
+  # TODO: fix posterior plots
+  # - I fixed the arguments not being properly passed
+  # - however, the posterior distribution does not integrate to 1
+  # (I remember that I raised this issue when I was in US, and Saptati was working on fixing it)
+
+  # this is how the functions should work
+  posterior_plot(fit)
+  posterior_plot(fit, prior = TRUE)
+
+  # this highlights the issue (run `devtools::load_all()` first)
+  tau2 <- get_two_sample_tau2(n1 = fit$input$n1, n2 = fit$input$n2, w = fit$omega, r = fit$r)
+
+  # does not integrate to 1
+  integrate(
+    f = function(x) .t_test.posterior(
+      t_stat = fit$input$t_stat, tau2 = tau2, r = fit$r, effect_size = x,
+      n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
+    lower = -Inf,
+    upper = Inf
+  )
+
+  # prior seems to work just fine (i.e., integrates to one)
+  integrate(
+    f = function(x) .t_test.prior(
+      tau2 = tau2, r = fit$r, effect_size = x,
+      n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
+    lower = -Inf,
+    upper = Inf
+  )
+  # <\TODO>
+
   # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior",           posterior_plot(fit))
   # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE))
 
@@ -48,16 +75,12 @@ test_that("two-sample: basic functionality", {
 
   # test S3 methods
   testthat::expect_equal(
-    capture_output_lines(fit, print = TRUE, width = 100),
+    testthat::capture_output_lines(fit, print = TRUE, width = 100),
     c(
       "\tBayesian non-local two-sample t test"  ,
       ""                                        ,
       "log Bayes factor = 0.50"                 ,
-<<<<<<< HEAD
-      "log tau2 = 0.50"                         ,
-=======
       "omega = 0.50 (Cohen's d)"                ,
->>>>>>> master
       "alternative = greater"
     )
   )
@@ -78,17 +101,12 @@ test_that("two-sample: basic functionality", {
 
   # test S3 methods
   testthat::expect_equal(
-    capture_output_lines(fit, print = TRUE, width = 100),
+    testthat::capture_output_lines(fit, print = TRUE, width = 100),
     c(
       "\tBayesian non-local two-sample t test"  ,
       ""                                        ,
-<<<<<<< HEAD
       "maximized log Bayes factor = 0.11"       ,
-      "maximized log tau2 = 0.09"               ,
-=======
-      "maximized log Bayes factor = 0.03"       ,
-      "maximized omega = 0.05 (Cohen's d)"      ,
->>>>>>> master
+      "maximized omega = 0.09 (Cohen's d)"      ,
       "alternative = two.sided"
     )
   )
@@ -117,7 +135,7 @@ test_that("two-sample: basic functionality", {
 
   # test S3 methods
   testthat::expect_equal(
-    capture_output_lines(summary(fit), print = TRUE, width = 100),
+    testthat::capture_output_lines(summary(fit), print = TRUE, width = 100),
     c(
       "\tBayesian non-local two-sample t test",
       ""                                        ,

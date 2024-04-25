@@ -1,12 +1,18 @@
 citHeader("To cite BFF in publications use:")
 
+note <- sprintf("R package version %s", meta$Version)
+
 bibentry(
   bibtype = "Manual",
   title   = "BFF: {An} {R} package to calculate Bayes Factor Functions",
-  author  =     c(person(given = "Rachael",
+  author  =  c(person(given = "Rachael",
            family = "Shudde",
            role = c("aut", "cre"),
            email = "rachael.shudde@gmail.com"),
+           person(given = "František",
+           family = "Bartoš",
+           role = c("aut"),
+           email = "f.bartos96@gmail.com"),
            person(given = "Saptati",
            family = "Datta",
            role = c("aut"),
@@ -23,7 +29,7 @@ bibentry(
            role = c("aut"),
            email = "vejohnson@exchange.tamu.edu")),
   year    = "2023",
-  note    = "R package version 3.0.1",
+  note    = note,
   url     = "https://github.com/rshudde/BFF"
 )
 

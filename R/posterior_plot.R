@@ -67,14 +67,25 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
   }
 
   # create plot otherwise
-  out <- ggplot2::ggplot(plot_data, ggplot2::aes(x = x)) +
-    ggplot2::geom_line(ggplot2::aes(y = posterior),
-                       color = color[1], linetype = linetype[1], linewidth = linewidth[1]) +
-    ggplot2::labs(x = if(x$generic_test) expression(tau^2) else .test_effect_size_name(x$test_type), y = "Density")
+  out <- ggplot2::ggplot(
+    data      = plot_data,
+    mapping   = ggplot2::aes(x = .data[["x"]])
+  ) + ggplot2::geom_line(
+    mapping   = ggplot2::aes(y = .data[["posterior"]]),
+    color     = color[1],
+    linetype  = linetype[1],
+    linewidth = linewidth[1]
+  ) + ggplot2::labs(
+    x = if(x$generic_test) expression(tau^2) else .test_effect_size_name(x$test_type),
+    y = "Density")
 
   if(prior){
-    out <- out + ggplot2::geom_line(ggplot2::aes(y = prior),
-                                    color = color[2], linetype = linetype[2], linewidth = linewidth[2])
+    out <- out + ggplot2::geom_line(
+      mapping   = ggplot2::aes(y = .data[["prior"]]),
+      color     = color[2],
+      linetype  = linetype[2],
+      linewidth = linewidth[2]
+    )
   }
 
   return(out)
@@ -87,7 +98,6 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
 
   # extract fitting information from the model object
   t_stat <- x$input$t_stat
-  df     <- x$input$df
   r      <- x$r
   if(x$one_sample){
     tau2 <- get_one_sample_tau2(n = x$input$n, w = x$omega, r = r)
@@ -100,8 +110,8 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
     stop("There is no non-local prior distribution that provides more evidence for the null hypothesis than the null prior distribution.")
 
   # compute prior and posterior
-  lik.prior     <- .t_test.prior(x_seq, tau2, r, one_sample = x$one_sample, one_sided = x$alternative != "two.sided")
-  lik.posterior <- .t_test.posterior(x_seq, tau2, r, t_stat, df, one_sample = x$one_sample, one_sided = x$alternative != "two.sided")
+  lik.prior     <- .t_test.prior(tau2 = tau2, r = r, effect_size = x_seq, n = x$input$n, n1 = x$input$n1, n2 = x$input$n2, one_sample = x$one_sample, one_sided = x$alternative != "two.sided")
+  lik.posterior <- .t_test.posterior(t_stat = t_stat, tau2 = tau2, r = r, effect_size = x_seq, n = x$input$n, n1 = x$input$n1, n2 = x$input$n2, one_sample = x$one_sample, one_sided = x$alternative != "two.sided")
 
   # create data.frame with values
   posterior = NULL

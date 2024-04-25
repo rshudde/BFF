@@ -158,7 +158,7 @@ maximize_cor = function(r,
                       one_sided = TRUE,
                       omega = NULL) {
 
-  logbf = dcauchy(r)/(1-pcauchy(1))
+  logbf = stats::dcauchy(r)/(1-stats::pcauchy(1))
   for (t in range(1, length(z_stat))) {
     logbf = logbf + backend_cor(r = r,
                               z_stat = z_stat[t],
@@ -246,6 +246,9 @@ cor_test_BFF = function(z_stat,
     used_alternative = "greater"
   }
 
+  # compute df
+  df <- n - 1
+
   # did user set
   omega_set = !is.null(omega)
 
@@ -277,7 +280,7 @@ cor_test_BFF = function(z_stat,
     count = 1
     for (i in omega_max)
     {
-      optimal_r[count] = optimize(
+      optimal_r[count] = stats::optimize(
         maximize_cor,
         c(1, 20),
         tol = 0.001,
