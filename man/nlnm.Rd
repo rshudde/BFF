@@ -5,7 +5,7 @@
 \alias{dnlnm}
 \title{Non-local Normal Moment Distribution}
 \usage{
-dnlnm(x, tau2, r, log = FALSE)
+dnlnm(x, tau2, r)
 }
 \arguments{
 \item{x}{vector of quantiles.}
