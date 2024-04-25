@@ -116,12 +116,12 @@ plot.BFF = function(x, plot = TRUE,  ...) {
 }
 
 .get_effect_size_cutpoints <- function(test_type){
-  switch(test_type,
-         "t_test"    = c(0.2, 0.5, 0.8), # https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2013.00863/full
+  switch(test_type, # for sources, see each test in https://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf if not listed below
+         "t_test"    = c(0.2, 0.5, 0.8),
          "z_test"    = c(0.2, 0.5, 0.8), # https://pressbooks.bccampus.ca/statspsych/chapter/chapter-11/
-         "chi2_test" = c(0.1, 0.3, 0.5), #  https://www.oxfordreference.com/display/10.1093/oi/authority.20110803095743480#:~:text=For%20the%20chi%2Dsquare%20test,effect%2C%20independent%20of%20sample%20size.
-         "regression_test" = c(0.1, 0.35, 0.65),
-         "f_test"    = c(0.1, 0.24, 0.4)) # https://www.ncss.com/wp-content/themes/ncss/pdf/Procedures/PASS/One-Way_Analysis_of_Variance_F-Tests_using_Effect_Size.pdf
+         "chi2_test" = c(0.1, 0.3, 0.5),
+         "regression_test" = c(0.02, 0.15, 0.35),
+         "f_test"    = c(0.1, 0.24, 0.4))
 }
 .get_effect_size_range    <-  function(test_type){
   switch(test_type,
