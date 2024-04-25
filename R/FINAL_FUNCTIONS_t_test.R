@@ -334,6 +334,7 @@ t_test_BFF = function(t_stat,
     }
   }
 
+  t_stat_original = t_stat
   used_alternative = alternative
   if (alternative == "less")
   {
@@ -436,7 +437,7 @@ t_test_BFF = function(t_stat,
     generic_test = FALSE,
     r            = r, # r that is maximized or set by user
     input = list(
-      t_stat = t_stat,
+      t_stat = t_stat_original,
       df     = df,
       n1     = n1,
       n2     = n2
