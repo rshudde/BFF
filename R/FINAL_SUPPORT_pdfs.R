@@ -24,12 +24,17 @@ NULL
 # p(nlnm) = for cdf
 
 #' @rdname nlnm
-dnlnm <- function(x, tau2, r){
+dnlnm <- function(x, tau2, r, log = FALSE){
 
   # TODO: add input checks
 
   lik <- ((abs(x))^(2*r) * exp((-x^2)/(2*tau2)))/(((2*tau2)^(r+0.5))*gamma(r+0.5))
+
+  if(log){
+    return(log(lik))
+  }else{
     return(lik)
+  }
 }
 
 
@@ -96,7 +101,7 @@ return(post_lik)
 ### helper functions for one-sided t-test (i.e., t_test1)
 # likelihood
 .dt.t_test1 <- function(t, df, n, effect_size){
-  ifelse(t>0, 2*dt(x = t, df = df, ncp = sqrt(n)*effect_size), 0)
+  ifelse(t>0, 2*stats::dt(x = t, df = df, ncp = sqrt(n)*effect_size), 0)
 }
 
 # for prior
@@ -130,7 +135,7 @@ return(post_lik)
 ### helper functions for two-sample t-test (i.e., t_test2)
 # likelihood
 .dt.t_test2 <- function(t, df, n1, n2, effect_size){
-  dt(x = t, df = df, ncp =  ((sqrt(2*n1*n2))/(sqrt(n1+n2))) * effect_size)
+  stats::dt(x = t, df = df, ncp =  ((sqrt(2*n1*n2))/(sqrt(n1+n2))) * effect_size)
 }
 
 # marginal under null
