@@ -14,17 +14,12 @@ test_that("two-sample: basic functionality", {
 
   # test S3 methods
   testthat::expect_equal(
-    capture_output_lines(fit, print = TRUE, width = 100),
+    testthat::capture_output_lines(fit, print = TRUE, width = 100),
     c(
     "\tBayesian non-local two-sample t test"  ,
     ""                                        ,
-<<<<<<< HEAD
-    "log Bayes factor = 0.40"                 ,
-    "log tau2 = 0.50"                         ,
-=======
     "log Bayes factor = 0.12"                 ,
     "omega = 0.50 (Cohen's d)"                ,
->>>>>>> master
     "alternative = two.sided"
     )
   )
@@ -48,16 +43,12 @@ test_that("two-sample: basic functionality", {
 
   # test S3 methods
   testthat::expect_equal(
-    capture_output_lines(fit, print = TRUE, width = 100),
+    testthat::capture_output_lines(fit, print = TRUE, width = 100),
     c(
       "\tBayesian non-local two-sample t test"  ,
       ""                                        ,
       "log Bayes factor = 0.50"                 ,
-<<<<<<< HEAD
-      "log tau2 = 0.50"                         ,
-=======
       "omega = 0.50 (Cohen's d)"                ,
->>>>>>> master
       "alternative = greater"
     )
   )
@@ -78,17 +69,12 @@ test_that("two-sample: basic functionality", {
 
   # test S3 methods
   testthat::expect_equal(
-    capture_output_lines(fit, print = TRUE, width = 100),
+    testthat::capture_output_lines(fit, print = TRUE, width = 100),
     c(
       "\tBayesian non-local two-sample t test"  ,
       ""                                        ,
-<<<<<<< HEAD
       "maximized log Bayes factor = 0.11"       ,
-      "maximized log tau2 = 0.09"               ,
-=======
-      "maximized log Bayes factor = 0.03"       ,
-      "maximized omega = 0.05 (Cohen's d)"      ,
->>>>>>> master
+      "maximized omega = 0.09 (Cohen's d)"      ,
       "alternative = two.sided"
     )
   )
@@ -117,7 +103,7 @@ test_that("two-sample: basic functionality", {
 
   # test S3 methods
   testthat::expect_equal(
-    capture_output_lines(summary(fit), print = TRUE, width = 100),
+    testthat::capture_output_lines(summary(fit), print = TRUE, width = 100),
     c(
       "\tBayesian non-local two-sample t test",
       ""                                        ,
