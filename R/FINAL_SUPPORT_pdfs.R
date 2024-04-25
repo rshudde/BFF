@@ -63,25 +63,31 @@ dnlnm <- function(x, tau2, r){
   return(lik)
 }
 
-.t_test.posterior <- function(t_stat, tau2, r, df, effect_size, n = NULL, n1 = NULL, n2 = NULL, one_sample = FALSE, one_sided = FALSE){
+.t_test.posterior <- function(t_stat, tau2, r, effect_size, n = NULL, n1 = NULL, n2 = NULL, one_sample = FALSE, one_sided = FALSE){
 
   if(one_sided){
-  lik_prior = .t_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n = n, one_sample = one_sample, one_sided = one_sided)
-  m0 = .m0.t_test1(t = t_stat, df = df)
-  I1 = .I1.t_test1(tau2 = tau2, r = r, df = df, t = t_stat)
-  I2 = .I2.t_test1(tau2 = tau2, r = r, df = df, t = t_stat)
-  m1 = 2*m0*(I1 + I2)
-  post_lik = ((.dt.t_test1(t = t_stat, df = df, n = n, effect_size = effect_size) * lik_prior)/m1)
+    # TODO: please check whether the code for one-sample and two sample identical, if not, dispatch
+    df <- n - 1
+    lik_prior = .t_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n = n, n1 = n1, n2 = n2, one_sample = one_sample, one_sided = one_sided)
+    m0 = .m0.t_test1(t = t_stat, df = df)
+    I1 = .I1.t_test1(tau2 = tau2, r = r, df = df, t = t_stat)
+    I2 = .I2.t_test1(tau2 = tau2, r = r, df = df, t = t_stat)
+    m1 = 2*m0*(I1 + I2)
+    post_lik = ((.dt.t_test1(t = t_stat, df = df, n = n, effect_size = effect_size) * lik_prior)/m1)
   }else{
     if(one_sample){
+      # one-sample two-sided t-test
+      # TODO: needs to be implemented
       stop("TODO")
     }else{
-      lik_prior = .t_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n1 = n1, n2 = n2, one_sample = one_sample, one_sided = one_sided)
-      m0 = .m0.t_test2(t = t_stat, df = df)
-      I1 = .I1.t_test2(tau2 = tau2, r = r, df = df, t = t_stat)
-      I2 = .I2.t_test2(tau2 = tau2, r = r, df = df, t = t_stat)
-      m1 = m0*(I1 + I2)
-      post_lik = ((.dt.t_test2(t = t_stat, df = df, n1 = n1, n2 = n2, effect_size = effect_size) * lik_prior)/m1)
+      # two-sample two-sided t-test
+      df <- n1 + n2 - 2
+      lik_prior <- .t_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n1 = n1, n2 = n2, one_sample = one_sample, one_sided = one_sided)
+      m0 <- .m0.t_test2(t = t_stat, df = df)
+      I1 <- .I1.t_test2(tau2 = tau2, r = r, df = df, t = t_stat)
+      I2 <- .I2.t_test2(tau2 = tau2, r = r, df = df, t = t_stat)
+      m1 <- m0*(I1 + I2)
+      post_lik <- ((.dt.t_test2(t = t_stat, df = df, n1 = n1, n2 = n2, effect_size = effect_size) * lik_prior)/m1)
     }
 }
 return(post_lik)
@@ -135,7 +141,7 @@ return(post_lik)
 
 # for prior
 .dnlnm_t_test2 <- function(n1, n2, effect_size, tau2, r){
-  density = dens_function((((sqrt(2*n1*n2))/(sqrt(n1+n2))) * effect_size), tau2, r)
+  density = dnlnm((((sqrt(2*n1*n2))/(sqrt(n1+n2))) * effect_size), tau2, r)
   return(density)
 }
 
