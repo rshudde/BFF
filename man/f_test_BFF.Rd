@@ -17,7 +17,7 @@ f_test_BFF(f_stat, n, df1, df2, r = NULL, omega = NULL)
 
 \item{r}{r value}
 
-\item{omega}{omega values (can be a single entry or a vector of values)}
+\item{omega}{standardized effect size. (can be a single entry or a vector of values)}
 }
 \value{
 Returns an S3 object with Bayes Factor function results.

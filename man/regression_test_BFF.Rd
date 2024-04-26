@@ -24,7 +24,7 @@ regression_test_BFF(
 
 \item{r}{r value}
 
-\item{omega}{omega values (can be a single entry or a vector of values)}
+\item{omega}{stnadardized effect size. For the regression test, this is also known as eta-squared. (can be a single entry or a vector of values)}
 }
 \value{
 Returns an S3 object with Bayes Factor function results.
