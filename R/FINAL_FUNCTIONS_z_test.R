@@ -201,7 +201,7 @@ maximize_z = function(r,
 #' @param n1 sample size of group one for two sample test. Must be provided if one_sample = FALSE
 #' @param n2 sample size of group two for two sample test. Must be provided if one_sample = FALSE
 #' @param r r value
-#' @param omega omega values (can be a single entry or a vector of values)
+#' @param omega standardized effect size. For the z-test, this is often called Cohen's d (can be a single entry or a vector of values)
 #'
 #' @return Returns an S3 object with Bayes Factor function results.
 #'  \tabular{ll}{
