@@ -248,7 +248,7 @@ maximize_t = function(r,
 #' @param n1 sample size of group one for two sample test. Must be provided if one_sample = FALSE
 #' @param n2 sample size of group two for two sample test. Must be provided if one_sample = FALSE
 #' @param r r value
-#' @param omega omega values (can be a single entry or a vector of values)
+#' @param omega standardized effect size. For the t-test, this is often called Cohen's d (can be a single entry or a vector of values)
 #'
 #' @return Returns an S3 object with Bayes Factor function results.
 #'  \tabular{ll}{
@@ -267,8 +267,6 @@ maximize_t = function(r,
 #'    \code{omega_set} \tab was an omega value provided?\cr
 #'    \tab \cr
 #'    \code{r} \tab r value (default is 1 if not provided by user) \cr
-#'    \tab \cr
-#'    \code{alternative} \tab user provided alternative \cr
 #'    \tab \cr
 #'    \code{test_type} \tab type of BFF test\cr
 #'    \tab \cr
