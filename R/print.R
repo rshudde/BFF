@@ -29,7 +29,8 @@ print.BFF <- function(x, ...) {
   }else{
     cat(gettextf("%1$somega = %2$.2f (%3$s)\n", if(!x$omega_set) "maximized " else "", x$omega, .test_effect_size_name(x$test_type)))
   }
-  cat(paste0("alternative = ", x$alternative))
+
+  if(!is.null(x$alternative)) cat(paste0("alternative = ", x$alternative))
 }
 
 .test_type_name <- function(test_type, one_sample) {
@@ -48,8 +49,8 @@ print.BFF <- function(x, ...) {
   switch(test_type,
          "t_test"           = "Cohen's d",
          "z_test"           = "Cohen's d",
-         "chi2_test"        = "???",
-         "f_test"           = "???",
-         "regression_test"  = "partial correlation coefficient",
+         "chi2_test"        = "Standardized effect size",
+         "f_test"           = "Standardized effect size",
+         "regression_test"  = "Partial correlation coefficient",
          "correlation_test" = "correlation coefficient")
 }
