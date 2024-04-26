@@ -30,7 +30,7 @@ z_test_BFF(
 
 \item{r}{r value}
 
-\item{omega}{omega values (can be a single entry or a vector of values)}
+\item{omega}{standardized effect size. For the z-test, this is often called Cohen's d (can be a single entry or a vector of values)}
 }
 \value{
 Returns an S3 object with Bayes Factor function results.

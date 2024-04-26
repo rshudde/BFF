@@ -30,7 +30,7 @@ t_test_BFF(
 
 \item{r}{r value}
 
-\item{omega}{omega values (can be a single entry or a vector of values)}
+\item{omega}{standardized effect size. For the t-test, this is often called Cohen's d (can be a single entry or a vector of values)}
 }
 \value{
 Returns an S3 object with Bayes Factor function results.
@@ -50,8 +50,6 @@ Returns an S3 object with Bayes Factor function results.
    \code{omega_set} \tab was an omega value provided?\cr
    \tab \cr
    \code{r} \tab r value (default is 1 if not provided by user) \cr
-   \tab \cr
-   \code{alternative} \tab user provided alternative \cr
    \tab \cr
    \code{test_type} \tab type of BFF test\cr
    \tab \cr

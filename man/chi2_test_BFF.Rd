@@ -17,7 +17,7 @@ chi2_test_BFF(chi2_stat, n, df, LRT = FALSE, r = NULL, omega = NULL)
 
 \item{r}{r value}
 
-\item{omega}{omega values (can be a single entry or a vector of values)}
+\item{omega}{standardized effect size. (can be a single entry or a vector of values)}
 }
 \value{
 Returns an S3 object with Bayes Factor function results.
