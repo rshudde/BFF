@@ -203,7 +203,7 @@ maximize_f = function(r,
 #' @param df1 sample size of group one for two sample test.
 #' @param df2 sample size of group two for two sample test
 #' @param r r value
-#' @param omega omega values (can be a single entry or a vector of values)
+#' @param omega standardized effect size. (can be a single entry or a vector of values)
 #'
 #' @return Returns an S3 object with Bayes Factor function results.
 #'  \tabular{ll}{

@@ -230,7 +230,7 @@ maximize_t_reg = function(r,
 #'
 #' @param t_stat T statistic
 #' @param alternative is the alternative a one.sided or two.sided test? default is two.sided
-#' @param omega omega values (can be a single entry or a vector of values)
+#' @param omega stnadardized effect size. For the regression test, this is also known as eta-squared. (can be a single entry or a vector of values)
 #' @param n sample size (if one sample test)
 #' @param k number of predictors
 #' @param r r value

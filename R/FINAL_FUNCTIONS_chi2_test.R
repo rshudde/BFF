@@ -181,7 +181,7 @@ maximize_chi2 = function(r,
 #' @param df degrees of freedom
 #' @param LRT should LRT be performed? Default is FALSE
 #' @param r r value
-#' @param omega omega values (can be a single entry or a vector of values)
+#' @param omega standardized effect size. (can be a single entry or a vector of values)
 #'
 #' @return Returns an S3 object with Bayes Factor function results.
 #'  \tabular{ll}{
