@@ -24,20 +24,29 @@ regression_test_BFF(
 
 \item{r}{r value}
 
-\item{omega}{omega values (can be a single entry or a vector of values)}
+\item{omega}{stnadardized effect size. For the regression test, this is also known as eta-squared. (can be a single entry or a vector of values)}
 }
 \value{
-Returns Bayes factor function results
+Returns an S3 object with Bayes Factor function results.
  \tabular{ll}{
-   \code{BFF} \tab The log of the Bayes Factor Function values \cr
+   \code{BFF} \tab the object containing the log_bf (log bayes factor values) and corresponding omega values \cr
    \tab \cr
-   \code{effect_size} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
+   \code{input} \tab the object containing the input values \cr
    \tab \cr
-   \code{BFF_max_RMSE} \tab Maximum BFF value \cr
+   \code{log_bf} \tab maximized bayes factor\cr
    \tab \cr
-   \code{max_RMSE} \tab Effect size that maximizes BFF\cr
+   \code{omega} \tab corresponding omega value for maximized bayes factor\cr
    \tab \cr
-   \code{omega} \tab omega values tested, can be a single number or vector\cr
+   \code{alternative} \tab alternative hypothesis used in calculations\cr
+   \tab \cr
+   \code{omega_set} \tab was an omega value provided?\cr
+   \tab \cr
+   \code{r} \tab r value (default is 1 if not provided by user) \cr
+   \tab \cr
+   \code{test_type} \tab type of BFF test\cr
+   \tab \cr
+   \code{generic_test} \tab FALSE \cr
+   \tab \cr
 }
 }
 \description{

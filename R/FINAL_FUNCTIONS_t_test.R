@@ -248,21 +248,29 @@ maximize_t = function(r,
 #' @param n1 sample size of group one for two sample test. Must be provided if one_sample = FALSE
 #' @param n2 sample size of group two for two sample test. Must be provided if one_sample = FALSE
 #' @param r r value
-#' @param omega omega values (can be a single entry or a vector of values)
+#' @param omega standardized effect size. For the t-test, this is often called Cohen's d (can be a single entry or a vector of values)
 #'
-#' @return Returns Bayes factor function results
+#' @return Returns an S3 object with Bayes Factor function results.
 #'  \tabular{ll}{
-#'    \code{BFF} \tab The object containing the log_bf (log bayes factor values) and corresponding omega values \cr
+#'    \code{BFF} \tab the object containing the log_bf (log bayes factor values) and corresponding omega values \cr
+#'    \tab \cr
+#'    \code{input} \tab the object containing the input values \cr
 #'    \tab \cr
 #'    \code{log_bf} \tab maximized bayes factor\cr
 #'    \tab \cr
-#'    \code{omega_set} \tab omega value corresponding to maximized bayes factor\cr
+#'    \code{omega} \tab corresponding omega value for maximized bayes factor\cr
+#'    \tab \cr
+#'    \code{one_sample} \tab is this a one sample test? \cr
+#'    \tab \cr
+#'    \code{alternative} \tab alternative hypothesis used in calculations \cr
 #'    \tab \cr
 #'    \code{omega_set} \tab was an omega value provided?\cr
 #'    \tab \cr
-#'    \code{alternative} \tab user provided alternative \cr
+#'    \code{r} \tab r value (default is 1 if not provided by user) \cr
 #'    \tab \cr
-#'    \code{f} \tab final t value if maximized, or input r value if provided \cr
+#'    \code{test_type} \tab type of BFF test\cr
+#'    \tab \cr
+#'    \code{generic_test} \tab FALSE \cr
 #'    \tab \cr
 #' }
 #' @export
@@ -334,6 +342,7 @@ t_test_BFF = function(t_stat,
     }
   }
 
+  t_stat_original = t_stat
   used_alternative = alternative
   if (alternative == "less")
   {
@@ -436,7 +445,7 @@ t_test_BFF = function(t_stat,
     generic_test = FALSE,
     r            = r, # r that is maximized or set by user
     input = list(
-      t_stat = t_stat,
+      t_stat = t_stat_original,
       df     = df,
       n1     = n1,
       n2     = n2

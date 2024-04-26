@@ -115,14 +115,13 @@ plot.BFF = function(x, plot = TRUE,  ...) {
   return(out)
 }
 
-# TODO: different effect size cut points need to be added for different tests/effect sizes
 .get_effect_size_cutpoints <- function(test_type){
-  switch(test_type,
-         "t_test"    = c(0.1, 0.35, 0.65),
-         "z_test"    = c(0.1, 0.35, 0.65),
-         "chi2_test" = c(0.1, 0.35, 0.65),
-         "regression_test" = c(0.1, 0.35, 0.65),
-         "f_test"    = c(0.1, 0.35, 0.65))
+  switch(test_type, # for sources, see each test in https://www.utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf if not listed below
+         "t_test"    = c(0.2, 0.5, 0.8),
+         "z_test"    = c(0.2, 0.5, 0.8), # https://pressbooks.bccampus.ca/statspsych/chapter/chapter-11/
+         "chi2_test" = c(0.1, 0.3, 0.5),
+         "regression_test" = c(0.02, 0.15, 0.35),
+         "f_test"    = c(0.1, 0.24, 0.4))
 }
 .get_effect_size_range    <-  function(test_type){
   switch(test_type,
