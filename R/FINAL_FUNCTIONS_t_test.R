@@ -132,103 +132,71 @@ log_T_frac_onesided = function(tau2, t, v, r)
 }
 
 ####################### backend implementation
-backend_t = function(r,
-                     t_stat,
-                     df,
-                     n = NULL,
-                     one_sample = TRUE,
-                     one_sided = TRUE,
-                     n1 = NULL,
-                     n2 = NULL,
-                     omega = NULL,
-                     tau2 = NULL)
+backend_t <- function(
+    r,
+    input,
+    omega = NULL){
 
-{
-  # same effect sizes for all tests
-  if (!is.null(omega))
-  {
-    effect_size = omega
-  } else {
-    effect_size = seq(0.01, 1, by = 0.01)
-  }
+  # function can deal with a vector of t-statistics and vector of omegas
+  # however, only one r is supported at a time
+  if(length(r) != 1)
+    stop("internal error: 'r' must be of length 1.")
 
-  # user_supplied_omega = TRUE
-  # if (is.null(omega))
-  #   user_supplied_omega = FALSE
+  # compute tau2 from omega
+  # if multiple omegas and t-stats are supplied, each element of tau2
+  # corresponds a vector of tau2 for the corresponding t-statistics
+  # i.e., tau2[omega][t-stat]
+  tau2 <- lapply(omega, function(x){
+    if(input$one_sample){
+      tau2 <- get_one_sample_tau2(n = input$n, w = x, r = r)
+    }else{
+      tau2 <- get_two_sample_tau2(n1 = input$n1, n2 = input$n2, w = x, r = r)
+    }
+  })
 
-  log_vals = rep(0, length(effect_size))
-
-  if (is.null(tau2))
-  {
-    if (one_sample)
-    {
-      tau2 = get_one_sample_tau2(n = n, w = effect_size, r = r)
-    } else if (!one_sample)
-      tau2 = get_two_sample_tau2(n1 = n1,
-                                 n2 = n2,
-                                 w = effect_size,
-                                 r = r)
-  }
-
-
-  if (one_sided) {
-    log_vals = unlist(lapply(
-      tau2,
-      log_T_frac_onesided,
-      r = r,
-      v = df,
-      t = t_stat
-    ))
-  } else {
-    log_vals = unlist(lapply(
-      tau2,
-      log_T_frac,
-      r = r,
-      v = df,
-      t = t_stat
-    ))
-  }
-
-  # stuff to return
-  BFF = log_vals
+  # compute log_BF
+  log_BF <- sapply(tau2, function(x){
+    sum(sapply(seq_along(input$t_stat), function(i){
+      if(input$alternative == "greater"){
+        log_T_frac_onesided(
+          tau2 = x[i],
+          r    = r,
+          v    = input$df[i],
+          t    = input$t_stat[i]
+        )
+      }else{
+        log_T_frac(
+          tau2 = x[i],
+          r    = r,
+          v    = input$df[i],
+          t    = input$t_stat[i]
+        )
+      }
+    }))
+  })
 
   # check the results are finite
-  if (!all(is.finite(BFF)))
-  {
+  if (!all(is.finite(log_BF)))
     warning(
       "Values entered produced non-finite numbers for some effect sizes.
       The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow.
       Only effect sizes with non-NaN values are kept in the plots.
       Please contact the maintainer for more information."
     )
-  }
 
-  return(BFF)
+  return(log_BF)
 }
 
-maximize_t = function(r,
-                     t_stat,
-                     df,
-                     n = NULL,
-                     one_sample = TRUE,
-                     one_sided = TRUE,
-                     n1 = NULL,
-                     n2 = NULL,
-                     omega = NULL) {
+maximize_t <- function(
+    r,
+    input,
+    omega = NULL){
 
-  logbf = stats::dcauchy(r)/(1-stats::pcauchy(1))
-  for (t in range(1, length(t_stat))) {
-    logbf = logbf + backend_t(r = r,
-                              t_stat = t_stat[t],
-                              df = df[t],
-                              n = n[t],
-                              one_sample = one_sample,
-                              one_sided = one_sided,
-                              n1 = n1[t],
-                              n2 = n2[t],
-                              omega = omega, # technically not used
-                              tau2 = omega^2*n[t])
-  }
+  logbf <- stats::dcauchy(r)/(1-stats::pcauchy(1))
+  logbf <- logbf + sum(backend_t(
+    r         = r,
+    input     = input,
+    omega     = omega))
 
   return(logbf)
 }
@@ -257,143 +225,60 @@ maximize_t = function(r,
 #' tBFF = t_test_BFF(t_stat = 2.5, n = 50, one_sample = TRUE)
 #' tBFF
 #' plot(tBFF)
-t_test_BFF = function(t_stat,
-                      n = NULL,
-                      one_sample = FALSE,
-                      alternative = "two.sided",
-                      n1 = NULL,
-                      n2 = NULL,
-                      r = NULL,
-                      omega = NULL)
-
-{
-
-
-  ### input checks
-  .check_alternative(alternative)
-  r <- .check_and_set_r(r, t_stat)
-
-  # check that the correct lengths for everything is populated
-  if (length(t_stat > 1)) {
-    len_t = length(t_stat)
-
-    if (is.null(n)) {
-      if (length(n1) != len_t || length(n2) != len_t) {
-        stop("If providing a vector of t statistics, sample sizes must also be supplied as vectors of equal length")
-      }
-    } else {
-      if (length(n) != len_t) {
-        stop("If providing a vector of t statistics, sample size must also be supplied as a vector of equal length")
-      }
-    }
-  }
-
-  # check if one_sample is FALSE that n1 and n2 are provided
-  if ((!one_sample) && (is.null(n1) || is.null(n1))) {
-    stop("if one_sample is FALSE, both n1 and n2 must be provided")
-  }
-
-  df = vector(length = length(t_stat))
-  # set and check the degrees of freedom
-  if (!is.null(n) && one_sample)
-  {
-    df = n-1
-  } else if (!is.null(n1) && !is.null(n2)) {
-    df = n1 + n2 - 2
-    one_sample = FALSE
-  } else if (!is.null(n) && !one_sample) {
-    df = n - 2
-    n1 = n/2
-    n2 = n/2
-  }
-
-  .check_df(df, "(Total sample size must be greater than 3 for two-sample test or 2 for one-sample test.)")
+t_test_BFF <- function(
+    t_stat,
+    n = NULL,
+    n1 = NULL,
+    n2 = NULL,
+    one_sample = FALSE,
+    alternative = "two.sided",
+    r = NULL,
+    omega = NULL,
+    omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01)){
 
 
+  ### input checks and processing
+  r     <- .check_and_set_r(r, t_stat)
+  input <- .process_input.t.test(t_stat, n, n1, n2, one_sample, alternative)
 
-  t_stat_original = t_stat
-  used_alternative = alternative
-  if (alternative == "less")
-  {
-    t_stat = -t_stat
-    used_alternative = "greater"
-  }
+  ### computation
+  # if only one t-statistic is present or if r is set, we can directly compute the BFF
+  # otherwise, we need to find the r that maximizes the BFF
+  if(length(input$t_stat) == 1 || !is.null(r)){
 
-  # did user set
-  omega_set = !is.null(omega)
-
-  # should we maximize? If the t statistic is a vector and r is not provided, yes
-  maximize = length(t_stat) > 1 && is.null(r)
-
-  #####  same effect sizes for all tests
-  omega_sequence = seq(0.01, 1, by = 0.01)
-
-  ##### optimization logic
-  if (maximize)
-  {
-    # set the "omega max" we are searching over. We are calling this omega
-    # max because it is important to keep original value of omega for later
-    if (is.null(omega)) {
-
-      omega_max = omega_sequence
-    } else {
-      omega_max = omega
-    }
-    optimal_r = vector(length = length(omega_max))
-    count = 1
-    for (i in omega_max)
-    {
-      optimal_r[count] = stats::optimize(
-        maximize_t,
-        c(1, 20),
-        tol = 0.001,
-        t_stat = t_stat,
-        df = df,
-        n = n,
-        one_sample = one_sample,
-        one_sided = used_alternative == "greater",
-        n1 = n1,
-        n2 = n1,
-        omega = i,
-        maximum = TRUE
-      )$maximum
-      count = count + 1
-    }
-    maximized_values = as.data.frame(cbind(omega_max, optimal_r))
-
-    r = optimal_r
-    results = vector()
-    for (i in 1:length(optimal_r)) {
-      results[i] = maximize_t(
-        r = optimal_r[i],
-        t_stat = t_stat,
-        df = df,
-        n = n,
-        one_sample = one_sample,
-        one_sided =  used_alternative == "greater",
-        n1 = n1,
-        n2 = n2,
-        omega = omega_max[i]
-      )
-    }
-
-  } else {
-    results = backend_t(
-      t_stat = t_stat,
-      n = n,
-      df = df,
-      r = r,
-      n1 = n1,
-      n2 = n2,
-      omega = omega,
-      one_sample = one_sample,
-      one_sided = used_alternative == "greater"
+    results   <- backend_t(
+      r         = r,
+      input     = input,
+      omega     = if(!is.null(omega)) omega else omega_sequence
     )
-  }
 
+  }else{
+
+    # compute optimal r for each omega
+    optimal_r <- sapply(if(!is.null(omega)) omega else omega_sequence, function(x){
+      stats::optimize(
+        maximize_t,
+        interval  = c(1, 20),
+        tol       = 0.001,
+        input     = input,
+        omega     = x,
+        maximum   = TRUE
+      )$maximum
+    })
+
+    # use each r to compute BFF
+    results <- sapply(seq_along(optimal_r), function(i){
+      backend_t(
+        r         = optimal_r[i],
+        input     = input,
+        omega     = if(!is.null(omega)) omega else omega_sequence[i]
+      )
+    })
+
+  }
 
   ###### return logic
-  if (!omega_set) {
+  if(is.null(omega)){
     log_bf         <- c(0, results)
     omega_sequence <- c(0, omega_sequence)
     idx_max        <- which.max(log_bf)
@@ -407,20 +292,13 @@ t_test_BFF = function(t_stat,
   output = list(
     log_bf       = this_log_bf,
     omega        = this_omega,
-    omega_set    = omega_set,
-    alternative  = alternative,
+    omega_set    = !is.null(omega),
     test_type    = "t_test",
     generic_test = FALSE,
     r            = r, # r that is maximized or set by user
-    input = list(
-      t_stat      = t_stat_original,
-      df          = df,
-      n1          = n1,
-      n2          = n2,
-      one_sample  = one_sample
-    )
+    input        = input
   )
-  if (!omega_set) {
+  if(is.null(omega)){
     output$BFF = list(log_bf = log_bf, omega = omega_sequence)
   }
 
@@ -429,6 +307,50 @@ t_test_BFF = function(t_stat,
 }
 
 
+.process_input.t.test <- function(t_stat, n, n1, n2, one_sample, alternative){
 
+  .check_alternative(alternative)
 
+  # one vs. two-sample test processing
+  if(one_sample){
 
+    if(is.null(t_stat) || is.null(n))
+      stop("Both t_stat and and n must be provided for one-sample (`one_sample = TRUE`) test.")
+    if(length(t_stat) != length(n))
+      stop("The input length of t_stat and n must be the same.")
+
+    df <- n - 1
+    .check_df(df, "(Total sample size must be greater than 2.)")
+  }else{
+
+    if(is.null(t_stat) || is.null(n1) || is.null(n2))
+      stop("Both t_stat, n1, and n2 must be provided for two-sample (`one_sample = FALSE`) test.")
+    if(length(t_stat) != length(n1) || length(t_stat) != length(n2))
+      stop("The input length of t_stat, n1, and n2 must be the same.")
+
+    df <- n1 + n2 - 2
+    .check_df(df, "(Total sample size must be greater than 3.)")
+  }
+
+  # computation is implemented only for alternative = "two-sided" or "greater"
+  # if lower, reverse the sign of t_stat, set alternative to "greater",
+  # and remember that the original alternative was "less"
+  if (alternative == "less"){
+    t_stat      <- -t_stat
+    alternative <- "greater"
+    alternative.original <- "less"
+  }else{
+    alternative.original <- alternative
+  }
+
+  return(list(
+    t_stat     = t_stat,
+    n          = n,
+    n1         = n1,
+    n2         = n2,
+    df         = df,
+    one_sample = one_sample,
+    alternative          = alternative,
+    alternative.original = alternative.original
+  ))
+}

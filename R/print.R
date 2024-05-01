@@ -30,7 +30,7 @@ print.BFF <- function(x, ...) {
     cat(gettextf("%1$somega = %2$.2f (%3$s)\n", if(!x$omega_set) "maximized " else "", x$omega, .test_effect_size_name(x$test_type)))
   }
 
-  if(!is.null(x$alternative)) cat(paste0("alternative = ", x$alternative))
+  if(!is.null(x$input$alternative)) cat(paste0("alternative = ", x$input$alternative))
 }
 
 .test_type_name <- function(test_type, one_sample) {
