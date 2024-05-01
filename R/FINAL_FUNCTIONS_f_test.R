@@ -240,6 +240,10 @@ f_test_BFF = function(f_stat,
     }
   }
 
+  # TODO: should all n, df1, and df2 be specified? Should we rather have (n + k) or (df1 + df2) and check that?
+  #.check_df(df1, "(numerator)")
+  #.check_df(df2, "(denomiantor)")
+
   # did user set
   omega_set = !is.null(omega)
 

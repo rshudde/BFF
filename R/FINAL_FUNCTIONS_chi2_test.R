@@ -200,10 +200,8 @@ chi2_test_BFF = function(chi2_stat,
 
 {
 
-  if (is.null(r) && length(chi2_stat) == 1) r = 1
-  if (!is.null(r) && r < 1) {
-    stop("r must be greater than 1")
-  }
+  ### input checks
+  r <- .check_and_set_r(r, chi2_stat)
 
   # check that the correct lengths for everything is populated
   if (length(chi2_stat > 1)) {
@@ -215,12 +213,8 @@ chi2_test_BFF = function(chi2_stat,
     }
   }
 
-  for (k in df){
-    if (k <= 1) {
-      stop("Degrees of freedom must be greater than 1. If using a two sample test, n must be greater
-         than 3, if using a one sample test, n must be greater than 2")
-    }
-  }
+  .check_df(df1)
+  .check_n(n, n_min = df1)
 
   # did user set
   omega_set = !is.null(omega)

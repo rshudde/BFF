@@ -231,6 +231,7 @@ cor_test_BFF = function(z_stat,
 
   # compute df
   df <- n - 1
+  .check_df(df, "(Sample size must be one larger than 2.)")
 
   # did user set
   omega_set = !is.null(omega)

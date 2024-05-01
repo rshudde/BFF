@@ -307,12 +307,9 @@ t_test_BFF = function(t_stat,
     n2 = n/2
   }
 
-  for (k in df){
-    if (k <= 1) {
-      stop("Degrees of freedom must be greater than 1. If using a two sample test, n must be greater
-         than 3, if using a one sample test, n must be greater than 2")
-    }
-  }
+  .check_df(df, "(Total sample size must be greater than 3 for two-sample test or 2 for one-sample test.)")
+
+
 
   t_stat_original = t_stat
   used_alternative = alternative
@@ -430,6 +427,7 @@ t_test_BFF = function(t_stat,
   class(output) = "BFF"
   return(output)
 }
+
 
 
 

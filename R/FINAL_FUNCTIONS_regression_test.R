@@ -267,14 +267,9 @@ regression_test_BFF = function(t_stat,
     }
   }
 
-  df = n - k - 1
-
-  for (i in df){
-    if (i <= 1) {
-      stop("Degrees of freedom must be greater than 1. If using a two sample test, n must be greater
-         than 3, if using a one sample test, n must be greater than 2")
-    }
-  }
+  # compute sample size
+  df <- n - k - 1
+  .check_df(df, "(Sample size must be one larger than the number of predictors.)")
 
   used_alternative = alternative
   if (alternative == "less")
