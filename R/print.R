@@ -21,7 +21,7 @@ summary.BFF <- function(object, ...){
 #' @seealso [z_test_BFF()], [t_test_BFF()], [chi2_test_BFF()], [f_test_BFF()]
 #' @export
 print.BFF <- function(x, ...) {
-  cat(paste0("\t", .test_type_name(x$test_type, x$one_sample)))
+  cat(paste0("\t", .test_type_name(x$test_type, x$input$one_sample)))
   cat("\n\n")
   cat(gettextf("%1$slog Bayes factor = %2$.2f\n", if(!x$omega_set) "maximized " else "", x$log_bf))
   if(x$generic_test){

@@ -15,8 +15,6 @@ The BFF object contains the following fields:
  \tab \cr
  \code{omega} \tab corresponding omega value for maximized Bayes factor\cr
  \tab \cr
- \code{one_sample} \tab is this a one sample test? \cr
- \tab \cr
  \code{alternative} \tab alternative hypothesis used in calculations \cr
  \tab \cr
  \code{omega_set} \tab was an omega value provided?\cr

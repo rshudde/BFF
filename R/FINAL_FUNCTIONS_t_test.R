@@ -417,16 +417,16 @@ t_test_BFF = function(t_stat,
     log_bf       = this_log_bf,
     omega        = this_omega,
     omega_set    = omega_set,
-    one_sample   = one_sample,
     alternative  = alternative,
     test_type    = "t_test",
     generic_test = FALSE,
     r            = r, # r that is maximized or set by user
     input = list(
-      t_stat = t_stat_original,
-      df     = df,
-      n1     = n1,
-      n2     = n2
+      t_stat      = t_stat_original,
+      df          = df,
+      n1          = n1,
+      n2          = n2,
+      one_sample  = one_sample
     )
   )
   if (!omega_set) {
