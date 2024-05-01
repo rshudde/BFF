@@ -8,6 +8,14 @@
 \description{
 Bayes factors represent the ratio of probabilities assigned to data by competing scientific hypotheses. However, one drawback of Bayes factors is their dependence on prior specifications that define null and alternative hypotheses. Additionally, there are challenges in their computation. To address these issues, we define Bayes factor functions (BFFs) directly from common test statistics. BFFs express Bayes factors as a function of the prior densities used to define the alternative hypotheses. These prior densities are centered on standardized effects, which serve as indices for the BFF. Therefore, BFFs offer a summary of evidence in favor of alternative hypotheses that correspond to a range of scientifically interesting effect sizes. Such summaries remove the need for arbitrary thresholds to determine "statistical significance." BFFs are available in closed form and can be easily computed from z, t, chi-squared, and F statistics. They depend on hyperparameters "r" and "tau^2", which determine the shape and scale of the prior distributions defining the alternative hypotheses. For replicated designs, the "r" parameter in each function can be adjusted to be greater than 1. Plots of BFFs versus effect size provide informative summaries of hypothesis tests that can be easily aggregated across studies.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/rshudde/BFF}
+  \item Report bugs at \url{https://github.com/rshudde/BFF/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Rachael Shudde \email{rachael.shudde@gmail.com}
 

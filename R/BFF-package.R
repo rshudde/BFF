@@ -6,3 +6,34 @@
 # Imports: end ----
 
 NULL
+
+
+
+# Create a documentation for the BFF class that contains the following fields:
+#' @title BFF Object
+#' @description The BFF object is a class that contains the results of a Bayes Factor Function.
+#' The BFF object contains the following fields:
+#' \tabular{ll}{
+#'  \code{BFF} \tab the object containing the log_bf (log Bayes factor values) and corresponding omega values \cr
+#'  \tab \cr
+#'  \code{input} \tab the object containing the input values \cr
+#'  \tab \cr
+#'  \code{log_bf} \tab maximized Bayes factor\cr
+#'  \tab \cr
+#'  \code{omega} \tab corresponding omega value for maximized Bayes factor\cr
+#'  \tab \cr
+#'  \code{one_sample} \tab is this a one sample test? \cr
+#'  \tab \cr
+#'  \code{alternative} \tab alternative hypothesis used in calculations \cr
+#'  \tab \cr
+#'  \code{omega_set} \tab was an omega value provided?\cr
+#'  \tab \cr
+#'  \code{r} \tab r value (default is 1 if not provided by user) \cr
+#'  \tab \cr
+#'  \code{test_type} \tab type of BFF test\cr
+#'  \tab \cr
+#'  \code{generic_test} \tab FALSE \cr
+#'  \tab \cr
+#' }
+#' @name BFF.object
+NULL

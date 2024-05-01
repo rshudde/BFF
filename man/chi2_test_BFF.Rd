@@ -20,27 +20,7 @@ chi2_test_BFF(chi2_stat, n, df, LRT = FALSE, r = NULL, omega = NULL)
 \item{omega}{standardized effect size. (can be a single entry or a vector of values)}
 }
 \value{
-Returns an S3 object with Bayes Factor function results.
- \tabular{ll}{
-   \code{BFF} \tab the object containing the log_bf (log bayes factor values) and corresponding omega values \cr
-   \tab \cr
-   \code{input} \tab the object containing the input values \cr
-   \tab \cr
-   \code{log_bf} \tab maximized bayes factor\cr
-   \tab \cr
-   \code{omega} \tab corresponding omega value for maximized bayes factor\cr
-   \tab \cr
-   \code{LRT} \tab is this a likelihood ratio test? \cr
-   \tab \cr
-   \code{omega_set} \tab was an omega value provided?\cr
-   \tab \cr
-   \code{r} \tab r value (default is 1 if not provided by user) \cr
-   \tab \cr
-   \code{test_type} \tab type of BFF test\cr
-   \tab \cr
-   \code{generic_test} \tab FALSE \cr
-   \tab \cr
-}
+Returns an S3 object of class `BFF` (see `BFF.object` for details).
 }
 \description{
 chi2_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
