@@ -222,10 +222,8 @@ f_test_BFF = function(f_stat,
 
 {
 
-  if (is.null(r) && length(f_stat) == 1) r = 1
-  if (!is.null(r) && r < 1) {
-    stop("r must be greater than 1")
-  }
+  ### input checks
+  r <- .check_and_set_r(r, f_stat)
 
   # check that the correct lengths for everything is populated
   if (length(f_stat > 1)) {

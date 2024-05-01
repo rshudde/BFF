@@ -252,15 +252,9 @@ regression_test_BFF = function(t_stat,
 
 {
 
-  # check alternative
-  if (!alternative %in% c("two.sided", "less", "greater")) {
-    stop("The alternative must be either 'two.sided', 'less', or 'greater'")
-  }
-
-  if (is.null(r) && length(t_stat) == 1) r = 1
-  if (!is.null(r) && r < 1) {
-    stop("r must be greater than 1")
-  }
+  ### input checks
+  .check_alternative(alternative)
+  r <- .check_and_set_r(r, t_stat)
 
   # check that the correct lengths for everything is populated
   if (length(t_stat > 1)) {
