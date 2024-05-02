@@ -205,25 +205,7 @@ maximize_f = function(r,
 #' @param r r value
 #' @param omega standardized effect size. (can be a single entry or a vector of values)
 #'
-#' @return Returns an S3 object with Bayes Factor function results.
-#'  \tabular{ll}{
-#'    \code{BFF} \tab the object containing the log_bf (log bayes factor values) and corresponding omega values \cr
-#'    \tab \cr
-#'    \code{input} \tab the object containing the input values \cr
-#'    \tab \cr
-#'    \code{log_bf} \tab maximized bayes factor\cr
-#'    \tab \cr
-#'    \code{omega} \tab corresponding omega value for maximized bayes factor\cr
-#'    \tab \cr
-#'    \code{omega_set} \tab was an omega value provided?\cr
-#'    \tab \cr
-#'    \code{r} \tab r value (default is 1 if not provided by user) \cr
-#'    \tab \cr
-#'    \code{test_type} \tab type of BFF test\cr
-#'    \tab \cr
-#'    \code{generic_test} \tab FALSE \cr
-#'    \tab \cr
-#' }
+#' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
 #'
 #' @examples
@@ -240,10 +222,8 @@ f_test_BFF = function(f_stat,
 
 {
 
-  if (is.null(r) && length(f_stat) == 1) r = 1
-  if (!is.null(r) && r < 1) {
-    stop("r must be greater than 1")
-  }
+  ### input checks
+  r <- .check_and_set_r(r, f_stat)
 
   # check that the correct lengths for everything is populated
   if (length(f_stat > 1)) {
@@ -259,6 +239,10 @@ f_test_BFF = function(f_stat,
       }
     }
   }
+
+  # TODO: should all n, df1, and df2 be specified? Should we rather have (n + k) or (df1 + df2) and check that?
+  #.check_df(df1, "(numerator)")
+  #.check_df(df2, "(denomiantor)")
 
   # did user set
   omega_set = !is.null(omega)

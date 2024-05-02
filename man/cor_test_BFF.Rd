@@ -22,18 +22,7 @@ cor_test_BFF(
 \item{tau2}{tau2 values (can be a single entry or a vector of values)}
 }
 \value{
-Returns Bayes factor function results
- \tabular{ll}{
-   \code{BFF} \tab The log of the Bayes Factor Function values \cr
-   \tab \cr
-   \code{omega_sequence} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
-   \tab \cr
-   \code{BFF_max_RMSE} \tab Maximum BFF value \cr
-   \tab \cr
-   \code{max_RMSE} \tab Effect size that maximizes BFF\cr
-   \tab \cr
-   \code{omega} \tab omega values tested, can be a single number or vector\cr
-}
+Returns an S3 object of class `BFF` (see `BFF.object` for details).
 }
 \description{
 cor_test_BFF constructs BFFs based on the z test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.

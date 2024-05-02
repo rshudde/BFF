@@ -235,27 +235,7 @@ maximize_t_reg = function(r,
 #' @param k number of predictors
 #' @param r r value
 #'
-#' @return Returns an S3 object with Bayes Factor function results.
-#'  \tabular{ll}{
-#'    \code{BFF} \tab the object containing the log_bf (log bayes factor values) and corresponding omega values \cr
-#'    \tab \cr
-#'    \code{input} \tab the object containing the input values \cr
-#'    \tab \cr
-#'    \code{log_bf} \tab maximized bayes factor\cr
-#'    \tab \cr
-#'    \code{omega} \tab corresponding omega value for maximized bayes factor\cr
-#'    \tab \cr
-#'    \code{alternative} \tab alternative hypothesis used in calculations\cr
-#'    \tab \cr
-#'    \code{omega_set} \tab was an omega value provided?\cr
-#'    \tab \cr
-#'    \code{r} \tab r value (default is 1 if not provided by user) \cr
-#'    \tab \cr
-#'    \code{test_type} \tab type of BFF test\cr
-#'    \tab \cr
-#'    \code{generic_test} \tab FALSE \cr
-#'    \tab \cr
-#' }
+#' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
 #'
 #' @examples
@@ -272,15 +252,9 @@ regression_test_BFF = function(t_stat,
 
 {
 
-  # check alternative
-  if (!alternative %in% c("two.sided", "less", "greater")) {
-    stop("The alternative must be either 'two.sided', 'less', or 'greater'")
-  }
-
-  if (is.null(r) && length(t_stat) == 1) r = 1
-  if (!is.null(r) && r < 1) {
-    stop("r must be greater than 1")
-  }
+  ### input checks
+  .check_alternative(alternative)
+  r <- .check_and_set_r(r, t_stat)
 
   # check that the correct lengths for everything is populated
   if (length(t_stat > 1)) {
@@ -293,14 +267,9 @@ regression_test_BFF = function(t_stat,
     }
   }
 
-  df = n - k - 1
-
-  for (i in df){
-    if (i <= 1) {
-      stop("Degrees of freedom must be greater than 1. If using a two sample test, n must be greater
-         than 3, if using a one sample test, n must be greater than 2")
-    }
-  }
+  # compute sample size
+  df <- n - k - 1
+  .check_df(df, "(Sample size must be one larger than the number of predictors.)")
 
   used_alternative = alternative
   if (alternative == "less")

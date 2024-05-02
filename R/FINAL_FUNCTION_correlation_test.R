@@ -184,18 +184,7 @@ maximize_cor = function(r,
 #' @param r r value
 #' @param tau2 tau2 values (can be a single entry or a vector of values)
 #'
-#' @return Returns Bayes factor function results
-#'  \tabular{ll}{
-#'    \code{BFF} \tab The log of the Bayes Factor Function values \cr
-#'    \tab \cr
-#'    \code{omega_sequence} \tab Effect sizes tested (seq(0, 1, by = 0.01)) \cr
-#'    \tab \cr
-#'    \code{BFF_max_RMSE} \tab Maximum BFF value \cr
-#'    \tab \cr
-#'    \code{max_RMSE} \tab Effect size that maximizes BFF\cr
-#'    \tab \cr
-#'    \code{omega} \tab omega values tested, can be a single number or vector\cr
-#' }
+#' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
 #'
 #' @examples
@@ -221,15 +210,9 @@ cor_test_BFF = function(z_stat,
 
 {
 
-  # check alternative
-  if (!alternative %in% c("two.sided", "less", "greater")) {
-    stop("The alternative must be either 'two.sided', 'less', or 'greater'")
-  }
-
-  if (is.null(r) && length(z_stat) == 1) r = 1
-  if (!is.null(r) && r < 1) {
-    stop("r must be greater than 1")
-  }
+  ### input checks
+  .check_alternative(alternative)
+  r <- .check_and_set_r(r, z_stat)
 
   # check that the correct lengths for everything is populated
   if (length(z_stat > 1)) {
@@ -248,6 +231,7 @@ cor_test_BFF = function(z_stat,
 
   # compute df
   df <- n - 1
+  .check_df(df, "(Sample size must be one larger than 2.)")
 
   # did user set
   omega_set = !is.null(omega)
