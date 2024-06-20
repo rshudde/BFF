@@ -1,5 +1,5 @@
 ################# T functions if r is an integer and equal to 1
-t_val_r1 = function(tau2, t_stat, df)
+reg_t_val_r1 = function(tau2, t_stat, df)
 {
   r = 1 + t_stat ^ 2 / df
   s = 1 + t_stat ^ 2 / (df * (1 + tau2))
@@ -13,212 +13,50 @@ t_val_r1 = function(tau2, t_stat, df)
 }
 
 
-################# T functions if r is an integer and greater than 1
-#
-# get_w = function(tau, v, t = t)
-# {
-#   num = 1 + t ^ 2 / (v * (1 + tau))
-#   den = 1 + t ^ 2 / v
-#
-#   to_return = num / den
-#   return(to_return)
-# }
-#
-# sum_val_t = function(r, m, tau, t, v, w)
-# {
-#   one = choose(2 * r, 2 * m)
-#   two = (2 * tau * t ^ 2 / ((t ^ 2 + v) * (tau + 1) * w)) ^ m
-#   three = sterling_gamma((v + 2 * m + 1) / 2) * double_factorial(2 * r - 2 *
-#                                                                    m - 1)
-#
-#   to_return = one * two * three
-#   return(to_return)
-# }
-#
-# sum_val_function_t = function(r, tau, t, v, w)
-# {
-#   val = 0
-#   for (mm in 0:r)
-#   {
-#     val = val + sum_val_t(
-#       r = r,
-#       m = mm,
-#       tau = tau,
-#       t = t,
-#       v = v,
-#       w = w
-#     )
-#   }
-#   return(val)
-# }
-#
-# log_T = function(t, r, tau, v)
-# {
-#   w = get_w(tau = tau, v = v, t = t)
-#   num1 = 1
-#   den1 = double_factorial(2 * r - 1) * (1 + tau) ^ (r + 1 / 2) * sterling_gamma((v +
-#                                                                                    1) / 2) * w ^ ((v + 1) / 2)
-#   first_term = num1 / den1
-#
-#   second_term = sum_val_function_t(
-#     r = r,
-#     tau = tau,
-#     t = t,
-#     v = v,
-#     w = w
-#   )
-#
-#   to_return = first_term * second_term
-#
-#   # log_version
-#   to_return = log(first_term) + log(second_term)
-#
-#   return(to_return)
-# }
-
-################# T functions if r is a fraction
-log_T_frac = function(tau2, t, v, r)
-{
-  tp1 = 1 + tau2 # one plus tau^2
-  tau = sqrt(tau2)
-  c = 1 / (tp1 ^ (r + 1 / 2)) # c
-  y = tau * t / sqrt((t ^ 2 + v) * tp1)
-
-  a1 = (v + 1) / 2
-  b1 = r + 1 / 2
-  c1 = 1 / 2
-  first_hypergeo = Gauss2F1(a1, b1, c1, y ^ 2)
-
-  four = sterling_gamma(v / 2 + 1) * sterling_gamma(r + 1)
-  five = sterling_gamma((v + 1) / 2) * sterling_gamma(r + 1 / 2)
-  gamma_term = four / five
-
-  aa = v / 2 + 1
-  bb = r + 1
-  cc = 3 / 2
-  second_hypergeo = Gauss2F1(aa, bb, cc, y ^ 2)
-
-  to_return = c * (first_hypergeo + y * gamma_term * second_hypergeo)
-  to_return = log(to_return)
-
-  return(to_return)
-}
-
-log_T_frac_onesided = function(tau2, t, v, r)
-{
-  tp1 = 1 + tau2
-  tau = sqrt(tau2)
-  c = 1 / (tp1 ^ (r + 1 / 2)) # c
-  y = tau * t / sqrt((t ^ 2 + v) * tp1)
-
-  a1 = (v + 1) / 2
-  b1 = r + 1 / 2
-  c1 = 1 / 2
-  first_hypergeo = Gauss2F1(a1, b1, c1, y ^ 2)
-
-  four = sterling_gamma(v / 2 + 1) * sterling_gamma(r + 1)
-  five = sterling_gamma((v + 1) / 2) * sterling_gamma(r + 1 / 2)
-  gamma_term = four / five
-
-  aa = v / 2 + 1
-  bb = r + 1
-  cc = 3 / 2
-  second_hypergeo = Gauss2F1(aa, bb, cc, y ^ 2)
-
-  to_return = c * (first_hypergeo + 2 * y * gamma_term * second_hypergeo)
-  to_return = log(to_return)
-
-  return(to_return)
-}
-
 ####################### backend implementation
-backend_reg = function(r,
-                     t_stat,
-                     df,
-                     n,
-                     k,
-                     one_sided = TRUE,
-                     omega = NULL,
-                     tau2 = NULL)
+backend_reg <- function(
+    input,
+    omega = NULL){
 
-{
-  # same effect sizes for all tests
-  if (!is.null(omega))
-  {
-    effect_size = omega
-  } else {
-    effect_size = seq(0.01, 1, by = 0.01)
-  }
+  # compute tau2 from omega
+  # if multiple omegas and t-stats are supplied, each element of tau2
+  # corresponds a vector of tau2 for the corresponding t-statistics
+  # i.e., tau2[omega][t-stat]
+  tau2 <- lapply(omega, function(x){
+      tau2 <- get_regression_tau2(n = input$n, k = input$k, w = x)
+  })
 
-  # user_supplied_omega = TRUE
-  # if (is.null(omega))
-  #   user_supplied_omega = FALSE
-
-  log_vals = rep(0, length(effect_size))
-
-  if (is.null(tau2))
-  {
-    tau2 = get_regression_tau2(n = n, k = k, w = effect_size, r = r)
-  }
-
-
-  if (one_sided) {
-    log_vals = unlist(lapply(
-      tau2,
-      log_T_frac_onesided,
-      r = r,
-      v = df,
-      t = t_stat
-    ))
-  } else {
-    log_vals = unlist(lapply(
-      tau2,
-      log_T_frac,
-      r = r,
-      v = df,
-      t = t_stat
-    ))
-  }
-
-  # stuff to return
-  BFF = log_vals
+  # compute log_BF
+  log_BF <- sapply(tau2, function(x){
+    sum(sapply(seq_along(input$t_stat), function(i){
+      if(input$alternative == "greater"){
+        reg_t_val_r1(
+          tau2 = x[i],
+          df    = input$df[i],
+          t_stat    = input$t_stat[i]
+        )
+      }else{
+        reg_t_val_r1(
+          tau2 = x[i],
+          df    = input$df[i],
+          t_stat    = input$t_stat[i]
+        )
+      }
+    }))
+  })
 
   # check the results are finite
-  if (!all(is.finite(BFF)))
-  {
+  if (!all(is.finite(log_BF)))
     warning(
       "Values entered produced non-finite numbers for some effect sizes.
       The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow.
       Only effect sizes with non-NaN values are kept in the plots.
       Please contact the maintainer for more information."
     )
-  }
 
-  return(BFF)
+  return(log_BF)
 }
 
-maximize_t_reg = function(r,
-                      t_stat,
-                      df,
-                      n,
-                      k = TRUE,
-                      one_sided = TRUE,
-                      omega = NULL) {
-
-  logbf = stats::dcauchy(r)/(1-stats::pcauchy(1))
-  for (t in range(1, length(t_stat))) {
-    logbf = logbf + backend_reg(r = r,
-                              t_stat = t_stat[t],
-                              df = df[t],
-                              n = n[t],
-                              k = k[t],
-                              one_sided = one_sided,
-                              omega = omega, # technically not used
-                              tau2 = omega^2*n[t])
-  }
-
-  return(logbf)
-}
 
 ################# T function user interaction
 
@@ -230,10 +68,11 @@ maximize_t_reg = function(r,
 #'
 #' @param t_stat T statistic
 #' @param alternative is the alternative a one.sided or two.sided test? default is two.sided
-#' @param omega stnadardized effect size. For the regression test, this is also known as eta-squared. (can be a single entry or a vector of values)
 #' @param n sample size (if one sample test)
 #' @param k number of predictors
-#' @param r r value
+#' @param omega stnadardized effect size. For the regression test, this is also known as eta-squared. (can be a single entry or a vector of values)
+#' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
+#'
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
@@ -243,109 +82,29 @@ maximize_t_reg = function(r,
 #' regBFF
 #' plot(regBFF)
 #'
-regression_test_BFF = function(t_stat,
-                      n,
-                      k,
-                      alternative = "two.sided",
-                      r = NULL,
-                      omega = NULL)
 
-{
+regression_test_BFF <- function(
+    t_stat,
+    n = NULL,
+    k = NULL,
+    one_sample = FALSE,
+    alternative = "two.sided",
+    omega = NULL,
+    omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01)){
 
-  ### input checks
-  .check_alternative(alternative)
-  r <- .check_and_set_r(r, t_stat)
 
-  # check that the correct lengths for everything is populated
-  if (length(t_stat > 1)) {
-    len_t = length(t_stat)
-    if (length(n) != len_t) {
-      stop("If providing a vector of t statistics, sample size must also be supplied as a vector of equal length")
-    }
-    if (length(k) != len_t) {
-      stop("If providing a vector of t statistics, k (number of predictors) must also be supplied as a vector of equal length")
-    }
-  }
+  ### input checks and processing
+  input <- .process_input.reg.test(t_stat, n, k, one_sample, alternative)
 
-  # compute sample size
-  df <- n - k - 1
-  .check_df(df, "(Sample size must be one larger than the number of predictors.)")
-
-  used_alternative = alternative
-  if (alternative == "less")
-  {
-    t_stat = -t_stat
-    used_alternative = "greater"
-  }
-
-  # did user set
-  omega_set = !is.null(omega)
-
-  # should we maximize? If the t statistic is a vector and r is not provided, yes
-  maximize = length(t_stat) > 1 && is.null(r)
-
-  #####  same effect sizes for all tests
-  omega_sequence = seq(0.01, 1, by = 0.01)
-
-  ##### optimization logic
-  if (maximize)
-  {
-    # set the "omega max" we are searching over. We are calling this omega
-    # max because it is important to keep original value of omega for later
-    if (is.null(omega)) {
-
-      omega_max = omega_sequence
-    } else {
-      omega_max = omega
-    }
-    optimal_r = vector(length = length(omega_max))
-    count = 1
-    for (i in omega_max)
-    {
-      optimal_r[count] = stats::optimize(
-        c(1, 20),
-        tol = 0.001,
-        t_stat = t_stat,
-        df = df,
-        n = n,
-        k = k,
-        one_sided = used_alternative == "greater",
-        omega = i,
-        maximum = TRUE
-      )$maximum
-      count = count + 1
-    }
-    maximized_values = as.data.frame(cbind(omega_max, optimal_r))
-
-    r = optimal_r
-    results = vector()
-    for (i in 1:length(optimal_r)) {
-      results[i] = maximize_t_reg(
-        r = optimal_r[i],
-        t_stat = t_stat,
-        df = df,
-        n = n,
-        k = k,
-        one_sided = used_alternative == "greater",
-        omega = omega_max[i]
-      )
-    }
-
-  } else {
-    results = backend_reg(
-      t_stat = t_stat,
-      n = n,
-      df = df,
-      r = r,
-      omega = omega,
-      k = k,
-      one_sided = used_alternative == "greater"
-    )
-  }
-
+  ### computation
+  # calculate BF
+  results   <- backend_reg(
+    input     = input,
+    omega     = if(!is.null(omega)) omega else omega_sequence
+  )
 
   ###### return logic
-  if (!omega_set) {
+  if(is.null(omega)){
     log_bf         <- c(0, results)
     omega_sequence <- c(0, omega_sequence)
     idx_max        <- which.max(log_bf)
@@ -359,18 +118,12 @@ regression_test_BFF = function(t_stat,
   output = list(
     log_bf       = this_log_bf,
     omega        = this_omega,
-    omega_set    = omega_set,
-    alternative  = alternative,
+    omega_set    = !is.null(omega),
     test_type    = "regression_test",
     generic_test = FALSE,
-    r            = r, # r that is maximized or set by user
-    input = list(
-      t_stat = t_stat,
-      df     = df,
-      k = k
-    )
+    input        = input
   )
-  if (!omega_set) {
+  if(is.null(omega)){
     output$BFF = list(log_bf = log_bf, omega = omega_sequence)
   }
 
@@ -379,5 +132,29 @@ regression_test_BFF = function(t_stat,
 }
 
 
+.process_input.reg.test <- function(t_stat, n, k, one_sample, alternative){
 
+  .check_alternative(alternative)
 
+  df <- n -k - 1
+
+  # computation is implemented only for alternative = "two-sided" or "greater"
+  # if lower, reverse the sign of t_stat, set alternative to "greater",
+  # and remember that the original alternative was "less"
+  if (alternative == "less"){
+    t_stat      <- -t_stat
+    alternative <- "greater"
+    alternative.original <- "less"
+  }else{
+    alternative.original <- alternative
+  }
+
+  return(list(
+    t_stat     = t_stat,
+    n          = n,
+    df         = df,
+    k = k,
+    alternative          = alternative,
+    alternative.original = alternative.original
+  ))
+}
