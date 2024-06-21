@@ -1,54 +1,54 @@
 ###########################################################################################################
 ###########functions to set tau2 - user does not interact with these ######################################
 ###########################################################################################################
-get_one_sample_tau2 = function(n, w, r = 1)
+get_one_sample_tau2 = function(n, w)
 {
-  to_return = n * w ^ 2 / (2 * r)
+  to_return = n * w ^ 2 / (2)
   return(to_return)
 }
 
-get_two_sample_tau2 = function(n1, n2, w, r = 1)
+get_two_sample_tau2 = function(n1, n2, w)
 {
-  to_return = n1 * n2 * w ^ 2 / (2 * r * (n1 + n2))
+  to_return = n1 * n2 * w ^ 2 / (2 * (n1 + n2))
   return(to_return)
 }
 
-get_count_tau2 = function(n, w, k, r = 1)
+get_count_tau2 = function(n, w, k)
 {
   top = n * w ^ 2 * k
-  bottom = 2 * (k / 2 + r - 1)
+  bottom = 2 * (k / 2)
   to_return = top / bottom
   return(to_return)
 }
 
-get_LRT_tau2 = function(n, w, k, r = 1)
+get_LRT_tau2 = function(n, w, k)
 {
   top = n * k * w ^ 2
-  bottom = 2 * (k / 2 + r - 1)
+  bottom = 2 * (k / 2)
   to_return = top / bottom
   return(to_return)
 }
 
-get_linear_tau2 = function(n, w, k, r = 1)
+get_linear_tau2 = function(n, w, k)
 {
   top = 2 * k * w ^ 2
-  bottom = 4 * (k / 2 + r - 1)
+  bottom = 4 * (k / 2)
   to_return = top / bottom
   return(to_return)
 }
 
-get_corr_tau2 = function(n, w, r = 1)
+get_corr_tau2 = function(n, w)
 {
   top = (n-2) * w^2
-  bottom = 2*r
+  bottom = 2
   to_return = top / bottom
   return(to_return)
 }
 
-get_regression_tau2 = function(n, k, w, r = 1)
+get_regression_tau2 = function(n, k, w)
 {
   top = (n-k-1)*w^2
-  bottom = (2*r)
+  bottom = (2)
   to_return = top / bottom
   return(to_return)
 }

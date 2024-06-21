@@ -4,7 +4,14 @@
 \alias{f_test_BFF}
 \title{f_test_BFF}
 \usage{
-f_test_BFF(f_stat, n, df1, df2, r = NULL, omega = NULL)
+f_test_BFF(
+  f_stat,
+  n,
+  df1,
+  df2,
+  omega = NULL,
+  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01)
+)
 }
 \arguments{
 \item{f_stat}{T statistic}
@@ -15,9 +22,9 @@ f_test_BFF(f_stat, n, df1, df2, r = NULL, omega = NULL)
 
 \item{df2}{sample size of group two for two sample test}
 
-\item{r}{r value}
-
 \item{omega}{standardized effect size. (can be a single entry or a vector of values)}
+
+\item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
 }
 \value{
 Returns an S3 object of class `BFF` (see `BFF.object` for details).

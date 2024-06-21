@@ -7,12 +7,12 @@
 z_test_BFF(
   z_stat,
   n = NULL,
-  one_sample = FALSE,
-  alternative = "two.sided",
   n1 = NULL,
   n2 = NULL,
-  r = NULL,
-  omega = NULL
+  one_sample = FALSE,
+  alternative = "two.sided",
+  omega = NULL,
+  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01)
 )
 }
 \arguments{
@@ -20,17 +20,17 @@ z_test_BFF(
 
 \item{n}{sample size (if one sample test)}
 
-\item{one_sample}{is test one sided? Default is FALSE}
-
-\item{alternative}{the alternative. options are "two.sided" or "less" or "greater"}
-
 \item{n1}{sample size of group one for two sample test. Must be provided if one_sample = FALSE}
 
 \item{n2}{sample size of group two for two sample test. Must be provided if one_sample = FALSE}
 
-\item{r}{r value}
+\item{one_sample}{is test one sided? Default is FALSE}
+
+\item{alternative}{the alternative. options are "two.sided" or "less" or "greater"}
 
 \item{omega}{standardized effect size. For the z-test, this is often called Cohen's d (can be a single entry or a vector of values)}
+
+\item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
 }
 \value{
 Returns an S3 object of class `BFF` (see `BFF.object` for details).

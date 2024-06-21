@@ -9,163 +9,44 @@ G_val_r1 = function(tau2, chi2_stat, df)
 }
 
 
-################# chi2 functions if r is an integer and greater than 1
-
-# ################# Gamma functions / chi^2
-# prod_val_g = function(k, r, n)
-# {
-#   one = k/2 + r - 1 - n
-#   return(one)
-# }
-#
-# prod_val_function_g = function(k, m, r)
-# {
-#   val = 1
-#   if (m > 0)
-#   {
-#     for (nn in 0:(m-1))
-#     {
-#       val = val * prod_val_g(k=k, r=r, n=nn)
-#     }
-#   }
-#   return(val)
-# }
-#
-# sum_val_g = function(k, r, m, tau, x)
-# {
-#   one = choose(r, m)
-#   two = prod_val_function_g(k = k, m=m, r=r)
-#   three = (tau*x/(2*(1+tau)))^(r-m)
-#   four = 1/((1+tau)^(k/2+r))
-#
-#   to_return = one*two*three*four
-#   return(to_return)
-# }
-#
-# sum_val_function_g = function(k, r, tau,x)
-# {
-#   val = 0
-#   for (mm in 0:r)
-#   {
-#     val = val + sum_val_g(k=k, r = r, m =mm, tau=tau, x=x)
-#   }
-#
-#   return(val)
-# }
-#
-# log_G = function(tau, h, k, r)
-# {
-#   num1 = sterling_gamma(k/2)
-#   den1 = sterling_gamma(k/2 + r)
-#   first_term = num1/den1
-#
-#   second_term = exp(tau * h / (2*(1+tau)))
-#
-#   third_term = sum_val_function_g(k=k, r=r, tau=tau, x=h)
-#
-#   to_return = first_term * second_term * third_term
-#
-#   # log version
-#   to_return = log(first_term) + log(second_term) + log(third_term)
-#   return(to_return)
-# }
-
-################# T functions if r is a fraction
-log_G_frac = function(tau2, h, k, r)
-{
-  tp1 = 1 + tau2
-  one = 1 / (tp1 ^ (k / 2 + r))
-
-  a = k / 2 + r
-  b = k / 2
-  c = tau2 * h / (2 * (1 + tau2))
-
-  two = hypergeom1F1(a, b, c)$f
-
-  to_return = log(one) + log(two)
-
-  return(to_return)
-}
-
-
 ####################### backend implementation
-backend_chi2 = function(r,
-                     chi2_stat,
-                     df,
-                     n = NULL,
-                     LRT = FALSE,
-                     omega = NULL,
-                     tau2 = NULL)
+backend_chi2 <- function(
+    input,
+    omega = NULL){
 
-{
-  # same effect sizes for all tests
-  if (!is.null(omega))
-  {
-    effect_size = omega
-  } else {
-    effect_size = seq(0.01, 1, by = 0.01)
-  }
-
-  # user_supplied_omega = TRUE
-  # if (is.null(omega))
-  #   user_supplied_omega = FALSE
-
-  log_vals = rep(0, length(effect_size))
-
-  if (is.null(tau2))
-  {
-    if (LRT)
-    {
-      tau2 = get_count_tau2(n = n, k = df, w = effect_size)
-    } else {
-      tau2 = get_LRT_tau2(n = n, k = df, w = effect_size)
+  # compute tau2 from omega
+  # if multiple omegas and t-stats are supplied, each element of tau2
+  # corresponds a vector of tau2 for the corresponding t-statistics
+  # i.e., tau2[omega][t-stat]
+  tau2 <- lapply(omega, function(x){
+    if(input$LRT){
+      tau2 <- get_LRT_tau2(n = input$n, k = input$df, w = x)
+    }else{
+      tau2 <- get_count_tau2(n = input$n, k = input$df, w = x)
     }
-  }
+  })
 
-  log_vals = unlist(lapply(
-    tau2,
-    log_G_frac,
-    h = chi2_stat,
-    r = r,
-    k = df
-  ))
-
-  # stuff to return
-  BFF = log_vals
+  # compute log_BF
+  log_BF <- sapply(tau2, function(x){
+    sum(sapply(seq_along(input$chi2_stat), function(i){
+        G_val_r1(
+          tau2 = x[i],
+          chi2_stat    = input$chi2_stat[i],
+          df = input$df
+        )
+    }))
+  })
 
   # check the results are finite
-  if (!all(is.finite(BFF)))
-  {
+  if (!all(is.finite(log_BF)))
     warning(
       "Values entered produced non-finite numbers for some effect sizes.
       The most likely scenario is the evidence was so strongly in favor of the alternative that there was numeric overflow.
       Only effect sizes with non-NaN values are kept in the plots.
       Please contact the maintainer for more information."
     )
-  }
 
-  return(BFF)
-}
-
-maximize_chi2 = function(r,
-                      chi2_stat,
-                      df,
-                      n = NULL,
-                      LRT = FALSE,
-                      omega = NULL) {
-
-  logbf = stats::dcauchy(r)/(1-stats::pcauchy(1))
-  for (t in range(1, length(chi2_stat))) {
-    logbf = logbf + backend_chi2(r = r,
-                              chi2_stat = chi2_stat[t],
-                              df = df[t],
-                              n = n[t],
-                              LRT = LRT,
-                              omega = omega, # technically not used
-                              tau2 = omega^2*n[t])
-  }
-
-  return(logbf)
+  return(log_BF)
 }
 
 ################# T function user interaction
@@ -178,136 +59,77 @@ maximize_chi2 = function(r,
 #'
 #' @param chi2_stat chi-square statistic
 #' @param n sample size (if one sample test)
-#' @param df degrees of freedom
 #' @param LRT should LRT be performed? Default is FALSE
-#' @param r r value
 #' @param omega standardized effect size. (can be a single entry or a vector of values)
-#'
+#' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
+
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
 #'
 #' @examples
-#' chi2BFF = chi2_test_BFF(chi2_stat = 7.5, n = 25, df = 23)
+#' chi2BFF = chi2_test_BFF(chi2_stat = 7.5, n = 25)
 #' chi2BFF
 #' plot(chi2BFF)
 #'
 chi2_test_BFF = function(chi2_stat,
                       n,
-                      df,
                       LRT = FALSE,
-                      r = NULL,
-                      omega = NULL)
+                      omega = NULL,
+                      omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01))
 
 {
+  ### input checks and processing
+  input <- .process_input.chi2.test(chi2_stat, n, LRT)
 
-  ### input checks
-  r <- .check_and_set_r(r, chi2_stat)
-
-  # check that the correct lengths for everything is populated
-  if (length(chi2_stat > 1)) {
-    if (length(chi2_stat) != length(n)) {
-      stop("If providing a vector of t statistics, sample size must also be supplied as vectors of equal length")
-    }
-    if (length(chi2_stat) != length(df)) {
-      stop("If providing a vector of t statistics, degrees of freedom must also be supplied as vectors of equal length")
-    }
-  }
-
-  .check_df(df1)
-  .check_n(n, n_min = df1)
-
-  # did user set
-  omega_set = !is.null(omega)
-
-  # should we maximize? If the t statistic is a vector and r is not provided, yes
-  maximize = length(chi2_stat) > 1 && is.null(r)
-
-  #####  same effect sizes for all tests
-  effect_size = seq(0.01, 1, by = 0.01)
-
-  ##### optimization logic
-  if (maximize)
-  {
-    # set the "omega max" we are searching over. We are calling this omega
-    # max because it is important to keep original value of omega for later
-    if (is.null(omega)) {
-
-      omega_max = effect_size
-    } else {
-      omega_max = omega
-    }
-    optimal_r = vector(length = length(omega_max))
-    count = 1
-    for (i in omega_max)
-    {
-      optimal_r[count] = stats::optimize(
-        maximize_chi2,
-        c(1, 20),
-        tol = 0.001,
-        chi2_stat = chi2_stat,
-        df = df,
-        n = n,
-        LRT = LRT,
-        omega = i,
-        maximum = TRUE
-      )$maximum
-      count = count + 1
-    }
-    maximized_values = as.data.frame(cbind(omega_max, optimal_r))
-
-    r = optimal_r
-    results = vector()
-    for (i in 1:length(optimal_r)) {
-      results[i] = maximize_chi2(
-        r = optimal_r[i],
-        chi2_stat = chi2_stat,
-        df = df,
-        n = n,
-        LRT = LRT,
-        omega = omega_max[i]
-      )
-    }
-
-  } else {
-    results = backend_chi2(
-      chi2_stat = chi2_stat,
-      n = n,
-      df = df,
-      r = r,
-      LRT = LRT,
-      omega = omega
-    )
-  }
-
+  ### computation
+  # calculate BF
+  results   <- backend_chi2(
+    input     = input,
+    omega     = if(!is.null(omega)) omega else omega_sequence
+  )
 
   ###### return logic
-  BFF = results
-  effect_size = effect_size
-  idx_max = which.max(BFF)
-  BFF_max_RMSE = BFF[idx_max]
-  max_RMSE = effect_size[idx_max]
+  if(is.null(omega)){
+    log_bf         <- c(0, results)
+    omega_sequence <- c(0, omega_sequence)
+    idx_max        <- which.max(log_bf)
+    this_log_bf    <- log_bf[idx_max]
+    this_omega     <- omega_sequence[idx_max]
+  }else{
+    this_log_bf    <- results
+    this_omega     <- omega
+  }
 
   output = list(
-    log_bf = BFF_max_RMSE,
-    omega = max_RMSE,
-    omega_set = omega_set,
-    LRT = LRT,
-    test_type = "chi2_test",
+    log_bf       = this_log_bf,
+    omega        = this_omega,
+    omega_set    = !is.null(omega),
+    test_type    = "chi2_test",
     generic_test = FALSE,
-    r = r, # r that is maximized or set by user
-    input = list(
-      chi2_stat = chi2_stat,
-      df     = df
-    )
+    input        = input
   )
-  if (!omega_set) {
-    output$BFF = list(log_bf = results, omega = effect_size)
+  if(is.null(omega)){
+    output$BFF = list(log_bf = log_bf, omega = omega_sequence)
   }
 
   class(output) = "BFF"
   return(output)
 }
 
+
+
+
+.process_input.chi2.test <- function(chi2_stat, n, LRT){
+
+  df = n-1
+
+  return(list(
+    chi2_stat     = chi2_stat,
+    n          = n,
+    df         = df,
+    LRT = LRT
+  ))
+}
 
 
 
