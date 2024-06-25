@@ -52,6 +52,7 @@ test_that("chi2: basic functionality", {
     lower = -Inf,
     upper = Inf
   )
+  #MODIFY FOR CHI2
   # <\TODO>
 
   # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior",           posterior_plot(fit))
@@ -79,6 +80,7 @@ test_that("chi2: basic functionality", {
       "omega = 0.50 (Standardized effect size)"
     )
   )
+  #MODIFY FOR CHI2
   # vdiffr::expect_doppelganger("z_test-two_sample-one_sided-posterior",           posterior_plot(fit))
   # vdiffr::expect_doppelganger("z_test-two_sample-one_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE))
 
@@ -103,6 +105,7 @@ test_that("chi2: basic functionality", {
       "maximized omega = 0.00 (Standardized effect size)"
     )
   )
+  #MODIFY FOR CHI2
   # vdiffr::expect_doppelganger("t_test_BFF-two_sample-two_sided-BFF",                 plot(fit))
   # vdiffr::expect_doppelganger("t_test_BFF-two_sample-two_sided-posterior",           posterior_plot(fit))
   # vdiffr::expect_doppelganger("t_test_BFF-two_sample-two_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE, color = c("red", "blue"), linetype = c(3,5),
@@ -134,6 +137,7 @@ test_that("chi2: basic functionality", {
       "maximized omega = 0.00 (Standardized effect size)"
     )
   )
-  vdiffr::expect_doppelganger("z_test_BFF-two_sample-one_sided-BFF", plot(fit))
-  testthat::expect_error(posterior_plot(fit), "There is no non-local prior distribution")
+  #MODIFY FOR CHI2
+ # vdiffr::expect_doppelganger("z_test_BFF-two_sample-one_sided-BFF", plot(fit)) 
+ # testthat::expect_error(posterior_plot(fit), "There is no non-local prior distribution")
 })
