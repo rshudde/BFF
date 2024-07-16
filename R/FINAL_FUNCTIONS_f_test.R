@@ -62,7 +62,7 @@ backend_f <- function(
 #' @param n sample size (if one sample test)
 #' @param df1 sample size of group one for two sample test.
 #' @param df2 sample size of group two for two sample test
-#' @param omega standardized effect size. (can be a single entry or a vector of values)
+#' @param omega standardized effect size. For the f-test, this is often called Cohen's f (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
