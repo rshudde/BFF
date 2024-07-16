@@ -70,7 +70,7 @@ backend_reg <- function(
 #' @param alternative is the alternative a one.sided or two.sided test? default is two.sided
 #' @param n sample size (if one sample test)
 #' @param k number of predictors
-#' @param omega stnadardized effect size. For the regression test, this is also known as eta-squared. (can be a single entry or a vector of values)
+#' @param omega stnadardized effect size. For the regression test, this is also known as Cohen's f-squared. (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
 #'
 #'
