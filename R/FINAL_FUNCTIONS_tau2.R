@@ -1,15 +1,15 @@
 ###########################################################################################################
 ###########functions to set tau2 - user does not interact with these ######################################
 ###########################################################################################################
-get_one_sample_tau2 = function(n, w)
+get_one_sample_tau2 = function(n, w, r)
 {
-  to_return = n * w ^ 2 / (2)
+  to_return = n * w ^ 2 / (2 * r)
   return(to_return)
 }
 
-get_two_sample_tau2 = function(n1, n2, w)
+get_two_sample_tau2 = function(n1, n2, w, r)
 {
-  to_return = n1 * n2 * w ^ 2 / (2 * (n1 + n2))
+  to_return = n1 * n2 * w ^ 2 / (2 * r *(n1 + n2))
   return(to_return)
 }
 

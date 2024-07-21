@@ -23,7 +23,7 @@ regression_test_BFF(
 
 \item{alternative}{is the alternative a one.sided or two.sided test? default is two.sided}
 
-\item{omega}{stnadardized effect size. For the regression test, this is also known as eta-squared. (can be a single entry or a vector of values)}
+\item{omega}{stnadardized effect size. For the regression test, this is also known as Cohen's f^@ (can be a single entry or a vector of values)}
 
 \item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
 }

@@ -1,5 +1,5 @@
-################# T functions if r is an integer and equal to 1
-t_val_r1 = function(tau2, t_stat, df)
+################# T functions if r is an integer and equal to 1 (PNAS, not called)
+BFF_t_test_r1 = function(tau2, t_stat, df)
 {
   r = 1 + t_stat ^ 2 / df
   s = 1 + t_stat ^ 2 / (df * (1 + tau2))
@@ -12,10 +12,28 @@ t_val_r1 = function(tau2, t_stat, df)
   return(to_return)
 }
 
+####################### backend implementation (SPL, default)
+BFF_t_test = function(tau2, t_stat, df, r, two_sided)
+{
+
+  a = get_a(tau2=tau2, r=r)
+  c = get_c(tau2=tau2, df=df, r=r)
+  y = get_y_t_test(tau2=tau2, t=t_stat, df=df)
+
+  first_hypergeo = Gauss2F1((df+1)/2, r + 1/2, 1/2, y^2)
+  second_hypergeo = Gauss2F1(df/2 + 1, r + 1, 3/2, y^2)
+
+  const = ifelse(two_sided, 1, 2)
+
+  final_BF = a*(first_hypergeo + const*c*y*second_hypergeo)
+  return(final_BF)
+}
+
 
 ####################### backend implementation
 backend_t <- function(
     input,
+    r,
     omega = NULL){
 
   # compute tau2 from omega
@@ -24,28 +42,22 @@ backend_t <- function(
   # i.e., tau2[omega][t-stat]
   tau2 <- lapply(omega, function(x){
     if(input$one_sample){
-      tau2 <- get_one_sample_tau2(n = input$n, w = x)
+      tau2 <- get_one_sample_tau2(n = input$n, w = x, r = r)
     }else{
-      tau2 <- get_two_sample_tau2(n1 = input$n1, n2 = input$n2, w = x)
+      tau2 <- get_two_sample_tau2(n1 = input$n1, n2 = input$n2, w = x, r = r)
     }
   })
 
   # compute log_BF
   log_BF <- sapply(tau2, function(x){
     sum(sapply(seq_along(input$t_stat), function(i){
-      if(input$alternative == "greater"){
-        t_val_r1(
-          tau2 = x[i],
-          df    = input$df[i],
-          t_stat    = input$t_stat[i]
-        )
-      }else{
-        t_val_r1(
-          tau2 = x[i],
-          df    = input$df[i],
-          t_stat    = input$t_stat[i]
-        )
-      }
+      BFF_t_test(
+        tau2 = x[i],
+        t_stat    = input$t_stat[i],
+        df = input$df[i],
+        r = r,
+        two_sided = input$alternative == "two.sided"
+      )
     }))
   })
 
@@ -78,6 +90,7 @@ backend_t <- function(
 #' @param n2 sample size of group two for two sample test. Must be provided if one_sample = FALSE
 #' @param omega standardized effect size. For the t-test, this is often called Cohen's d (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
+#' @param r variable controlling dispesion of non-local piors. Default is 1.
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
@@ -94,7 +107,8 @@ t_test_BFF <- function(
     one_sample = FALSE,
     alternative = "two.sided",
     omega = NULL,
-    omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01)){
+    omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
+    r = 1){
 
 
   ### input checks and processing
@@ -104,6 +118,7 @@ t_test_BFF <- function(
   # calculate BF
     results   <- backend_t(
       input     = input,
+      r         = r,
       omega     = if(!is.null(omega)) omega else omega_sequence
     )
 
@@ -125,6 +140,7 @@ t_test_BFF <- function(
     omega_set    = !is.null(omega),
     test_type    = "t_test",
     generic_test = FALSE,
+    r            = r,
     input        = input
   )
   if(is.null(omega)){

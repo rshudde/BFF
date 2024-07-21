@@ -12,7 +12,8 @@ z_test_BFF(
   one_sample = FALSE,
   alternative = "two.sided",
   omega = NULL,
-  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01)
+  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01),
+  r = 1
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ z_test_BFF(
 \item{omega}{standardized effect size. For the z-test, this is often called Cohen's d (can be a single entry or a vector of values)}
 
 \item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
+
+\item{r}{variable controlling dispesion of non-local piors. Default is 1.}
 }
 \value{
 Returns an S3 object of class `BFF` (see `BFF.object` for details).
