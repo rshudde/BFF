@@ -90,7 +90,7 @@ backend_t <- function(
 #' @param n2 sample size of group two for two sample test. Must be provided if one_sample = FALSE
 #' @param omega standardized effect size. For the t-test, this is often called Cohen's d (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
-#' @param r variable controlling dispesion of non-local piors. Default is 1.
+#' @param r variable controlling dispersion of non-local priors Default is 1.
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
