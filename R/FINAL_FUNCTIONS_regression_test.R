@@ -12,10 +12,27 @@ reg_t_val_r1 = function(tau2, t_stat, df)
   return(to_return)
 }
 
+####################### backend implementation (SPL, default)
+BFF_reg_test = function(tau2, t_stat, df, r, two_sided)
+{
+
+  a = get_a(tau2=tau2, r=r)
+  c = get_c(tau2=tau2, df=df, r=r)
+  y = get_y_t_test(tau2=tau2, t=t_stat, df=df)
+
+  first_hypergeo = Gauss2F1((df+1)/2, r + 1/2, 1/2, y^2)
+  second_hypergeo = Gauss2F1(df/2 + 1, r + 1, 3/2, y^2)
+
+  const = ifelse(two_sided, 1, 2)
+
+  final_BF = a*(first_hypergeo + const*c*y*second_hypergeo)
+  return(final_BF)
+}
 
 ####################### backend implementation
 backend_reg <- function(
     input,
+    r,
     omega = NULL){
 
   # compute tau2 from omega
@@ -23,25 +40,19 @@ backend_reg <- function(
   # corresponds a vector of tau2 for the corresponding t-statistics
   # i.e., tau2[omega][t-stat]
   tau2 <- lapply(omega, function(x){
-      tau2 <- get_regression_tau2(n = input$n, k = input$k, w = x)
+      tau2 <- get_regression_tau2(n = input$n, k = input$k, w = x, r = r)
   })
 
   # compute log_BF
   log_BF <- sapply(tau2, function(x){
     sum(sapply(seq_along(input$t_stat), function(i){
-      if(input$alternative == "greater"){
-        reg_t_val_r1(
-          tau2 = x[i],
-          df    = input$df[i],
-          t_stat    = input$t_stat[i]
-        )
-      }else{
-        reg_t_val_r1(
-          tau2 = x[i],
-          df    = input$df[i],
-          t_stat    = input$t_stat[i]
-        )
-      }
+      BFF_reg_test(
+        tau2 = x[i],
+        t_stat    = input$t_stat[i],
+        df = input$df[i],
+        r = r,
+        two_sided = input$alternative == "two.sided"
+      )
     }))
   })
 
@@ -78,11 +89,10 @@ backend_reg <- function(
 #' @export
 #'
 #' @examples
-#' regBFF = regression_test_BFF(t_stat = 2.5, n = 50, k = 3)
+#' regBFF = regression_test_BFF(t_stat = 1.5, n = 50, k = 3)
 #' regBFF
 #' plot(regBFF)
 #'
-
 regression_test_BFF <- function(
     t_stat,
     n = NULL,
@@ -90,7 +100,8 @@ regression_test_BFF <- function(
     one_sample = FALSE,
     alternative = "two.sided",
     omega = NULL,
-    omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01)){
+    omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
+    r = 1){
 
 
   ### input checks and processing
@@ -100,6 +111,7 @@ regression_test_BFF <- function(
   # calculate BF
   results   <- backend_reg(
     input     = input,
+    r         = r,
     omega     = if(!is.null(omega)) omega else omega_sequence
   )
 
@@ -121,6 +133,7 @@ regression_test_BFF <- function(
     omega_set    = !is.null(omega),
     test_type    = "regression_test",
     generic_test = FALSE,
+    r            = r,
     input        = input
   )
   if(is.null(omega)){

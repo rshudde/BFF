@@ -11,7 +11,8 @@ regression_test_BFF(
   one_sample = FALSE,
   alternative = "two.sided",
   omega = NULL,
-  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01)
+  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01),
+  r = 1
 )
 }
 \arguments{
@@ -36,7 +37,7 @@ By setting r > 1, we use higher-order moments for replicated studies. Fractional
 All results are on the log scale.
 }
 \examples{
-regBFF = regression_test_BFF(t_stat = 2.5, n = 50, k = 3)
+regBFF = regression_test_BFF(t_stat = 1.5, n = 50, k = 3)
 regBFF
 plot(regBFF)
 
