@@ -45,10 +45,10 @@ get_corr_tau2 = function(n, w)
   return(to_return)
 }
 
-get_regression_tau2 = function(n, k, w)
+get_regression_tau2 = function(n, k, w, r)
 {
   top = (n-k-1)*w^2
-  bottom = (2)
+  bottom = (2* r)
   to_return = top / bottom
   return(to_return)
 }
