@@ -38,7 +38,7 @@ backend_f <- function(
   # corresponds a vector of tau2 for the corresponding t-statistics
   # i.e., tau2[omega][t-stat]
   tau2 <- lapply(omega, function(x){
-      tau2 = get_linear_tau2(n = input$n, w = x, k = input$df1)
+      tau2 = get_linear_tau2(n = input$n, w = x, k = input$df1, r = r)
   })
 
   # compute log_BF

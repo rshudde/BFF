@@ -35,9 +35,9 @@ backend_chi2 <- function(
   # i.e., tau2[omega][t-stat]
   tau2 <- lapply(omega, function(x){
     if(input$LRT){
-      tau2 <- get_LRT_tau2(n = input$n, k = input$df, w = x)
+      tau2 <- get_LRT_tau2(n = input$n, k = input$df, w = x, r = r)
     }else{
-      tau2 <- get_count_tau2(n = input$n, k = input$df, w = x)
+      tau2 <- get_count_tau2(n = input$n, k = input$df, w = x, r = r)
     }
   })
 

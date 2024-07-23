@@ -57,18 +57,18 @@ get_b = function(tau2, r, k) {
 
 get_c = function(tau2, df, r) {
   numerator = gamma_approx(df/2+1) * gamma_approx(r + 1)
-  denomonator = gamma_approx((df+1)/2) * gamma(r + 1/2)
+  denomonator = gamma_approx((df+1)/2) * gamma_approx(r + 1/2)
   to_return = numerator / denomonator
   return(to_return)
 }
 
 get_y_onesided_z_test = function(tau2, z) {
-  to_return = sqrt(tau2) * z *(2+tau2)^(-1/2)
+  to_return = sqrt(tau2) * z *(2 + 2*tau2)^(-1/2)
   return(to_return)
 }
 
 get_y_t_test = function(tau2, t, df) {
-  inner = (df + tau2) * (1+tau2)
+  inner = (df + t^2) * (1+tau2)
   to_return = sqrt(tau2) * t * inner^(-1/2)
   return(to_return)
 }
