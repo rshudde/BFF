@@ -22,7 +22,7 @@ BFF_z_test = function(tau2, z_stat, r, two_sided)
     final_BF = a * hypergeom1F1(r + 1/2, 1/2, tau2 * z_stat^2 / (2 * (1 + tau2)) )$f
   } else {
     first_hypergeo = hypergeom1F1(r +1/2, 1/2, y^2)$f
-    # second_hyergeo = hypergeom1F1(r + 1/2, 3/2, y^2)$f
+    second_hyergeo = hypergeom1F1(r + 1/2, 3/2, y^2)$f
     const = 2 * y * gamma_approx(r+1) / gamma_approx(r + 1/2)
     final_BF = a*(first_hypergeo + const*second_hypergeo)
   }
