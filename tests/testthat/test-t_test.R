@@ -9,7 +9,7 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.40017, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf, 1.12436, tolerance = 1e-5)
   testthat::expect_equal(fit$omega,  0.5)
 
   # test S3 methods
@@ -18,7 +18,7 @@ test_that("two-sample: basic functionality", {
     c(
     "\tBayesian non-local two-sample t test"  ,
     ""                                        ,
-    "log Bayes factor = 0.40"                 ,
+    "log Bayes factor = 1.12"                 ,
     "omega = 0.50 (Cohen's d)"                ,
     "alternative = two.sided"
     )
@@ -70,7 +70,7 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.4952852, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf, 1.64097, tolerance = 1e-5)
   testthat::expect_equal(fit$omega,  0.50)
 
   # test S3 methods
@@ -79,7 +79,7 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local two-sample t test"  ,
       ""                                        ,
-      "log Bayes factor = 0.50"                 ,
+      "log Bayes factor = 1.64"                 ,
       "omega = 0.50 (Cohen's d)"                ,
       "alternative = greater"
     )
@@ -96,8 +96,8 @@ test_that("two-sample: basic functionality", {
     n2 = 75)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.1066665, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.09)
+  testthat::expect_equal(fit$log_bf, 1.03284, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega,  0.05)
 
   # test S3 methods
   testthat::expect_equal(
@@ -105,8 +105,8 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local two-sample t test"  ,
       ""                                        ,
-      "maximized log Bayes factor = 0.11"       ,
-      "maximized omega = 0.09 (Cohen's d)"      ,
+      "maximized log Bayes factor = 1.03"       ,
+      "maximized omega = 0.05 (Cohen's d)"      ,
       "alternative = two.sided"
     )
   )
@@ -130,8 +130,8 @@ test_that("two-sample: basic functionality", {
     n2 = 50)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0)
+  testthat::expect_equal(fit$log_bf, 0.97286, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega,  0.01)
 
   # test S3 methods
   testthat::expect_equal(
@@ -139,8 +139,8 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local two-sample t test",
       ""                                        ,
-      "maximized log Bayes factor = 0.00"       ,
-      "maximized omega = 0.00 (Cohen's d)"      ,
+      "maximized log Bayes factor = 0.97"       ,
+      "maximized omega = 0.01 (Cohen's d)"      ,
       "alternative = less"
     )
   )

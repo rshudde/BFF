@@ -9,8 +9,8 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, -0.278, tolerance = 1e-2)
-  testthat::expect_equal(fit$omega,  0.5)
+  testthat::expect_equal(fit$log_bf, 0.757, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega,  0.50)
 
   # test S3 methods
   testthat::expect_equal(
@@ -18,8 +18,9 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local two-sample z test"  ,
       ""                                        ,
-      "log Bayes factor = -0.28"                 ,
-      "omega = 0.50 (Cohen's d)"
+      "log Bayes factor = 0.76"                 ,
+      "omega = 0.50 (Cohen's d)"                ,
+      "alternative = two.sided"
     )
   )
   testthat::expect_error(plot(fit), "Bayes factor function can be plotted only if a specific omega/tau2 is not user set")
@@ -68,7 +69,7 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, -0.28, tolerance = 1e-2)
+  testthat::expect_equal(fit$log_bf, 1.34014, tolerance = 1e-5)
   testthat::expect_equal(fit$omega,  0.50)
 
   # test S3 methods
@@ -77,8 +78,9 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local two-sample z test"  ,
       ""                                        ,
-      "log Bayes factor = -0.28"                 ,
-      "omega = 0.50 (Cohen's d)"
+      "log Bayes factor = 1.34"                 ,
+      "omega = 0.50 (Cohen's d)"                ,
+      "alternative = greater"
     )
   )
   # vdiffr::expect_doppelganger("z_test-two_sample-one_sided-posterior",           posterior_plot(fit))
@@ -93,8 +95,8 @@ test_that("two-sample: basic functionality", {
     n2 = 75)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.00, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.00)
+  testthat::expect_equal(fit$log_bf, 0.99895, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega,  0.01)
 
   # test S3 methods
   testthat::expect_equal(
@@ -102,8 +104,9 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local two-sample z test"  ,
       ""                                        ,
-      "maximized log Bayes factor = 0.00"       ,
-      "maximized omega = 0.00 (Cohen's d)"
+      "maximized log Bayes factor = 1.00"       ,
+      "maximized omega = 0.01 (Cohen's d)"      ,
+      "alternative = two.sided"
     )
   )
   # vdiffr::expect_doppelganger("t_test_BFF-two_sample-two_sided-BFF",                 plot(fit))
@@ -125,8 +128,8 @@ test_that("two-sample: basic functionality", {
     n2 = 50)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0)
+  testthat::expect_equal(fit$log_bf, 0.97045, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega,  0.01)
 
   # test S3 methods
   testthat::expect_equal(
@@ -134,8 +137,9 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local two-sample z test",
       ""                                        ,
-      "maximized log Bayes factor = 0.00"       ,
-      "maximized omega = 0.00 (Cohen's d)"
+      "maximized log Bayes factor = 0.97"       ,
+      "maximized omega = 0.01 (Cohen's d)"      ,
+      "alternative = less"
     )
   )
   vdiffr::expect_doppelganger("z_test_BFF-two_sample-one_sided-BFF", plot(fit))
