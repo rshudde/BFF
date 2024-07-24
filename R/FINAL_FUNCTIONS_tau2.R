@@ -13,7 +13,7 @@ get_two_sample_tau2 = function(n1, n2, w, r)
   return(to_return)
 }
 
-get_count_tau2 = function(n, w, k)
+get_count_tau2 = function(n, w, k, r)
 {
   top = n * w ^ 2 * k
   bottom =2 * (k / 2 + r - 1)
