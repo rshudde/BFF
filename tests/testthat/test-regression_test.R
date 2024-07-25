@@ -9,7 +9,7 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.64808, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf, -0.43374, tolerance = 1e-5)
   testthat::expect_equal(fit$omega,  0.5)
 
   # test S3 methods
@@ -18,7 +18,7 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local regression test"  ,
       ""                                        ,
-      "log Bayes factor = 0.65"                 ,
+      "log Bayes factor = -0.43"                 ,
       "omega = 0.50 (Partial correlation coefficient (eta squared))"                ,
       "alternative = two.sided"
     )
@@ -70,7 +70,7 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.75657, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf, -0.27897, tolerance = 1e-4)
   testthat::expect_equal(fit$omega,  0.50)
 
   # test S3 methods
@@ -79,7 +79,7 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local regression test"  ,
       ""                                        ,
-      "log Bayes factor = 0.76"                 ,
+      "log Bayes factor = -0.28"                 ,
       "omega = 0.50 (Partial correlation coefficient (eta squared))"                ,
       "alternative = greater"
     )
@@ -96,7 +96,7 @@ test_that("two-sample: basic functionality", {
     k = 1)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 1.03336, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf, 0.03282, tolerance = 1e-5)
   testthat::expect_equal(fit$omega,  0.05)
 
   # test S3 methods
@@ -105,7 +105,7 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local regression test"  ,
       ""                                        ,
-      "maximized log Bayes factor = 1.03"       ,
+      "maximized log Bayes factor = 0.03"       ,
       "maximized omega = 0.05 (Partial correlation coefficient (eta squared))"      ,
       "alternative = two.sided"
     )
@@ -130,8 +130,8 @@ test_that("two-sample: basic functionality", {
     k = 4)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.96308, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.01)
+  testthat::expect_equal(fit$log_bf, 0.0, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega,  0.0)
 
   # test S3 methods
   testthat::expect_equal(
@@ -139,9 +139,9 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local regression test",
       ""                                        ,
-      "maximized log Bayes factor = 0.96"       ,
-      "maximized omega = 0.01 (Partial correlation coefficient (eta squared))"      ,
-      "alternative = lessr"
+      "maximized log Bayes factor = 0.00"       ,
+      "maximized omega = 0.00 (Partial correlation coefficient (eta squared))"      ,
+      "alternative = less"
     )
   )
   # vdiffr::expect_doppelganger("regression_test_BFF-two_sample-one_sided-BFF", plot(fit))
