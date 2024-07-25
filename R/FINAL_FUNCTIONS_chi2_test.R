@@ -19,7 +19,8 @@ BFF_chi2_test = function(tau2, chi2_stat, k, r)
   hypergeo = hypergeom1F1(k/2 + r, k/2, term_three)$f
 
   final_BF = b*hypergeo
-  return(final_BF)
+  to_return = log(final_BF)
+  return(to_return)
 }
 
 

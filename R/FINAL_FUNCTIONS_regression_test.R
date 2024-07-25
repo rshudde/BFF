@@ -26,6 +26,7 @@ BFF_reg_test = function(tau2, t_stat, df, r, two_sided)
   const = ifelse(two_sided, 1, 2)
 
   final_BF = a*(first_hypergeo + const*c*y*second_hypergeo)
+  to_return = log(final_BF)
   return(final_BF)
 }
 

@@ -26,8 +26,8 @@ BFF_z_test = function(tau2, z_stat, r, two_sided)
     const = 2 * y * gamma_approx(r+1) / gamma_approx(r + 1/2)
     final_BF = a*(first_hypergeo + const*second_hypergeo)
   }
-
-  return(final_BF)
+  to_return = log(final_BF)
+  return(to_return)
 }
 
 

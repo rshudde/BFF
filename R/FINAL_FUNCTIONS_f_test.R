@@ -24,7 +24,8 @@ BFF_f_test = function(tau2, f_stat, k, m, r)
   hypergeo = Gauss2F1(k/2 + r, (k+m)/2, k/2, term_four)
 
   final_BF =b * hypergeo
-  return(final_BF)
+  to_return = log(final_BF)
+  return(to_return)
 }
 
 ####################### backend implementation
