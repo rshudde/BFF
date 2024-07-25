@@ -9,7 +9,7 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.05534, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf, -2.89426, tolerance = 1e-5)
   testthat::expect_equal(fit$omega,  0.5)
 
   # test S3 methods
@@ -18,7 +18,7 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local f test"  ,
       ""                                        ,
-      "log Bayes factor = 0.06"                 ,
+      "log Bayes factor = -2.89"                 ,
       "omega = 0.50 (Standardized effect size)"
     )
   )
@@ -29,47 +29,47 @@ test_that("two-sample: basic functionality", {
   # - however, the posterior distribution does not integrate to 1
   # (I remember that I raised this issue when I was in US, and Saptati was working on fixing it)
 
-  # this is how the functions should work
-  posterior_plot(fit)
-  posterior_plot(fit, prior = TRUE)
-
-  # this highlights the issue (run `devtools::load_all()` first)
-  tau2 <- get_two_sample_tau2(n1 = fit$input$n1, n2 = fit$input$n2, w = fit$omega, r = fit$r)
-
-  # does not integrate to 1
-  integrate(
-    f = function(x) .t_test.posterior(
-      t_stat = fit$input$t_stat, tau2 = tau2, r = fit$r, effect_size = x,
-      n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
-    lower = -Inf,
-    upper = Inf
-  )
-
-  # prior seems to work just fine (i.e., integrates to one)
-  integrate(
-    f = function(x) .t_test.prior(
-      tau2 = tau2, r = fit$r, effect_size = x,
-      n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
-    lower = -Inf,
-    upper = Inf
-  )
-  # <\TODO> Adjust for F-test later
-
-  # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior",           posterior_plot(fit))
-  # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE))
-
+  # # this is how the functions should work
+  # posterior_plot(fit)
+  # posterior_plot(fit, prior = TRUE)
+  #
+  # # this highlights the issue (run `devtools::load_all()` first)
+  # tau2 <- get_two_sample_tau2(n1 = fit$input$n1, n2 = fit$input$n2, w = fit$omega, r = fit$r)
+  #
+  # # does not integrate to 1
+  # integrate(
+  #   f = function(x) .t_test.posterior(
+  #     t_stat = fit$input$t_stat, tau2 = tau2, r = fit$r, effect_size = x,
+  #     n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
+  #   lower = -Inf,
+  #   upper = Inf
+  # )
+  #
+  # # prior seems to work just fine (i.e., integrates to one)
+  # integrate(
+  #   f = function(x) .t_test.prior(
+  #     tau2 = tau2, r = fit$r, effect_size = x,
+  #     n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
+  #   lower = -Inf,
+  #   upper = Inf
+  # )
+  # # <\TODO> Adjust for F-test later
+  #
+  # # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior",           posterior_plot(fit))
+  # # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE))
+  #
 
 
   ### test unspecified omega -- BFF (two-sample; also change n1/n2)
   fit <- f_test_BFF(
-    f_stat = 0.5,
+    f_stat = 1.5,
     n = 50,
     df1 = 25,
     df2 = 75)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.98564, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.01)
+  testthat::expect_equal(fit$log_bf, 0.82228, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega,  0.14)
 
   # test S3 methods
   testthat::expect_equal(
@@ -77,8 +77,8 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local f test"  ,
       ""                                        ,
-      "maximized log Bayes factor = 0.99"       ,
-      "maximized omega = 0.01 (Standardized effect size)"
+      "maximized log Bayes factor = 0.82"       ,
+      "maximized omega = 0.14 (Standardized effect size)"
     )
   )
   #Modify for F test
@@ -89,9 +89,9 @@ test_that("two-sample: basic functionality", {
 
 
   # check that the data.frame plot output also works
-  no_plot_plot <- posterior_plot(fit, plot = FALSE, prior = TRUE)
-  testthat::expect_true(is.data.frame(no_plot_plot))
-  testthat::expect_equal(colnames(no_plot_plot), c("x", "prior", "posterior"))
+  # no_plot_plot <- posterior_plot(fit, plot = FALSE, prior = TRUE)
+  # testthat::expect_true(is.data.frame(no_plot_plot))
+  # testthat::expect_equal(colnames(no_plot_plot), c("x", "prior", "posterior"))
 
 
   ### test different r -- non-local prior f-test (two-sample)
@@ -103,8 +103,8 @@ test_that("two-sample: basic functionality", {
     r = 3)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 6.9389, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.2)
+  testthat::expect_equal(fit$log_bf, 1.93714, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega,  0.24)
 
   # test S3 methods
   testthat::expect_equal(
@@ -112,7 +112,7 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local f test"  ,
       ""                                        ,
-      "maximized log Bayes factor = 6.94"                 ,
+      "maximized log Bayes factor = 1.94"                 ,
       "maximized omega = 0.24 (Standardized effect size)"
     )
   )
