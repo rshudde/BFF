@@ -85,7 +85,7 @@ backend_chi2 <- function(
 #' @export
 #'
 #' @examples
-#' chi2BFF = chi2_test_BFF(chi2_stat = 7.5, n = 25)
+#' chi2BFF = chi2_test_BFF(chi2_stat = 6.5, n = 10)
 #' chi2BFF
 #' plot(chi2BFF)
 #'
