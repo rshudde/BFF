@@ -19,10 +19,10 @@ library(BFF)
 library(BSDA)
 ```
 
-Bayes factors are an alterntive to p-values for evaluating hypothesis tests. However, unlike p-values, bayes factors are able to provide evidence for a null hypothesis. Bayes factors also have a clear interpretation: a larger bayes factor shows more evidence for a hypothesis, as opposed to p-values (can anyone tell the difference between 0.05 and 0.06?). Bayes factors have in the past had limited acceptance due to computational issues and difficulty in selecting a prior. Recent work (see 1Bayes factor functions for reporting outcomes of hypothesis tests,' 2023 and 'On the use of non-local prior densities in Bayesian hypothesis tests,' 2010) introduced the idea of using non-local priors to calculate Bayes factors. This package implements "Bayes Factor Functions" (or BFFS). In contrast to a single bayes factor, BFFs express Bayes factors as a function of the prior densities used to
+Bayes factors are an alternative to p-values for evaluating hypothesis tests. However, unlike p-values, Bayes factors are able to provide evidence for a null hypothesis. This allows a researcher to conclude that data provides evidence for the null hypothesis (instead of just "failing to reject" a null hypothesis). Bayes factors also have a clear interpretation: a larger Bayes factor shows more evidence for a hypothesis, as opposed to p-values (can anyone tell the difference between 0.05 and 0.06?). Bayes factors have in the past had limited acceptance due to computational issues and difficulty in selecting a prior. Recent work (see 'Bayes factor functions for reporting outcomes of hypothesis tests,' 2023 and 'On the use of non-local prior densities in Bayesian hypothesis tests,' 2010) introduced the idea of using non-local priors to calculate Bayes factors. This package implements "Bayes Factor Functions" (or BFFS). In contrast to a single Bayes factor, BFFs express Bayes factors as a function of the prior densities used to
 define the alternative hypotheses. 
 
-Interpreting bayes factors is usuall done on the log scale (also called the weight of evidence, or WoE) On this scale, a positive bayes factor represents evidence for the alternative hypothesis. A negative bayes factor represents evidence for the null hypothesis. As a rule of thumb, the following table can be used to interpret a bayes factor. However, these are just guidlines and some fields may require higher or lower thresholds of evidence.
+Interpreting Bayes factors is usually done on the log scale (also called the weight of evidence, or WoE) On this scale, a positive Bayes factor represents evidence for the alternative hypothesis. A negative Bayes factor represents evidence for the null hypothesis. As a rule of thumb, the following table can be used to interpret a Bayes factor. However, these are just guidelines and some fields may require higher or lower thresholds of evidence.
 
 ```{=latex}
 \begin{table}[!ht]
@@ -42,228 +42,75 @@ Interpreting bayes factors is usuall done on the log scale (also called the weig
 \end{table}
 ```
 
-This package provides the bayes factor values for different effect sizes from 0 to 1. A small effect size is usually considered from  0.2 to 0.5,, medium effect sizes from 0.5 to 0.8, and large effect sizes as greater than 0.8. 
+This package provides the bayes factor values for different effect sizes from 0 to 1. A small effect size is usually considered from  0.2 to 0.5,, medium effect sizes from 0.5 to 0.8, and large effect sizes as greater than 0.8. However, we use the cutoffs in "Statistical Power Analysis For the Behavioral Sciences" (Cohen) for specific tests. 
 
 Using this package is very similar to using the familiar t, z, chi^2, and F tests in R. You will need the same information - the test statistic, degrees of freedom, and sample size. A graph is produced that shows the BFF curve over the different effect sizes. 
 
-For evaludating evidence from multiple studies (see 'Bayes factor functions', 2023 (arxiv)), the parameter 'r' can also be set. The default value for r is 1, but 'r' can be suggested that maximizes the bayes factor at each tau by setting the 'maximization' argument in each test to "TRUE." 
+For evaluating evidence from multiple studies, the parameter 'r' can also be set. The default value for r is 1, but 'r' can be set to place more of the prior mass around a suggested point. The higher the r, the more peaked the prior is around the desired effect size. The graph below shows different options.
 
-# The following examples will show how the BFF package calculates Bayes factors based on test statistics
+```{r}
+# Define the density function
+density_function <- function(lambda, tau2, r) {
+  coef <- (lambda^2)^r / ((2 * tau2)^(r + 0.5) * gamma(r + 0.5))
+  exp_term <- exp(-lambda^2 / (2 * tau2))
+  return(coef * exp_term)
+}
 
-## z - test
+# Define omega and n
+omega <- 0.5
+n <- 50
 
-```{r z-statistics}
-# generating some data
-n = 100
-data_one = rnorm(n = n, mean = 0.2, sd = 1)
-data_two = rnorm(n = n, mean = 0.1, sd = 1)
+# Define the range for lambda
+lambda_range <- seq(-10, 10, length.out = 1000)
 
-# calculating test statistics using z.test
-# one-sample z-test
-# z_score_one = BSDA::z.test(x = data_one, sigma.x = 1)$statistic
-# two-sample z-test
-# z_score_two = BSDA::z.test(x = data_one, y = data_two, sigma.x = 1, sigma.y = 1)$statistic
+# Define the values of r to plot
+r_values <- c(1, 2, 3, 5, 10)
 
-```
+# Define colors for the different r values
+colors <- rainbow(length(r_values))
 
-Calculating BFF using z_test_BFF
+# Plot the densities using base R plotting functions
+plot(NULL, xlim = c(-10, 10), xlab = expression(lambda), ylab = "Density", main = "Density for varying r", ylim = c(0, 0.4))
 
-```{r calculating BFF for z test}
-# default r and tau2
-# z_BFF_one = z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE) #one sample z-test
-# z_BFF_two = z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE) #two sample z-test
-#   
-# # default r and user specified tau2
-# # single tau2
-# z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = 0.5) #one sample z-test
-# z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = 0.5) #two sample z-test
-# # vector of tau2 values
-# z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8)) #one sample z-test
-# z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = c(0.5, 0.8)) #two sample z-test
-#   
-# # user specified r and default tau2
-# z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, r = 2) #one sample z-test, integer r >1  (higher order moments) 
-# z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, r = 2) #two sample z-test, integer r >1  (higher order moments) 
-# z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, r = 2.5) #one sample z-test, continuous r (fractional moments)
-# z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, r = 2.5) #two sample z-test, continuous r (fractional moments)
-```
+# Add lines for each value of r
+for (i in seq_along(r_values)) {
+  r <- r_values[i]
+  tau2 <- (n * omega^2) / (2 * r)
+  densities <- sapply(lambda_range, density_function, tau2 = tau2, r = r)
+  lines(lambda_range, densities, col = colors[i], lwd = 2)
+}
 
-
-## t - test
-
-```{r t-statistics}
-# # generating some data
-# n = 100
-# data_one = rnorm(n = n, mean = -0.1)
-# data_two = rnorm(n = n, mean = 0.1)
-# 
-# # calculating test statistics using t.test
-# t_one = t.test(x = data_one)
-# t_two = t.test(x = data_one, y = data_two)
-# t_score_one = t_one$statistic
-# t_score_two = t_two$statistic
-# t_df_one = n - 1
-# t_df_two = 197.9
+# Add a legend
+legend("topright", legend = paste("r =", r_values), col = colors, lwd = 2)
 
 ```
 
-Calculating BFF using t_test_BFF
+## Examples
 
-```{r calculating BFF for t test}
-# # default r and tau2
-# t_BFF_one = t_test_BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE) #one sample t-test
-# t_BFF_two = t_test_BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE) #two sample t-test
-#   
-# # default r and user specified tau2
-# # single tau2
-# t_test_BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, tau2 = 0.5) #one sample t-test
-# t_test_BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, tau2 = 0.5) #two sample t-test 
-# # vector of tau2 values
-# t_test_BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8)) #one sample t-test
-# t_test_BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, tau2 = c(0.5, 0.8)) #two sample t-test 
-#   
-# # user specified r and default tau2
-# t_test_BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, r = 2) #one sample t-test, integer r >1  (higher order moments) 
-# t_test_BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, r = 2) #two sample t-test, integer r >1  (higher order moments) 
-# t_test_BFF(t_stat = t_score_one, df = t_df_one, n = 100, save = FALSE, r = 2.5) #one sample t-test, continuous r (fractional moments)
-# t_test_BFF(t_stat = t_score_two, df = t_df_two, one_sample = FALSE, n1 = 100, n2  = 100, save = FALSE, r = 2.5) #two sample t-test, continuous r (fractional moments)
+In the example below, you can see how the test returns different results for the same t statistic in a one sided verses two sample case. In the one sample case, the Bayes factor is maximized at a Cohen's d value of 0.28, and in the two sample test the Bayes factor is maximized at the Cohen's d value of 0.59.
+
+The second two examples show the t statistic calculated with the same one and two sample cases, but with a higher r value. This higher r value leads to a smaller Cohen's d value that maxizes the Bayes factor.
+```{r}
+tBFF = t_test_BFF(t_stat = 2.5, n = 50, one_sample = TRUE)
+tBFF # plot the results
+plot(tBFF)
+
+# now an example with different types of settings
+tBFF_twosample = t_test_BFF(t_stat = 2.5, n1 = 50, n2 = 14, one_sample = FALSE)
+tBFF_twosample # plot the results
+plot(tBFF_twosample)
+
+
+# repeat the above with r = 5
+tBFF_r5 = t_test_BFF(t_stat = 2.5, n = 50, one_sample = TRUE, r = 5)
+tBFF_r5 # plot the results
+plot(tBFF_r5)
+
+# now an example with different types of settings
+tBFF_twosample_r5 = t_test_BFF(t_stat = 2.5, n1 = 50, n2 = 14, one_sample = FALSE, r = 5)
+tBFF_twosample_r5 # plot the results
+plot(tBFF_twosample_r5)
 ```
 
-## chi^2 - test
-
-```{r chi2-test}
-# # generate some data
-# x <- matrix(c(12, 5, 7, 7), ncol = 2)
-# 
-# # calculating chi2 test statistic from chisq.test
-# chi2_stat = chisq.test(x)$statistic        
-```
-
-Calculating BFF using chi2_test_BFF
-
-```{r calculating BFF for chi2 test}
-# # default r and tau2
-# chi2_BFF_pear = chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE) #Pearson's chi2 test
-# chi2_BFF_lrt = chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE) #Likelihood ratio chi2 test
-#   
-# # default r and user specified tau2
-# # single tau2
-# chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, tau2 = 0.5) #Pearson's chi2 test
-# chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, tau2 = 0.5) #Likelihood ratio chi2 test
-# # vector of tau2 values
-# chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, tau2 = c(0.5, 0.8)) #Pearson's chi2 test
-# chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, tau2 = c(0.5, 0.8)) #Likelihood ratio chi2 test
-#   
-# # user specified r and default tau2
-# chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, r = 2) #Pearson's chi2 test, integer r >1  (higher order moments) 
-# chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, r = 2) #Likelihood ratio chi2 test, integer r >1  (higher order moments) 
-# chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, r = 2.5) #Pearson's chi2 test, continuous r (fractional moments) 
-# chi2_test_BFF(chi2_stat = chi2_stat, df = 1, n = 4, save = FALSE, pearsons = FALSE, r = 2.5) #Likelihood ratio chi2 test, continuous r (fractional moments) 
-```
-
-## F - test
-
-```{r f statistics}
-# # generate some data
-# n = 100
-# p = 3
-# X = matrix(rnorm(n*p), nrow = n)
-# beta = c(1,1,0)
-# y = X %*% beta + rnorm(n)
-# model1 = lm(y ~ X)
-# anova_model = anova(model1)
-# F_stat = anova_model$`F value`[1]
-```
-
-Calculating BFF using f_test_BFF
-
-```{r calculating BFF for f test}
-# # default r and tau2
-# F_BFF_one = f_test_BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, save = FALSE)
-# 
-# # default r and user specified tau2
-# # single tau2
-# f_test_BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = 0.5, save = FALSE)
-# # vector of tau2 values
-# f_test_BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, tau2 = c(0.5, 0.8), save = FALSE)
-#   
-# # user specified r and default tau2
-# f_test_BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, r = 2, save = FALSE) #integer r >1  (higher order moments) 
-# f_test_BFF(f_stat = F_stat, df1 = anova_model$Df[1], df2 = anova_model$Df[2], n = n, r = 2.5, save = FALSE) #continuous r (fractional moments)
-```
-
-## Maximizing r for each specified tau2 (the same maximization parameter applies to all tests, examples are using the z test)
-
-```{r maximing r for z test}
-# # default tau2
-# z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, maximize = TRUE) #one sample z-test
-# z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, maximize = TRUE) #two sample z-test
-# 
-# # user specified tau2
-# #single tau2
-# z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #one sample z-test
-# z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = 0.5, maximize = TRUE) #two sample z- test
-# # vector of tau2 values
-# z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #one sample z-test
-# z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = FALSE, tau2 = c(0.5, 0.8), maximize = TRUE) #two sample z-test
-```
-
-Plotting (the same maximization parameter applies to all tests, examples are using the z test)
-
-Plots can be saved by setting "save = TRUE." If plots are saved, they are saved in working directory.
-
-```{r plotting for z test}
-# # saving the plot as a pdf with default name (BFF_plot.pdf). Stored in working directory.
-# z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE) #one sample z-test
-# z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE) #two sample z-test
-# 
-# # saving the plot as a pdf with user specified name. 
-# z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, savename = "z-BFF-one.pdf") #one sample z-test
-# z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, savename = "z-BFF-two.pdf") #two sample z-test
-#  
-# # customizing x-axis labels, y-axis labels and main title
-# z_test_BFF(z_stat = z_score_one, n = 100, save = FALSE, xlab = "RMSE", ylab = "Logarithm of Bayes Factor", main = "BFF curves") #one sample z-test
-# z_BFF_two = z_test_BFF(z_stat = z_score_two, one_sample = FALSE, n1 = 100, n2 = 100, save = TRUE, xlab = expression(tilde(omega)), ylab = expression(log(BF[10])), main = "BFF curves") #two sample z-test
-```
-
-## Default choices of tau2 for common statistical tests
-
-<!-- \begin{table}[h] -->
-<!-- \caption{Default choices of $\tau_{\omega,r}$} -->
-<!-- \label{parset} -->
-<!-- % -->
-<!-- \begin{tabular}{lccc} \hline \hline -->
-<!-- {\bf Test }& Statistic  & Standardized Effect ($\omega$) & $\tau^2_{\omega,r}$     \\ \hline \hline -->
-<!-- {1-sample z} & {$\frac{\sqrt{n}\bar{x}}{\sigma}$} &  $\frac{\mu}{\sigma}$ & $ \frac{n\omega^2}{2r}$ -->
-<!--            \\   -->
-<!-- {1-sample t} & {$\frac{\sqrt{n}\bar{x}}{s}$} &  $\frac{\mu}{\sigma}$ & $ \frac{n\omega^2}{2r}$ -->
-<!--            \\   -->
-<!-- {2-sample z}  -->
-<!-- 	& $\frac{\sqrt{n_1 n_2}(\bar{x}_1-\bar{x}_2)}{\sigma\sqrt{n_1+n_2}} $ & $\frac{\mu_1-\mu_2}{\sigma}$  -->
-<!--          & $\frac{n_1 n_2\omega^2}{2r(n_1+n_2)}$ \\  -->
-
-<!-- {2-sample t}  -->
-<!-- 	& $\frac{\sqrt{n_1 n_2}(\bar{x}_1-\bar{x}_2)}{s\sqrt{n_1+n_2}} $ & $\frac{\mu_1-\mu_2}{\sigma}$   -->
-<!--          & $\frac{n_1 n_2\omega^2}{2r(n_1+n_2)}$ \\  -->
-
-<!-- Multinomial/Poisson &  -->
-<!--           \multirow{2}{*}{$\chi^2_{\nu} = \sum\limits_{i=1}^k \frac{(n_i-nf_i(\hat{\theta}))^2}{nf_i(\hat{\theta})}$} & -->
-<!--           \multirow{2}{*}{{ $ \left( \frac{p_{i}-f_i(\theta)}{\sqrt{f_i(\theta)}} \right)_{k\times 1} $} }&  -->
-<!--           \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{2(\frac{k}{2}+r-1)}$} \\ -->
-<!--  & & &   \\ -->
-<!-- Linear model& \multirow{2}{*}{$F_{k,n-p} = \frac{(RSS_0-RSS_1)/k}{[(RSS_1)/(n-p)]}$} & -->
-<!--            \multirow{2}{*}{$\frac{\mathbf{L}^{-1}(\mathbf{A}\boldsymbol{\beta}-\mathbf{a})}{\sigma}$} &  -->
-<!--            \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{4(\frac{k}{2}+r-1)}$}  -->
-<!--                 \\ -->
-<!--                 \\  -->
-<!-- Likelihood Ratio &  -->
-<!--        \multirow{2}{*}{$ \chi^2_{k} = -2\log\left[\frac{l(\theta_{r0},\hat{\theta_{s}})}{l(\hat{\theta})} \right]$} & -->
-<!--        \multirow{2}{*}{${\bf L}^{-1}(\theta_{r}-\theta_{r0}) $ } &  -->
-<!--       \multirow{2}{*}{$ \frac{n \omega'\omega}{2(\frac{k}{2}+r-1)} $ = $\frac{nk\Tilde{\omega}^2}{2(\frac{k}{2}+r-1)}$}   \\ -->
-<!--  &  \\   -->
-<!--      \hline -->
-<!-- \end{tabular} -->
-<!-- % -->
-<!-- \end{table} -->
 
 
