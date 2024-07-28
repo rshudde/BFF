@@ -35,7 +35,7 @@ By setting r > 1, we use higher-order moments for replicated studies. Fractional
 All results are on the log scale.
 }
 \examples{
-chi2BFF = chi2_test_BFF(chi2_stat = 7.5, n = 25)
+chi2BFF = chi2_test_BFF(chi2_stat = 6.5, n = 10)
 chi2BFF
 plot(chi2BFF)
 
