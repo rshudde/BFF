@@ -52,7 +52,7 @@ backend_reg <- function(
         t_stat    = input$t_stat[i],
         df = input$df[i],
         r = r,
-        two_sided = input$alternative == "two.sided"
+        two_sided = input$alternative.original == "two.sided"
       )
     }))
   })
@@ -82,9 +82,9 @@ backend_reg <- function(
 #' @param alternative is the alternative a one.sided or two.sided test? default is two.sided
 #' @param n sample size (if one sample test)
 #' @param k number of predictors
-#' @param omega stnadardized effect size. For the regression test, this is also known as Cohen's f^@ (can be a single entry or a vector of values)
+#' @param omega standadized effect size. For the regression test, this is also known as Cohen's f^@ (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
-#'
+#' @param r variable controlling dispersion of non-local priors. Default is 1.
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
@@ -98,7 +98,6 @@ regression_test_BFF <- function(
     t_stat,
     n = NULL,
     k = NULL,
-    one_sample = FALSE,
     alternative = "two.sided",
     omega = NULL,
     omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
@@ -106,7 +105,7 @@ regression_test_BFF <- function(
 
 
   ### input checks and processing
-  input <- .process_input.reg.test(t_stat, n, k, one_sample, alternative)
+  input <- .process_input.reg.test(t_stat, n, k, alternative)
 
   ### computation
   # calculate BF
@@ -146,7 +145,7 @@ regression_test_BFF <- function(
 }
 
 
-.process_input.reg.test <- function(t_stat, n, k, one_sample, alternative){
+.process_input.reg.test <- function(t_stat, n, k, alternative){
 
   .check_alternative(alternative)
 

@@ -147,3 +147,4 @@ test_that("two-sample: basic functionality", {
   # vdiffr::expect_doppelganger("regression_test_BFF-two_sample-one_sided-BFF", plot(fit))
   # testthat::expect_error(posterior_plot(fit), "There is no non-local prior distribution")
 })
+
