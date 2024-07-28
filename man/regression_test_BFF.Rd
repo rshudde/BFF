@@ -8,10 +8,10 @@ regression_test_BFF(
   t_stat,
   n = NULL,
   k = NULL,
-  one_sample = FALSE,
   alternative = "two.sided",
   omega = NULL,
-  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01)
+  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01),
+  r = 1
 )
 }
 \arguments{
@@ -23,9 +23,11 @@ regression_test_BFF(
 
 \item{alternative}{is the alternative a one.sided or two.sided test? default is two.sided}
 
-\item{omega}{stnadardized effect size. For the regression test, this is also known as eta-squared. (can be a single entry or a vector of values)}
+\item{omega}{standadized effect size. For the regression test, this is also known as Cohen's f^@ (can be a single entry or a vector of values)}
 
 \item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
+
+\item{r}{variable controlling dispersion of non-local priors. Default is 1.}
 }
 \value{
 Returns an S3 object of class `BFF` (see `BFF.object` for details).
@@ -36,7 +38,7 @@ By setting r > 1, we use higher-order moments for replicated studies. Fractional
 All results are on the log scale.
 }
 \examples{
-regBFF = regression_test_BFF(t_stat = 2.5, n = 50, k = 3)
+regBFF = regression_test_BFF(t_stat = 1.5, n = 50, k = 3)
 regBFF
 plot(regBFF)
 

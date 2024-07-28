@@ -9,7 +9,8 @@ chi2_test_BFF(
   n,
   LRT = FALSE,
   omega = NULL,
-  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01)
+  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01),
+  r = 1
 )
 }
 \arguments{
@@ -19,9 +20,11 @@ chi2_test_BFF(
 
 \item{LRT}{should LRT be performed? Default is FALSE}
 
-\item{omega}{standardized effect size. (can be a single entry or a vector of values)}
+\item{omega}{standardized effect size. For the chi^2-test, this is often called Cohen's w (can be a single entry or a vector of values)}
 
 \item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
+
+\item{r}{variable controlling dispersion of non-local priors. Default is 1.}
 }
 \value{
 Returns an S3 object of class `BFF` (see `BFF.object` for details).
@@ -32,7 +35,7 @@ By setting r > 1, we use higher-order moments for replicated studies. Fractional
 All results are on the log scale.
 }
 \examples{
-chi2BFF = chi2_test_BFF(chi2_stat = 7.5, n = 25)
+chi2BFF = chi2_test_BFF(chi2_stat = 6.5, n = 10)
 chi2BFF
 plot(chi2BFF)
 

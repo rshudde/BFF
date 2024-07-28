@@ -1,4 +1,4 @@
-################# F functions if r is an integer and equal to 1
+################# F functions if r is an integer and equal to 1 (PNAS)
 f_val_r1 = function(tau2, f_stat, df1, df2)
 {
   v = df2 * (tau2 + 1)
@@ -13,9 +13,25 @@ f_val_r1 = function(tau2, f_stat, df1, df2)
   return(to_return)
 }
 
+####################### backend implementation (SPL, default)
+BFF_f_test = function(tau2, f_stat, k, m, r)
+{
+  b = get_b(tau2 = tau2, r = r, k = k)
+
+  numerator = k * tau2 * f_stat
+  denomonator = (1 + tau2) * (m + k*f_stat)
+  term_four = numerator / denomonator
+  hypergeo = Gauss2F1(k/2 + r, (k+m)/2, k/2, term_four)
+
+  final_BF =b * hypergeo
+  to_return = log(final_BF)
+  return(to_return)
+}
+
 ####################### backend implementation
 backend_f <- function(
     input,
+    r,
     omega = NULL){
 
   # compute tau2 from omega
@@ -23,17 +39,18 @@ backend_f <- function(
   # corresponds a vector of tau2 for the corresponding t-statistics
   # i.e., tau2[omega][t-stat]
   tau2 <- lapply(omega, function(x){
-      tau2 = get_linear_tau2(n = input$n, w = x, k = input$df1)
+      tau2 = get_linear_tau2(n = input$n, w = x, k = input$df1, r = r)
   })
 
   # compute log_BF
   log_BF <- sapply(tau2, function(x){
     sum(sapply(seq_along(input$f_stat), function(i){
-      f_val_r1(
+      BFF_f_test(
         tau2 = x[i],
         f_stat    = input$f_stat[i],
-        df1 = input$df1,
-        df2 = input$df2
+        k = input$df1,
+        m = input$df2,
+        r = r
       )
     }))
   })
@@ -64,12 +81,13 @@ backend_f <- function(
 #' @param df2 sample size of group two for two sample test
 #' @param omega standardized effect size. For the f-test, this is often called Cohen's f (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
+#' @param r variable controlling dispersion of non-local priors. Default is 1.
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
 #'
 #' @examples
-#' fBFF = f_test_BFF(f_stat = 2.5, n = 50, df1 = 25, df2 = 48)
+#' fBFF = f_test_BFF(f_stat = 1.5, n = 50, df1 = 25, df2 = 48)
 #' fBFF
 #' plot(fBFF)
 #'
@@ -78,7 +96,8 @@ f_test_BFF = function(f_stat,
                       df1,
                       df2,
                       omega = NULL,
-                      omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01))
+                      omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
+                      r = 1)
 
 
 {
@@ -90,6 +109,7 @@ f_test_BFF = function(f_stat,
   # calculate BF
   results   <- backend_f(
     input     = input,
+    r         = r,
     omega     = if(!is.null(omega)) omega else omega_sequence
   )
 
@@ -111,6 +131,7 @@ f_test_BFF = function(f_stat,
     omega_set    = !is.null(omega),
     test_type    = "f_test",
     generic_test = FALSE,
+    r            = r,
     input        = input
   )
   if(is.null(omega)){

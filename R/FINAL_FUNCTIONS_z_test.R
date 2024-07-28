@@ -10,10 +10,31 @@ z_val_r1 = function(tau2, z_stat)
   return(to_return)
 }
 
+####################### backend implementation (SPL, default)
+BFF_z_test = function(tau2, z_stat, r, two_sided)
+{
+
+  a = get_a(tau2=tau2, r=r)
+  y = get_y_onesided_z_test(tau2=tau2, z=z_stat)
+
+
+  if (two_sided) {
+    final_BF = a * hypergeom1F1(r + 1/2, 1/2, tau2 * z_stat^2 / (2 * (1 + tau2)) )$f
+  } else {
+    first_hypergeo = hypergeom1F1(r +1/2, 1/2, y^2)$f
+    second_hypergeo = hypergeom1F1(r + 1/2, 3/2, y^2)$f
+    const = 2 * y * gamma_approx(r+1) / gamma_approx(r + 1/2)
+    final_BF = a*(first_hypergeo + const*second_hypergeo)
+  }
+  to_return = log(final_BF)
+  return(to_return)
+}
+
 
 ####################### backend implementation
 backend_z <- function(
     input,
+    r,
     omega = NULL){
 
   # compute tau2 from omega
@@ -22,26 +43,21 @@ backend_z <- function(
   # i.e., tau2[omega][t-stat]
   tau2 <- lapply(omega, function(x){
     if(input$one_sample){
-      tau2 <- get_one_sample_tau2(n = input$n, w = x)
+      tau2 <- get_one_sample_tau2(n = input$n, w = x, r=r)
     }else{
-      tau2 <- get_two_sample_tau2(n1 = input$n1, n2 = input$n2, w = x)
+      tau2 <- get_two_sample_tau2(n1 = input$n1, n2 = input$n2, w = x, r=r)
     }
   })
 
   # compute log_BF
   log_BF <- sapply(tau2, function(x){
     sum(sapply(seq_along(input$z_stat), function(i){
-      if(input$alternative == "greater"){
-        z_val_r1(
-          tau2 = x[i],
-          z_stat    = input$z_stat[i]
-        )
-      }else{
-        z_val_r1(
-          tau2 = x[i],
-          z_stat    = input$z_stat[i]
-        )
-      }
+      BFF_z_test(
+        tau2 = x[i],
+        z_stat    = input$z_stat[i],
+        r = r,
+        two_sided = input$alternative == "two.sided"
+      )
     }))
   })
 
@@ -58,7 +74,7 @@ backend_z <- function(
 }
 
 
-################# T function user interaction
+################# Z function user interaction
 
 #' z_test_BFF
 #'
@@ -74,6 +90,7 @@ backend_z <- function(
 #' @param alternative the alternative. options are "two.sided" or "less" or "greater"
 #' @param omega standardized effect size. For the z-test, this is often called Cohen's d (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
+#' @param r variable controlling dispersion of non-local priors. Default is 1.
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
@@ -91,7 +108,8 @@ z_test_BFF <- function(
     one_sample = FALSE,
     alternative = "two.sided",
     omega = NULL,
-    omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01))
+    omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
+    r=1)
 
 {
   ### input checks and processing
@@ -101,6 +119,7 @@ z_test_BFF <- function(
   # calculate BF
   results   <- backend_z(
     input     = input,
+    r         = r,
     omega     = if(!is.null(omega)) omega else omega_sequence
   )
 
@@ -122,6 +141,7 @@ z_test_BFF <- function(
     omega_set    = !is.null(omega),
     test_type    = "z_test",
     generic_test = FALSE,
+    r            = r,
     input        = input
   )
   if(is.null(omega)){

@@ -9,9 +9,25 @@ G_val_r1 = function(tau2, chi2_stat, df)
 }
 
 
+####################### backend implementation (SPL, default)
+BFF_chi2_test = function(tau2, chi2_stat, k, r)
+{
+
+  b = get_b(tau2=tau2, r = r, k = k)
+
+  term_three = tau2 * chi2_stat / (2*(1 + tau2^2))
+  hypergeo = hypergeom1F1(k/2 + r, k/2, term_three)$f
+
+  final_BF = b*hypergeo
+  to_return = log(final_BF)
+  return(to_return)
+}
+
+
 ####################### backend implementation
 backend_chi2 <- function(
     input,
+    r,
     omega = NULL){
 
   # compute tau2 from omega
@@ -20,19 +36,20 @@ backend_chi2 <- function(
   # i.e., tau2[omega][t-stat]
   tau2 <- lapply(omega, function(x){
     if(input$LRT){
-      tau2 <- get_LRT_tau2(n = input$n, k = input$df, w = x)
+      tau2 <- get_LRT_tau2(n = input$n, k = input$df, w = x, r = r)
     }else{
-      tau2 <- get_count_tau2(n = input$n, k = input$df, w = x)
+      tau2 <- get_count_tau2(n = input$n, k = input$df, w = x, r = r)
     }
   })
 
   # compute log_BF
   log_BF <- sapply(tau2, function(x){
     sum(sapply(seq_along(input$chi2_stat), function(i){
-        G_val_r1(
+      BFF_chi2_test(
           tau2 = x[i],
           chi2_stat    = input$chi2_stat[i],
-          df = input$df
+          k = input$df,
+          r = r
         )
     }))
   })
@@ -62,12 +79,13 @@ backend_chi2 <- function(
 #' @param LRT should LRT be performed? Default is FALSE
 #' @param omega standardized effect size. For the chi^2-test, this is often called Cohen's w (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
-
+#' @param r variable controlling dispersion of non-local priors. Default is 1.
+#'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
 #'
 #' @examples
-#' chi2BFF = chi2_test_BFF(chi2_stat = 7.5, n = 25)
+#' chi2BFF = chi2_test_BFF(chi2_stat = 6.5, n = 10)
 #' chi2BFF
 #' plot(chi2BFF)
 #'
@@ -75,7 +93,8 @@ chi2_test_BFF = function(chi2_stat,
                       n,
                       LRT = FALSE,
                       omega = NULL,
-                      omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01))
+                      omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
+                      r = 1)
 
 {
   ### input checks and processing
@@ -85,6 +104,7 @@ chi2_test_BFF = function(chi2_stat,
   # calculate BF
   results   <- backend_chi2(
     input     = input,
+    r         = r,
     omega     = if(!is.null(omega)) omega else omega_sequence
   )
 
@@ -106,6 +126,7 @@ chi2_test_BFF = function(chi2_stat,
     omega_set    = !is.null(omega),
     test_type    = "chi2_test",
     generic_test = FALSE,
+    r            = r,
     input        = input
   )
   if(is.null(omega)){

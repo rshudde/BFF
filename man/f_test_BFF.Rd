@@ -10,7 +10,8 @@ f_test_BFF(
   df1,
   df2,
   omega = NULL,
-  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01)
+  omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01),
+  r = 1
 )
 }
 \arguments{
@@ -22,9 +23,11 @@ f_test_BFF(
 
 \item{df2}{sample size of group two for two sample test}
 
-\item{omega}{standardized effect size. (can be a single entry or a vector of values)}
+\item{omega}{standardized effect size. For the f-test, this is often called Cohen's f (can be a single entry or a vector of values)}
 
 \item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
+
+\item{r}{variable controlling dispersion of non-local priors. Default is 1.}
 }
 \value{
 Returns an S3 object of class `BFF` (see `BFF.object` for details).
@@ -35,7 +38,7 @@ By setting r > 1, we use higher-order moments for replicated studies. Fractional
 All results are on the log scale.
 }
 \examples{
-fBFF = f_test_BFF(f_stat = 2.5, n = 50, df1 = 25, df2 = 48)
+fBFF = f_test_BFF(f_stat = 1.5, n = 50, df1 = 25, df2 = 48)
 fBFF
 plot(fBFF)
 
