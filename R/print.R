@@ -50,7 +50,7 @@ print.BFF <- function(x, ...) {
          "t_test"           = "Cohen's d",
          "z_test"           = "Cohen's d",
          "chi2_test"        = "Standardized effect size",
-         "f_test"           = "Standardized effect size",
+         "f_test"           = "Cohen's f",
          "regression_test"  = "Partial correlation coefficient (eta squared)",
          "correlation_test" = "correlation coefficient")
 }

@@ -19,7 +19,7 @@ test_that("two-sample: basic functionality", {
       "\tBayesian non-local f test"  ,
       ""                                        ,
       "log Bayes factor = -2.89"                 ,
-      "omega = 0.50 (Standardized effect size)"
+      "omega = 0.50 (Cohen's f)"
     )
   )
   testthat::expect_error(plot(fit), "Bayes factor function can be plotted only if a specific omega/tau2 is not user set")
@@ -78,7 +78,7 @@ test_that("two-sample: basic functionality", {
       "\tBayesian non-local f test"  ,
       ""                                        ,
       "maximized log Bayes factor = 0.82"       ,
-      "maximized omega = 0.14 (Standardized effect size)"
+      "maximized omega = 0.14 (Cohen's f)"
     )
   )
   #Modify for F test
@@ -113,7 +113,7 @@ test_that("two-sample: basic functionality", {
       "\tBayesian non-local f test"  ,
       ""                                        ,
       "maximized log Bayes factor = 1.94"                 ,
-      "maximized omega = 0.24 (Standardized effect size)"
+      "maximized omega = 0.24 (Cohen's f)"
     )
   )
 
