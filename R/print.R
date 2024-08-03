@@ -51,6 +51,6 @@ print.BFF <- function(x, ...) {
          "z_test"           = "Cohen's d",
          "f_test"           = "Cohen's f",
          "chi2_test"        = "Cohen's w",
-         "regression_test"  = "Partial correlation coefficient (eta squared)",
+         "regression_test"  = "Cohen's d",
          "correlation_test" = "correlation coefficient")
 }
