@@ -49,7 +49,7 @@ print.BFF <- function(x, ...) {
   switch(test_type,
          "t_test"           = "Cohen's d",
          "z_test"           = "Cohen's d",
-         "chi2_test"        = "Standardized effect size",
+         "chi2_test"        = "Cohen's w",
          "f_test"           = "Standardized effect size",
          "regression_test"  = "Partial correlation coefficient (eta squared)",
          "correlation_test" = "correlation coefficient")

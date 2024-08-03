@@ -18,7 +18,7 @@ test_that("chi2: basic functionality", {
       "\tBayesian non-local chi2 test"  ,
       ""                                        ,
       "log Bayes factor = -25.63"                 ,
-      "omega = 0.50 (Standardized effect size)"
+      "omega = 0.50 (Cohen's w)"
     )
   )
   testthat::expect_error(plot(fit), "Bayes factor function can be plotted only if a specific omega/tau2 is not user set")
@@ -77,7 +77,7 @@ test_that("chi2: basic functionality", {
       "\tBayesian non-local chi2 test"  ,
       ""                                        ,
       "log Bayes factor = -25.29"                 ,
-      "omega = 0.50 (Standardized effect size)"
+      "omega = 0.50 (Cohen's w)"
     )
   )
   #MODIFY FOR CHI2
@@ -102,7 +102,7 @@ test_that("chi2: basic functionality", {
       "\tBayesian non-local chi2 test"  ,
       ""                                        ,
       "maximized log Bayes factor = 0.00"       ,
-      "maximized omega = 0.00 (Standardized effect size)"
+      "maximized omega = 0.00 (Cohen's w)"
     )
   )
   #MODIFY FOR CHI2
@@ -134,7 +134,7 @@ test_that("chi2: basic functionality", {
       "\tBayesian non-local chi2 test"  ,
       ""                                        ,
       "maximized log Bayes factor = 0.00"       ,
-      "maximized omega = 0.00 (Standardized effect size)"
+      "maximized omega = 0.00 (Cohen's w)"
     )
   )
   #MODIFY FOR CHI2
@@ -159,7 +159,7 @@ test_that("chi2: basic functionality", {
       "\tBayesian non-local chi2 test"  ,
       ""                                        ,
       "maximized log Bayes factor = 0.00"       ,
-      "maximized omega = 0.00 (Standardized effect size)"
+      "maximized omega = 0.00 (Cohen's w)"
     )
   )
 })
