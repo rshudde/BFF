@@ -108,6 +108,15 @@ chi2_test_BFF = function(chi2_stat,
     omega     = if(!is.null(omega)) omega else omega_sequence
   )
 
+
+  ## compute minimum BFF for anything larger than small effect sizes
+  if (is.null(omega)) {
+    minimums = get_min_omega_bff(omega = omega_sequence, bff = results, cutoff = 0.1)
+  }  else
+  {
+    minimums = c(NULL, NULL)
+  }
+
   ###### return logic
   if(is.null(omega)){
     log_bf         <- c(0, results)
@@ -121,8 +130,10 @@ chi2_test_BFF = function(chi2_stat,
   }
 
   output = list(
-    log_bf       = this_log_bf,
-    omega        = this_omega,
+    log_bf_h1       = this_log_bf,
+    omega_h1        = this_omega,
+    log_bf_h0     = minimums[1],
+    omega_h0      = minimums[2],
     omega_set    = !is.null(omega),
     test_type    = "chi2_test",
     generic_test = FALSE,

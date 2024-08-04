@@ -123,6 +123,14 @@ z_test_BFF <- function(
     omega     = if(!is.null(omega)) omega else omega_sequence
   )
 
+  ## compute minimum BFF for anything larger than small effect sizes
+  if (is.null(omega)) {
+    minimums = get_min_omega_bff(omega = omega_sequence, bff = results, cutoff = 0.2)
+  }  else
+  {
+    minimums = c(NULL, NULL)
+  }
+
   ###### return logic
   if(is.null(omega)){
     log_bf         <- c(0, results)
@@ -136,8 +144,10 @@ z_test_BFF <- function(
   }
 
   output = list(
-    log_bf       = this_log_bf,
-    omega        = this_omega,
+    log_bf_h1       = this_log_bf,
+    omega_h1        = this_omega,
+    log_bf_h0     = minimums[1],
+    omega_h0      = minimums[2],
     omega_set    = !is.null(omega),
     test_type    = "z_test",
     generic_test = FALSE,

@@ -9,8 +9,8 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, -0.43374, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.5)
+  testthat::expect_equal(fit$log_bf_h1, -0.43374, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega_h1,  0.5)
 
   # test S3 methods
   testthat::expect_equal(
@@ -19,7 +19,7 @@ test_that("two-sample: basic functionality", {
       "\tBayesian non-local regression test"  ,
       ""                                        ,
       "log Bayes factor = -0.43"                 ,
-      "omega = 0.50 (Partial correlation coefficient (eta squared))"                ,
+      "omega = 0.50 (Cohen's d)"                ,
       "alternative = two.sided"
     )
   )
@@ -35,7 +35,7 @@ test_that("two-sample: basic functionality", {
   # posterior_plot(fit, prior = TRUE)
   #
   # # this highlights the issue (run `devtools::load_all()` first)
-  # tau2 <- get_two_sample_tau2(n1 = fit$input$n1, n2 = fit$input$n2, w = fit$omega, r = fit$r)
+  # tau2 <- get_two_sample_tau2(n1 = fit$input$n1, n2 = fit$input$n2, w = fit$omega_h1, r = fit$r)
   #
   # # does not integrate to 1
   # integrate(
@@ -70,8 +70,8 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, -0.27897, tolerance = 1e-4)
-  testthat::expect_equal(fit$omega,  0.50)
+  testthat::expect_equal(fit$log_bf_h1, -0.27897, tolerance = 1e-4)
+  testthat::expect_equal(fit$omega_h1,  0.50)
 
   # test S3 methods
   testthat::expect_equal(
@@ -80,7 +80,7 @@ test_that("two-sample: basic functionality", {
       "\tBayesian non-local regression test"  ,
       ""                                        ,
       "log Bayes factor = -0.28"                 ,
-      "omega = 0.50 (Partial correlation coefficient (eta squared))"                ,
+      "omega = 0.50 (Cohen's d)"                ,
       "alternative = greater"
     )
   )
@@ -96,8 +96,8 @@ test_that("two-sample: basic functionality", {
     k = 1)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.03282, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.05)
+  testthat::expect_equal(fit$log_bf_h1, 0.03282, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega_h1,  0.05)
 
   # test S3 methods
   testthat::expect_equal(
@@ -105,8 +105,10 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local regression test"  ,
       ""                                        ,
-      "maximized log Bayes factor = 0.03"       ,
-      "maximized omega = 0.05 (Partial correlation coefficient (eta squared))"      ,
+      "maximized (in favor of alternative) log Bayes factor = 0.03",
+      "maximized (in favor of alternative) omega = 0.05 (Cohen's d)",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -3.17",
+      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (Cohen's d)",
       "alternative = two.sided"
     )
   )
@@ -130,8 +132,8 @@ test_that("two-sample: basic functionality", {
     k = 4)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.0, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.0)
+  testthat::expect_equal(fit$log_bf_h1, 0.0, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega_h1,  0.0)
 
   # test S3 methods
   testthat::expect_equal(
@@ -139,8 +141,10 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local regression test",
       ""                                        ,
-      "maximized log Bayes factor = 0.00"       ,
-      "maximized omega = 0.00 (Partial correlation coefficient (eta squared))"      ,
+      "maximized (in favor of alternative) log Bayes factor = 0.00",
+      "maximized (in favor of alternative) omega = 0.00 (Cohen's d)",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -8.63",
+      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (Cohen's d)",
       "alternative = less"
     )
   )

@@ -23,12 +23,25 @@ summary.BFF <- function(object, ...){
 print.BFF <- function(x, ...) {
   cat(paste0("\t", .test_type_name(x$test_type, x$input$one_sample)))
   cat("\n\n")
-  cat(gettextf("%1$slog Bayes factor = %2$.2f\n", if(!x$omega_set) "maximized " else "", x$log_bf))
+
+  # print in favor of alternative
+  cat(gettextf("%1$slog Bayes factor = %2$.2f\n", if(!x$omega_set) "maximized (in favor of alternative) " else "", x$log_bf_h1))
   if(x$generic_test){
-    cat(gettextf("%1$s tau2 = %2$.2f\n", if(!x$omega_set) "maximized " else "", x$omega))
+    cat(gettextf("%1$s tau2 = %2$.2f\n", if(!x$omega_set) "maximized (in favor of alternative) " else "", x$omega_h1))
   }else{
-    cat(gettextf("%1$somega = %2$.2f (%3$s)\n", if(!x$omega_set) "maximized " else "", x$omega, .test_effect_size_name(x$test_type)))
+    cat(gettextf("%1$somega = %2$.2f (%3$s)\n", if(!x$omega_set) "maximized (in favor of alternative) " else "", x$omega_h1, .test_effect_size_name(x$test_type)))
   }
+
+  # print in favor of null, only if no omega is set
+  if (!x$omega_set) {
+    cat(gettextf("%1$slog Bayes factor = %2$.2f\n", if(!x$omega_set) "minimized (in favor of null for medium/large effect sizes) " else "", x$log_bf_h0))
+    if(x$generic_test){
+      cat(gettextf("%1$s tau2 = %2$.2f\n", if(!x$omega_set) "minimized (in favor of null for medium/large effect sizes) " else "", x$omega_h0))
+    }else{
+      cat(gettextf("%1$somega = %2$.2f (%3$s)\n", if(!x$omega_set) "minimized (in favor of null for medium/large effect sizes) " else "", x$omega_h0, .test_effect_size_name(x$test_type)))
+    }
+  }
+
 
   if(!is.null(x$input$alternative)) cat(paste0("alternative = ", x$input$alternative.original))
 }

@@ -113,4 +113,15 @@ plot(tBFF_twosample_r5)
 ```
 
 
+## Supporting information
+
+The effect sizes for small, medium, and large that appear in the plots are taken from Statistical Power Analysis for The Behavioral Sciences (Cohen, 1988):
+
+Below are the tests and the small, medium, and large effect sizes:
+
+* t-test: 0.2, 0.5, 0.8
+* z-test: 0.2, 0.5, 0.8
+* chi2-test: 0.1, 0.3, 0.5
+* f test: 0.1, 0.25, 0.4
+* regression test: 0.02, 0.15, 0.35
 

@@ -9,8 +9,8 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, -0.27839, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.50)
+  testthat::expect_equal(fit$log_bf_h1, -0.27839, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega_h1,  0.50)
 
   # test S3 methods
   testthat::expect_equal(
@@ -35,7 +35,7 @@ test_that("two-sample: basic functionality", {
   # posterior_plot(fit, prior = TRUE)
   #
   # # this highlights the issue (run `devtools::load_all()` first)
-  # tau2 <- get_two_sample_tau2(n1 = fit$input$n1, n2 = fit$input$n2, w = fit$omega, r = fit$r)
+  # tau2 <- get_two_sample_tau2(n1 = fit$input$n1, n2 = fit$input$n2, w = fit$omega_h1, r = fit$r)
   #
   # # does not integrate to 1
   # integrate(
@@ -69,8 +69,8 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.29278, tolerance = 1e-4)
-  testthat::expect_equal(fit$omega,  0.50)
+  testthat::expect_equal(fit$log_bf_h1, 0.29278, tolerance = 1e-4)
+  testthat::expect_equal(fit$omega_h1,  0.50)
 
   # test S3 methods
   testthat::expect_equal(
@@ -95,8 +95,8 @@ test_that("two-sample: basic functionality", {
     n2 = 75)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 2.07857, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.45)
+  testthat::expect_equal(fit$log_bf_h1, 2.07857, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega_h1,  0.45)
 
   # test S3 methods
   testthat::expect_equal(
@@ -104,8 +104,10 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local two-sample z test"  ,
       ""                                        ,
-      "maximized log Bayes factor = 2.08"       ,
-      "maximized omega = 0.45 (Cohen's d)"      ,
+      "maximized (in favor of alternative) log Bayes factor = 2.08",
+      "maximized (in favor of alternative) omega = 0.45 (Cohen's d)",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = 0.65",
+      "minimized (in favor of null for medium/large effect sizes) omega = 0.11 (Cohen's d)",
       "alternative = two.sided"
     )
   )
@@ -128,8 +130,8 @@ test_that("two-sample: basic functionality", {
     n2 = 50)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf, 0.00, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega,  0.00)
+  testthat::expect_equal(fit$log_bf_h1, 0.00, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega_h1,  0.00)
 
   # test S3 methods
   testthat::expect_equal(
@@ -137,11 +139,14 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local two-sample z test",
       ""                                        ,
-      "maximized log Bayes factor = 0.00"       ,
-      "maximized omega = 0.00 (Cohen's d)"      ,
+      "maximized (in favor of alternative) log Bayes factor = 0.00",
+      "maximized (in favor of alternative) omega = 0.00 (Cohen's d)",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -3.11",
+      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (Cohen's d)",
       "alternative = less"
     )
   )
   # vdiffr::expect_doppelganger("z_test_BFF-two_sample-one_sided-BFF", plot(fit))
   # testthat::expect_error(posterior_plot(fit), "There is no non-local prior distribution")
 })
+

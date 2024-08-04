@@ -18,9 +18,13 @@ NULL
 #'  \tab \cr
 #'  \code{input} \tab the object containing the input values \cr
 #'  \tab \cr
-#'  \code{log_bf} \tab maximized Bayes factor\cr
+#'  \code{log_bf_h1} \tab maximized Bayes factor in favor of the alternative, or the corresponding Bayes factor if an omega is supplied\cr
 #'  \tab \cr
-#'  \code{omega} \tab corresponding omega value for maximized Bayes factor\cr
+#'  \code{omega_h1} \tab corresponding omega value for maximized Bayes factor in favor of the alternative, orthe corresponding omega for the Bayes factor if an omega is supplied\cr
+#'  \tab \cr
+#'  \code{log_bf_h0} \tab minimized Bayes factor in favor of the null (for medium or large effect sizes, only returned if a specific omega is not set) \cr
+#'  \tab \cr
+#'  \code{omega_h0} \tab corresponding omega value for minimized Bayes factor in favor of the null (for medium or large effect sizes, only returned if a specific omega is not set)\cr
 #'  \tab \cr
 #'  \code{alternative} \tab alternative hypothesis used in calculations \cr
 #'  \tab \cr
