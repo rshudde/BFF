@@ -1,5 +1,5 @@
-################# T functions if r is an integer and equal to 1 (PNAS, not called)
-BFF_t_test_r1 = function(tau2, t_stat, df)
+################# T functions if r is an integer and equal to 1
+t_val_r1 = function(tau2, t_stat, df)
 {
   r = 1 + t_stat ^ 2 / df
   s = 1 + t_stat ^ 2 / (df * (1 + tau2))
@@ -12,30 +12,135 @@ BFF_t_test_r1 = function(tau2, t_stat, df)
   return(to_return)
 }
 
-####################### backend implementation (SPL, default)
-BFF_t_test = function(tau2, t_stat, df, r, two_sided)
+
+################# T functions if r is an integer and greater than 1
+#
+# get_w = function(tau, v, t = t)
+# {
+#   num = 1 + t ^ 2 / (v * (1 + tau))
+#   den = 1 + t ^ 2 / v
+#
+#   to_return = num / den
+#   return(to_return)
+# }
+#
+# sum_val_t = function(r, m, tau, t, v, w)
+# {
+#   one = choose(2 * r, 2 * m)
+#   two = (2 * tau * t ^ 2 / ((t ^ 2 + v) * (tau + 1) * w)) ^ m
+#   three = sterling_gamma((v + 2 * m + 1) / 2) * double_factorial(2 * r - 2 *
+#                                                                    m - 1)
+#
+#   to_return = one * two * three
+#   return(to_return)
+# }
+#
+# sum_val_function_t = function(r, tau, t, v, w)
+# {
+#   val = 0
+#   for (mm in 0:r)
+#   {
+#     val = val + sum_val_t(
+#       r = r,
+#       m = mm,
+#       tau = tau,
+#       t = t,
+#       v = v,
+#       w = w
+#     )
+#   }
+#   return(val)
+# }
+#
+# log_T = function(t, r, tau, v)
+# {
+#   w = get_w(tau = tau, v = v, t = t)
+#   num1 = 1
+#   den1 = double_factorial(2 * r - 1) * (1 + tau) ^ (r + 1 / 2) * sterling_gamma((v +
+#                                                                                    1) / 2) * w ^ ((v + 1) / 2)
+#   first_term = num1 / den1
+#
+#   second_term = sum_val_function_t(
+#     r = r,
+#     tau = tau,
+#     t = t,
+#     v = v,
+#     w = w
+#   )
+#
+#   to_return = first_term * second_term
+#
+#   # log_version
+#   to_return = log(first_term) + log(second_term)
+#
+#   return(to_return)
+# }
+
+################# T functions if r is a fraction
+log_T_frac = function(tau2, t, v, r)
 {
+  tp1 = 1 + tau2 # one plus tau^2
+  tau = sqrt(tau2)
+  c = 1 / (tp1 ^ (r + 1 / 2)) # c
+  y = tau * t / sqrt((t ^ 2 + v) * tp1)
 
-  a = get_a(tau2=tau2, r=r)
-  c = get_c(tau2=tau2, df=df, r=r)
-  y = get_y_t_test(tau2=tau2, t=t_stat, df=df)
+  a1 = (v + 1) / 2
+  b1 = r + 1 / 2
+  c1 = 1 / 2
+  first_hypergeo = Gauss2F1(a1, b1, c1, y ^ 2)
 
-  first_hypergeo = Gauss2F1((df+1)/2, r + 1/2, 1/2, y^2)
-  second_hypergeo = Gauss2F1(df/2 + 1, r + 1, 3/2, y^2)
+  four = sterling_gamma(v / 2 + 1) * sterling_gamma(r + 1)
+  five = sterling_gamma((v + 1) / 2) * sterling_gamma(r + 1 / 2)
+  gamma_term = four / five
 
-  const = ifelse(two_sided, 1, 2)
+  aa = v / 2 + 1
+  bb = r + 1
+  cc = 3 / 2
+  second_hypergeo = Gauss2F1(aa, bb, cc, y ^ 2)
 
-  final_BF = a*(first_hypergeo + const*c*y*second_hypergeo)
-  to_return = log(final_BF)
+  to_return = c * (first_hypergeo + 2*y * gamma_term * second_hypergeo)
+  to_return = log(to_return)
+
   return(to_return)
 }
 
+log_T_frac_onesided = function(tau2, t, v, r)
+{
+  tp1 = 1 + tau2
+  tau = sqrt(tau2)
+  c = 1 / (tp1 ^ (r + 1 / 2)) # c
+  y = tau * t / sqrt((t ^ 2 + v) * tp1)
+
+  a1 = (v + 1) / 2
+  b1 = r + 1 / 2
+  c1 = 1 / 2
+  first_hypergeo = Gauss2F1(a1, b1, c1, y ^ 2)
+
+  four = sterling_gamma(v / 2 + 1) * sterling_gamma(r + 1)
+  five = sterling_gamma((v + 1) / 2) * sterling_gamma(r + 1 / 2)
+  gamma_term = four / five
+
+  aa = v / 2 + 1
+  bb = r + 1
+  cc = 3 / 2
+  second_hypergeo = Gauss2F1(aa, bb, cc, y ^ 2)
+
+  to_return = c * (first_hypergeo + 2 * y * gamma_term * second_hypergeo)
+  to_return = log(to_return)
+
+  return(to_return)
+}
 
 ####################### backend implementation
 backend_t <- function(
-    input,
     r,
+    input,
     omega = NULL){
+
+  # function can deal with a vector of t-statistics and vector of omegas
+  # however, only one r is supported at a time
+  if(length(r) != 1)
+    stop("internal error: 'r' must be of length 1.")
 
   # compute tau2 from omega
   # if multiple omegas and t-stats are supplied, each element of tau2
@@ -52,13 +157,21 @@ backend_t <- function(
   # compute log_BF
   log_BF <- sapply(tau2, function(x){
     sum(sapply(seq_along(input$t_stat), function(i){
-      BFF_t_test(
-        tau2 = x[i],
-        t_stat    = input$t_stat[i],
-        df = input$df[i],
-        r = r,
-        two_sided = input$alternative == "two.sided"
-      )
+      if(input$alternative == "greater"){
+        log_T_frac_onesided(
+          tau2 = x[i],
+          r    = r,
+          v    = input$df[i],
+          t    = input$t_stat[i]
+        )
+      }else{
+        log_T_frac(
+          tau2 = x[i],
+          r    = r,
+          v    = input$df[i],
+          t    = input$t_stat[i]
+        )
+      }
     }))
   })
 
@@ -74,6 +187,19 @@ backend_t <- function(
   return(log_BF)
 }
 
+maximize_t <- function(
+    r,
+    input,
+    omega = NULL){
+
+  logbf <- stats::dcauchy(r)/(1-stats::pcauchy(1))
+  logbf <- logbf + sum(backend_t(
+    r         = r,
+    input     = input,
+    omega     = omega))
+
+  return(logbf)
+}
 
 ################# T function user interaction
 
@@ -89,9 +215,8 @@ backend_t <- function(
 #' @param alternative the alternative. options are "two.sided" or "less" or "greater"
 #' @param n1 sample size of group one for two sample test. Must be provided if one_sample = FALSE
 #' @param n2 sample size of group two for two sample test. Must be provided if one_sample = FALSE
+#' @param r r value
 #' @param omega standardized effect size. For the t-test, this is often called Cohen's d (can be a single entry or a vector of values)
-#' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
-#' @param r variable controlling dispersion of non-local priors. Default is 1.
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
@@ -107,32 +232,54 @@ t_test_BFF <- function(
     n2 = NULL,
     one_sample = FALSE,
     alternative = "two.sided",
+    r = NULL,
     omega = NULL,
-    omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
-    r = 1){
+    omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01)){
 
 
   ### input checks and processing
+  r     <- .check_and_set_r(r, t_stat)
   input <- .process_input.t.test(t_stat, n, n1, n2, one_sample, alternative)
 
   ### computation
-  # calculate BF
+  # if only one t-statistic is present or if r is set, we can directly compute the BFF
+  # otherwise, we need to find the r that maximizes the BFF
+  if(length(input$t_stat) == 1 || !is.null(r)){
+
     results   <- backend_t(
-      input     = input,
       r         = r,
+      input     = input,
       omega     = if(!is.null(omega)) omega else omega_sequence
     )
 
-  ## compute minimum BFF for anything larger than small effect sizes
-  if (is.null(omega)) {
-    minimums = get_min_omega_bff(omega = omega_sequence, bff = results, cutoff = 0.2)
-  }  else
-  {
-    minimums = c(NULL, NULL)
+  }else{
+
+    # compute optimal r for each omega
+    optimal_r <- sapply(if(!is.null(omega)) omega else omega_sequence, function(x){
+      stats::optimize(
+        maximize_t,
+        interval  = c(1, 20),
+        tol       = 0.001,
+        input     = input,
+        omega     = x,
+        maximum   = TRUE
+      )$maximum
+    })
+
+    # use each r to compute BFF
+    results <- sapply(seq_along(optimal_r), function(i){
+      backend_t(
+        r         = optimal_r[i],
+        input     = input,
+        omega     = if(!is.null(omega)) omega else omega_sequence[i]
+      )
+    })
+
   }
+
   ###### return logic
   if(is.null(omega)){
-    log_bf        <- c(0, results)
+    log_bf         <- c(0, results)
     omega_sequence <- c(0, omega_sequence)
     idx_max        <- which.max(log_bf)
     this_log_bf    <- log_bf[idx_max]
@@ -143,14 +290,12 @@ t_test_BFF <- function(
   }
 
   output = list(
-    log_bf_h1     = this_log_bf,
-    omega_h1      = this_omega,
-    log_bf_h0     = minimums[1],
-    omega_h0      = minimums[2],
+    log_bf       = this_log_bf,
+    omega        = this_omega,
     omega_set    = !is.null(omega),
     test_type    = "t_test",
     generic_test = FALSE,
-    r            = r,
+    r            = r, # r that is maximized or set by user
     input        = input
   )
   if(is.null(omega)){
@@ -209,4 +354,3 @@ t_test_BFF <- function(
     alternative.original = alternative.original
   ))
 }
-
