@@ -84,7 +84,7 @@ backend_reg <- function(
 #' @param k number of predictors
 #' @param omega standadized effect size. For the regression test, this is also known as Cohen's f^@ (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
-#' @param r variable controlling dispersion of non-local priors. Default is 1.
+#' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
@@ -105,7 +105,7 @@ regression_test_BFF <- function(
 
 
   ### input checks and processing
-  input <- .process_input.reg.test(t_stat, n, k, alternative)
+  input <- .process_input.reg.test(t_stat, n, k, alternative, r)
 
   ### computation
   # calculate BF
@@ -155,7 +155,10 @@ regression_test_BFF <- function(
 }
 
 
-.process_input.reg.test <- function(t_stat, n, k, alternative){
+.process_input.reg.test <- function(t_stat, n, k, alternative, r){
+
+  if (r < 1)
+    stop("r must be greater than or equal to 1")
 
   .check_alternative(alternative)
 

@@ -90,7 +90,7 @@ backend_z <- function(
 #' @param alternative the alternative. options are "two.sided" or "less" or "greater"
 #' @param omega standardized effect size. For the z-test, this is often called Cohen's d (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
-#' @param r variable controlling dispersion of non-local priors. Default is 1.
+#' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
@@ -113,7 +113,7 @@ z_test_BFF <- function(
 
 {
   ### input checks and processing
-  input <- .process_input.z.test(z_stat, n, n1, n2, one_sample, alternative)
+  input <- .process_input.z.test(z_stat, n, n1, n2, one_sample, alternative, r)
 
   ### computation
   # calculate BF
@@ -163,7 +163,11 @@ z_test_BFF <- function(
 }
 
 
-.process_input.z.test <- function(z_stat, n, n1, n2, one_sample, alternative){
+.process_input.z.test <- function(z_stat, n, n1, n2, one_sample, alternative, r){
+
+
+  if (r < 1)
+    stop("r must be greater than or equal to 1")
 
   .check_alternative(alternative)
 
