@@ -4,6 +4,7 @@ test_that("chi2: basic functionality", {
   fit <- chi2_test_BFF(
     chi2_stat = 1.5,
     n = 25,
+    df = 24,
     LRT = TRUE,
     omega = 0.5)
 
@@ -63,6 +64,7 @@ test_that("chi2: basic functionality", {
   fit <- chi2_test_BFF(
     chi2_stat = 5.5,
     n = 25,
+    df = 24,
     LRT = FALSE,
     omega = 0.5)
 
@@ -89,6 +91,7 @@ test_that("chi2: basic functionality", {
   fit <- chi2_test_BFF(
     chi2_stat = 9.5,
     n = 45,
+    df = 44,
     LRT = FALSE)
 
   # check that the BF and omega is consistent
@@ -123,6 +126,7 @@ test_that("chi2: basic functionality", {
   fit <- chi2_test_BFF(
     chi2_stat = 7.5,
     n = 45,
+    df = 44,
     LRT = TRUE)
 
   # check that the BF and omega is consistent
@@ -149,6 +153,7 @@ test_that("chi2: basic functionality", {
   fit <- chi2_test_BFF(
     chi2_stat = 7.5,
     n = 45,
+    df = 44,
     LRT = FALSE,
     r = 5)
 
