@@ -22,9 +22,12 @@ BFF_t_test = function(tau2, t_stat, r, two_sided, df)
 
 
   if (two_sided) {
-    first_hypergeo_2 = Gauss2F1((df+1)/2, r + 1/2, 1/2, y^2)
-    second_hypergeo_2 = c * y * Gauss2F1(df/2 + 1, r + 1, 3/2, y^2)
-    final_BF = a * (first_hypergeo_2 + second_hypergeo_2)
+    # first_hypergeo_2 = Gauss2F1((df+1)/2, r + 1/2, 1/2, y^2)
+    # second_hypergeo_2 = c * y * Gauss2F1(df/2 + 1, r + 1, 3/2, y^2)
+    # final_BF = a * (first_hypergeo_2 + second_hypergeo_2)
+    # updates from errata
+    hypergeo = Gauss2F1((df+1)/2, r + 1/2, 1/2, y^2)
+    final_BF = a*hypergeo
   } else {
     first_hypergeo = Gauss2F1((df+1)/2, r + 1/2, 1/2, y^2)
     second_hypergeo = 2 * c * y * Gauss2F1(df/2 + 1, r + 1, 3/2, y^2)
