@@ -15,7 +15,7 @@ frame with the support, prior ordinates, and
 posterior ordinates is returned instead.}
 
 \item{...}{additional arguments to the plotting
-function. These include: \itemize{
+function. These include: \describe{
  \item{"title"}{tile of the figure}
  \item{"xlab"}{x-axis label of the figure}
  \item{"ylab"}{y-axis label of the figure}

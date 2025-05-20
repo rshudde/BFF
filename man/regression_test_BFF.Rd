@@ -27,7 +27,7 @@ regression_test_BFF(
 
 \item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
 
-\item{r}{variable controlling dispersion of non-local priors. Default is 1.}
+\item{r}{variable controlling dispersion of non-local priors. Default is 1. r must be >= 1}
 }
 \value{
 Returns an S3 object of class `BFF` (see `BFF.object` for details).

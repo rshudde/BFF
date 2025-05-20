@@ -76,21 +76,23 @@ backend_chi2 <- function(
 #'
 #' @param chi2_stat chi-square statistic
 #' @param n sample size (if one sample test)
+#' @param df degrees of freedom
 #' @param LRT should LRT be performed? Default is FALSE
 #' @param omega standardized effect size. For the chi^2-test, this is often called Cohen's w (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
-#' @param r variable controlling dispersion of non-local priors. Default is 1.
+#' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
 #'
 #' @examples
-#' chi2BFF = chi2_test_BFF(chi2_stat = 6.5, n = 10)
+#' chi2BFF = chi2_test_BFF(chi2_stat = 6.5, n = 10, df = 9)
 #' chi2BFF
 #' plot(chi2BFF)
 #'
 chi2_test_BFF = function(chi2_stat,
                       n,
+                      df,
                       LRT = FALSE,
                       omega = NULL,
                       omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
@@ -98,7 +100,7 @@ chi2_test_BFF = function(chi2_stat,
 
 {
   ### input checks and processing
-  input <- .process_input.chi2.test(chi2_stat, n, LRT)
+  input <- .process_input.chi2.test(chi2_stat, n, LRT, df, r)
 
   ### computation
   # calculate BF
@@ -151,9 +153,10 @@ chi2_test_BFF = function(chi2_stat,
 
 
 
-.process_input.chi2.test <- function(chi2_stat, n, LRT){
+.process_input.chi2.test <- function(chi2_stat, n, LRT, df, r){
 
-  df = n-1
+  if (r < 1)
+    stop("r must be greater than or equal to 1")
 
   return(list(
     chi2_stat     = chi2_stat,
