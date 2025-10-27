@@ -54,6 +54,18 @@ get_regression_tau2 = function(n, k, w, r)
   return(to_return)
 }
 
+get_two_sample_invm_t_tau2 = function(n1, n2, w, nu)
+{
+  to_return = n1*n2*w^2*(nu+1)/(n1+n2) # M vector
+  return(to_return)
+}
+
+get_one_sample_invm_t_tau2 = function(n, w, nu)
+{
+  to_return = n*w^2*(nu+1)/(2) # M vector
+  return(to_return)
+}
+
 ################## for fractional cases
 # get_wbar = function(w, k)
 # {

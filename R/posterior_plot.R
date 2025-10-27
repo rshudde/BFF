@@ -13,7 +13,7 @@
 #' frame with the support, prior ordinates, and
 #' posterior ordinates is returned instead.
 #' @param ... additional arguments to the plotting
-#' function. These include: \itemize{
+#' function. These include: \describe{
 #'  \item{"x_limit"}{vector defining the plotting range,
 #'  defaults to \code{c(-3, 3)}.}
 #'  \item{"color"}{vector with color for the posterior and
