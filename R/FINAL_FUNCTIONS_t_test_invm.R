@@ -1,6 +1,15 @@
 # TODO ask val about tau2 for one sample test
 # TODO ask val about warning "In dt(t, df = df, ncp = lambda, log = TRUE) : full precision may not have been achieved in pnt{final}"
 
+# x <- function(i){
+#   if (i < 10) warning("A warning")
+#   return(i)
+# }
+#
+# a = tryCatch(x(5),warning=function(w) return(list(x(5),w)))
+# b = tryCatch(x(15),warning=function(w) return(list(x(5),w)))
+
+
 integrand_invm = function(lambda,t,tau2,nu,df, default_max){
   # set initial values of nu an lambda^2 based on input and control for overflow
   nu_half = 0.5*nu
@@ -8,7 +17,14 @@ integrand_invm = function(lambda,t,tau2,nu,df, default_max){
   lambda2[lambda2<(10^(-25))] = 10^(-25) # control for overflow
 
   # do the actual integration
-  arg = -tau2/lambda^2-(0.5*(nu+1))*log(lambda2)+nu_half*log(tau2)- lgamma(nu_half)+dt(t,df=df,ncp=lambda,log=TRUE)
+  # is_warning = FALSE
+  # dt_term = tryCatch(dt(t,df=df,ncp=lambda,log=TRUE),warning=function(w) return(list(x(5),w)))
+  # if (length(dt_term) == 2) {
+  #   dt_term = dt_term[[1]]
+  #   is_warning = TRUE
+  # }
+
+  arg = -tau2/lambda^2-(0.5*(nu+1))*log(lambda2)+nu_half*log(tau2)- lgamma(nu_half) + dt(t,df=df,ncp=lambda,log=TRUE)
 
   arg[arg<(-default_max)]=(-default_max) # cut off anything that is too small
   x = exp(arg)
@@ -17,17 +33,41 @@ integrand_invm = function(lambda,t,tau2,nu,df, default_max){
 
 # backend_t_invm = function(t,n1,n2,nu,omega, default_max = 700){ # Two-sided t test with IM(nu,tau(omega))#  prior}
 
-BFF_t_test_invm = function(input, tau2) {
-  to_return = integrate(integrand_invm,
+BFF_t_test_invm = function(tau2, t_stat, nu, df, default_max) {
+  BFF = tryCatch(integrate(integrand_invm,
                                 lower=-Inf,
                                 upper=Inf,
-                                t=input$t_stat,
+                                t=t_stat,
                                 tau2=tau2,
-                                nu=input$nu,
-                                df=input$df,
-                                default_max=input$default_max,
-                                rel.tol=.Machine$double.eps^.125)$value
-  return(to_return)
+                                nu=nu,
+                                df=df,
+                                default_max=default_max,
+                                rel.tol=.Machine$double.eps^.125),
+                 warning = function(w)
+                   # return(list(5, w)))
+                 return(list(suppressWarnings(integrate(integrand_invm,
+                                       lower=-Inf,
+                                       upper=Inf,
+                                       t=t_stat,
+                                       tau2=tau2,
+                                       nu=nu,
+                                       df=df,
+                                       default_max=default_max,
+                                       rel.tol=.Machine$double.eps^.125))$value,w)))
+  is_warning = FALSE
+  if (length(BFF) == 2) {
+    BFF = BFF[[1]]
+    is_warning = TRUE
+    # print("The non-central t may have precision input issues stemming from the dt() function. The estimate is still returned")
+  }
+  # calculate logs and control for overflow
+  # first, catch if any errors in dt
+  dt_term = dt(input$t_stat,df,ncp=0,log=TRUE)
+
+  log_BF = log(BFF)-dt_term
+  to_return = min(log_BF,default_max)
+
+  return(list("to_return" = to_return, "is_warning" = is_warning))
 }
 
 backend_t_invm <- function(
@@ -47,19 +87,51 @@ backend_t_invm <- function(
       }
     })
 
+    # # compute log_BF
+    # log_BF <- sapply(tau2, function(x){
+    #   sum(sapply(seq_along(input$t_stat), function(i){
+    #     BFF_t_test_invm(
+    #       input = input,
+    #       tau2=x[i]
+    #     )
+    #   }))
+    # })
+
     # compute log_BF
-    BF <- sapply(tau2, function(x){
+    log_BF <- sapply(tau2, function(x){
       sum(sapply(seq_along(input$t_stat), function(i){
         BFF_t_test_invm(
-          input = input,
-          tau2=x[i]
-        )
+          tau2 = x[i],
+          t_stat    = input$t_stat[i],
+          nu = input$nu,
+          df = input$df,
+          default_max = input$default_max
+        )$to_return
       }))
     })
 
-    # calculate logs and control for overflow
-    log_BF = log(x)-dt(input$t_stat,df,ncp=0,log=TRUE)
-    log_BF = min(arg,default_max)
+
+  # recompute to check for any warnings
+  # TODO have a more elegant solution for this, this is not great yet
+  count = 1
+  warnings_list = vector()
+  for (i in 1:length(tau2)) {
+    for (j in 1:length(input$t_stat)) {
+      warnings_list[count] = BFF_t_test_invm(
+        tau2 = tau2[[i]],
+        t_stat    = input$t_stat[j],
+        nu = input$nu,
+        df = input$df,
+        default_max = input$default_max
+      )$is_warning
+
+      count = count + 1
+    }
+  }
+
+  if (any(warnings_list)) {
+    print("The non-central t has potential precision issues stemming from dt(). The estimate is still returned")
+  }
 
   return(log_BF)
 }
@@ -88,14 +160,14 @@ backend_t_invm <- function(
 #' @export
 #'
 #' @examples
-#' tBFF = t_test_BFF_invm(t_stat = 2.5, n = 50, nu = 1, one_sample = TRUE)
+#' tBFF = t_test_BFF_invm(t_stat = 0.5, n = 50, nu = 1, one_sample = TRUE)
 #' tBFF
 #' plot(tBFF)
 
 t_test_BFF_invm <- function(
     t_stat,
     n = NULL,
-    nu = NULL,
+    nu = 1,
     n1 = NULL,
     n2 = NULL,
     one_sample = FALSE,
@@ -214,5 +286,58 @@ t_test_BFF_invm <- function(
 }
 
 
-
+# Code from Val
+# InvmomentBF = function(t,n1,n2,nu,omega){ # Two-sided t test with IM(nu,tau(omega))
+#
+#   #  prior}
+#
+#   M = length(t)
+#
+#   bf = c(rep(0,M))
+#
+#   tau = n1*n2*omega^2*(nu+1)/(n1+n2) # M vector
+#
+#   df = n1+n2-2
+#
+#
+#
+#   for(m in 1:M ){
+#
+#     x = integrate(integrand,lower=-Inf,upper=Inf,t=t[m],
+#
+#                   tau=tau[m],nu=nu,df=df[m],rel.tol=.Machine$double.eps^.125)$value
+#
+#     arg = log(x)-dt(t[m],df[m],ncp=0,log=TRUE)
+#
+#     arg = min(arg,700)
+#
+#     bf[m] = exp(arg)
+#
+#   }
+#
+#   return(bf)
+#
+# }
+#
+#
+#
+# integrand = function(lambda,t,tau,nu,df){
+#
+#   nuhalf = 0.5*nu
+#
+#   lambda2 = lambda^2
+#
+#   lambda2[lambda2<(10^(-25))] = 10^(-25)
+#
+#   arg = -tau/lambda^2-(0.5*(nu+1))*log(lambda2)+nuhalf*log(tau)-
+#
+#     lgamma(nuhalf)+dt(t,df=df,ncp=lambda,log=TRUE)
+#
+#   arg[arg<(-700)]=(-700)
+#
+#   x = exp(arg)
+#
+#   return(x)
+#
+# }
 
