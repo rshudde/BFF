@@ -24,7 +24,7 @@ integrand_invm = function(lambda,t,tau2,nu,df, default_max){
   #   is_warning = TRUE
   # }
 
-  arg = -tau2/lambda^2-(0.5*(nu+1))*log(lambda2)+nu_half*log(tau2)- lgamma(nu_half) + dt(t,df=df,ncp=lambda,log=TRUE)
+  arg = -tau2/lambda^2-(0.5*(nu+1))*log(lambda2)+nu_half*log(tau2)- lgamma(nu_half) + stats::dt(t,df=df,ncp=lambda,log=TRUE)
 
   arg[arg<(-default_max)]=(-default_max) # cut off anything that is too small
   x = exp(arg)
@@ -34,7 +34,7 @@ integrand_invm = function(lambda,t,tau2,nu,df, default_max){
 # backend_t_invm = function(t,n1,n2,nu,omega, default_max = 700){ # Two-sided t test with IM(nu,tau(omega))#  prior}
 
 BFF_t_test_invm = function(tau2, t_stat, nu, df, default_max) {
-  BFF = tryCatch(integrate(integrand_invm,
+  BFF = tryCatch(stats::integrate(integrand_invm,
                                 lower=-Inf,
                                 upper=Inf,
                                 t=t_stat,
@@ -45,7 +45,7 @@ BFF_t_test_invm = function(tau2, t_stat, nu, df, default_max) {
                                 rel.tol=.Machine$double.eps^.125),
                  warning = function(w)
                    # return(list(5, w)))
-                 return(list(suppressWarnings(integrate(integrand_invm,
+                 return(list(suppressWarnings(stats::integrate(integrand_invm,
                                        lower=-Inf,
                                        upper=Inf,
                                        t=t_stat,
@@ -62,7 +62,7 @@ BFF_t_test_invm = function(tau2, t_stat, nu, df, default_max) {
   }
   # calculate logs and control for overflow
   # first, catch if any errors in dt
-  dt_term = dt(input$t_stat,df,ncp=0,log=TRUE)
+  dt_term = stats::dt(t_stat,df,ncp=0,log=TRUE)
 
   log_BF = log(BFF)-dt_term
   to_return = min(log_BF,default_max)
@@ -231,11 +231,11 @@ t_test_BFF_invm <- function(
 .process_input.t.test.invm <- function(t_stat, n, n1, n2, nu, one_sample, alternative, default_max){
 
 
-  if (r < 1)
-    stop("r must be greater than or equal to 1")
-
-  if (nu < 0)
-    stop("nu must be greater than or equal to 0")
+  # if (r < 1)
+  #   stop("r must be greater than or equal to 1")
+  #
+  # if (nu < 0)
+  #   stop("nu must be greater than or equal to 0")
 
   .check_alternative(alternative)
 
