@@ -63,7 +63,7 @@ backend_t <- function(
         tau2 = x[i],
         t_stat    = input$t_stat[i],
         r = r,
-        df = input$df,
+        df = input$df[i],
         two_sided = input$alternative == "two.sided"
       )
     }))
@@ -88,16 +88,17 @@ backend_t <- function(
 #'
 #' t_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
+#' For two-sample tests (\code{one_sample = FALSE}), the function assumes the usual pooled equal-variance two-sample t statistic with \code{df = n1 + n2 - 2}. Welch unequal-variance t statistics are not supported by this interface.
 #' All results are on the log scale.
 #'
 #' @param t_stat t statistic
-#' @param n sample size (if one sample test)
-#' @param n1 sample size of group one for two sample test. Must be provided if one_sample = FALSE
-#' @param n2 sample size of group two for two sample test. Must be provided if one_sample = FALSE
-#' @param one_sample is test one sided? Default is FALSE
+#' @param n sample size for one-sample test. Must be provided if \code{one_sample = TRUE}.
+#' @param n1 sample size of group one for pooled equal-variance two-sample test. Must be provided if \code{one_sample = FALSE}.
+#' @param n2 sample size of group two for pooled equal-variance two-sample test. Must be provided if \code{one_sample = FALSE}.
+#' @param one_sample is this a one-sample test? Default is FALSE
 #' @param alternative the alternative. options are "two.sided" or "less" or "greater"
 #' @param omega standardized effect size. For the t-test, this is often called Cohen's d (can be a single entry or a vector of values)
-#' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
+#' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01). In that case, \code{log_bf_h1} and \code{omega_h1} report the largest log Bayes factor and corresponding effect size on this evaluated grid, with 0 also included.
 #' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
@@ -122,6 +123,10 @@ t_test_BFF <- function(
 {
   ### input checks and processing
   input <- .process_input.t.test(t_stat, n, n1, n2, one_sample, alternative, r)
+  .check_nonnegative_numeric(
+    if(!is.null(omega)) omega else omega_sequence,
+    if(!is.null(omega)) "omega" else "omega_sequence"
+  )
 
   ### computation
   # calculate BF
@@ -174,8 +179,7 @@ t_test_BFF <- function(
 .process_input.t.test <- function(t_stat, n, n1, n2, one_sample, alternative, r){
 
 
-  if (r < 1)
-    stop("r must be greater than or equal to 1")
+  .check_r(r)
 
   .check_alternative(alternative)
 
@@ -186,18 +190,23 @@ t_test_BFF <- function(
       stop("Both t_stat and and n must be provided for one-sample (`one_sample = TRUE`) test.")
     if(length(t_stat) != length(n))
       stop("The input length of t_stat and n must be the same.")
+    .check_finite_numeric(t_stat, "t_stat")
+    .check_positive_numeric(n, "n")
 
     df <- n - 1
-    .check_df(df, "(Total sample size must be greater than 2.)")
+    .check_df(df, "(Total sample size must be greater than 1.)")
   }else{
 
     if(is.null(t_stat) || is.null(n1) || is.null(n2))
       stop("Both t_stat, n1, and n2 must be provided for two-sample (`one_sample = FALSE`) test.")
     if(length(t_stat) != length(n1) || length(t_stat) != length(n2))
       stop("The input length of t_stat, n1, and n2 must be the same.")
+    .check_finite_numeric(t_stat, "t_stat")
+    .check_positive_numeric(n1, "n1")
+    .check_positive_numeric(n2, "n2")
 
     df <- n1 + n2 - 2
-    .check_df(df, "(Total sample size must be greater than 3.)")
+    .check_df(df, "(Total sample size must be greater than 2.)")
   }
 
   # computation is implemented only for alternative = "two-sided" or "greater"

@@ -11,29 +11,33 @@ f_test_BFF(
   df2,
   omega = NULL,
   omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01),
-  r = 1
+  r = 1,
+  effect_size = NULL
 )
 }
 \arguments{
-\item{f_stat}{T statistic}
+\item{f_stat}{F statistic}
 
-\item{n}{sample size (if one sample test)}
+\item{n}{sample size}
 
-\item{df1}{sample size of group one for two sample test.}
+\item{df1}{numerator degrees of freedom.}
 
-\item{df2}{sample size of group two for two sample test}
+\item{df2}{denominator degrees of freedom.}
 
-\item{omega}{standardized effect size. For the f-test, this is often called Cohen's f (can be a single entry or a vector of values)}
+\item{omega}{prior-mode standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values)}
 
-\item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
+\item{omega_sequence}{sequence of prior-mode standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
 
 \item{r}{variable controlling dispersion of non-local priors. Default is 1. r must be >= 1}
+
+\item{effect_size}{scale used for \code{omega} and \code{omega_sequence}. Defaults to the package's internal \code{"omega"} RMSES scale. Alternatives include \code{"cohens_f"}, \code{"cohens_f2"}, \code{"partial_eta2"}, and \code{"partial_r2"}.}
 }
 \value{
 Returns an S3 object of class `BFF` (see `BFF.object` for details).
 }
 \description{
-f_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+f_test_BFF constructs BFFs based on the F test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+When \code{omega} or \code{omega_sequence} is used, tau^2 is calibrated so that the induced prior density on the selected effect-size scale has its mode at the requested value.
 By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 All results are on the log scale.
 }

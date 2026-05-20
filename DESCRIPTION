@@ -1,6 +1,6 @@
 Package: BFF
 Title: Bayes Factor Functions
-Version: 4.4.1
+Version: 4.5.0
 Authors@R: 
     c(person(given = "Rachael",
            family = "Shudde",
@@ -45,7 +45,7 @@ Suggests:
     rmarkdown,
     BSDA, 
     vdiffr
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 Depends: R (>= 2.10)
 Config/testthat/edition: 3

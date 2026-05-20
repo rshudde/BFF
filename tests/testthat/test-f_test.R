@@ -9,7 +9,7 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf_h1, -2.89426, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf_h1, -2.73527, tolerance = 1e-5)
   testthat::expect_equal(fit$omega_h1,  0.5)
 
   # test S3 methods
@@ -18,43 +18,12 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local f test"  ,
       ""                                        ,
-      "log Bayes factor = -2.89"                 ,
-      "omega = 0.50 (Cohen's f)"
+      "log Bayes factor = -2.74"                 ,
+      "omega = 0.50 (RMSES)"
     )
   )
   testthat::expect_error(plot(fit), "Bayes factor function can be plotted only if a specific omega/tau2 is not user set")
 
-  # TODO: fix posterior plots
-  # - I fixed the arguments not being properly passed
-  # - however, the posterior distribution does not integrate to 1
-  # (I remember that I raised this issue when I was in US, and Saptati was working on fixing it)
-
-  # # this is how the functions should work
-  # posterior_plot(fit)
-  # posterior_plot(fit, prior = TRUE)
-  #
-  # # this highlights the issue (run `devtools::load_all()` first)
-  # tau2 <- get_two_sample_tau2(n1 = fit$input$n1, n2 = fit$input$n2, w = fit$omega, r = fit$r)
-  #
-  # # does not integrate to 1
-  # integrate(
-  #   f = function(x) .t_test.posterior(
-  #     t_stat = fit$input$t_stat, tau2 = tau2, r = fit$r, effect_size = x,
-  #     n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
-  #   lower = -Inf,
-  #   upper = Inf
-  # )
-  #
-  # # prior seems to work just fine (i.e., integrates to one)
-  # integrate(
-  #   f = function(x) .t_test.prior(
-  #     tau2 = tau2, r = fit$r, effect_size = x,
-  #     n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
-  #   lower = -Inf,
-  #   upper = Inf
-  # )
-  # # <\TODO> Adjust for F-test later
-  #
   # # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior",           posterior_plot(fit))
   # # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE))
   #
@@ -68,7 +37,7 @@ test_that("two-sample: basic functionality", {
     df2 = 75)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf_h1, 0.82228, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf_h1, 0.82374, tolerance = 1e-5)
   testthat::expect_equal(fit$omega_h1,  0.14)
 
   # test S3 methods
@@ -78,9 +47,9 @@ test_that("two-sample: basic functionality", {
       "\tBayesian non-local f test"  ,
       ""                                        ,
       "maximized (in favor of alternative) log Bayes factor = 0.82",
-      "maximized (in favor of alternative) omega = 0.14 (Cohen's f)",
-      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -23.60",
-      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (Cohen's f)"
+      "maximized (in favor of alternative) omega = 0.14 (RMSES)",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -23.13",
+      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (RMSES)"
     )
   )
   #Modify for F test
@@ -105,7 +74,7 @@ test_that("two-sample: basic functionality", {
     r = 3)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf_h1, 1.93714, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf_h1, 1.93649, tolerance = 1e-5)
   testthat::expect_equal(fit$omega_h1,  0.24)
 
   # test S3 methods
@@ -115,10 +84,79 @@ test_that("two-sample: basic functionality", {
       "\tBayesian non-local f test"  ,
       ""                                        ,
       "maximized (in favor of alternative) log Bayes factor = 1.94",
-      "maximized (in favor of alternative) omega = 0.24 (Cohen's f)",
-      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -22.83",
-      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (Cohen's f)"
+      "maximized (in favor of alternative) omega = 0.24 (RMSES)",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -22.46",
+      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (RMSES)"
     )
   )
 
+})
+
+test_that("vectorized F-test uses study-specific degrees of freedom", {
+  fit <- f_test_BFF(
+    f_stat = c(1.4, 2.1),
+    n = c(40, 65),
+    df1 = c(2, 4),
+    df2 = c(37, 60),
+    omega = 0.25
+  )
+
+  expected <- sum(
+    f_test_BFF(f_stat = 1.4, n = 40, df1 = 2, df2 = 37, omega = 0.25)$log_bf_h1,
+    f_test_BFF(f_stat = 2.1, n = 65, df1 = 4, df2 = 60, omega = 0.25)$log_bf_h1
+  )
+
+  testthat::expect_equal(fit$log_bf_h1, expected, tolerance = 1e-10)
+})
+
+test_that("vectorized F-test handles conventional scales only with common numerator df", {
+  fit <- f_test_BFF(
+    f_stat = c(1.4, 2.1),
+    n = c(40, 65),
+    df1 = c(2, 2),
+    df2 = c(37, 62),
+    omega = 0.4,
+    effect_size = "cohens_f"
+  )
+
+  expected <- sum(
+    f_test_BFF(f_stat = 1.4, n = 40, df1 = 2, df2 = 37, omega = 0.4, effect_size = "cohens_f")$log_bf_h1,
+    f_test_BFF(f_stat = 2.1, n = 65, df1 = 2, df2 = 62, omega = 0.4, effect_size = "cohens_f")$log_bf_h1
+  )
+
+  testthat::expect_length(fit$log_bf_h1, 1)
+  testthat::expect_equal(fit$log_bf_h1, expected, tolerance = 1e-10)
+
+  testthat::expect_error(
+    f_test_BFF(
+      f_stat = c(1.4, 2.1),
+      n = c(40, 65),
+      df1 = c(2, 4),
+      df2 = c(37, 60),
+      omega = 0.4,
+      effect_size = "cohens_f"
+    ),
+    "requires a common `df1`"
+  )
+})
+
+test_that("F-test rejects invalid inputs", {
+  testthat::expect_error(
+    f_test_BFF(f_stat = -1, n = 25, df1 = 5, df2 = 20, omega = 0.2)
+  )
+  testthat::expect_error(
+    f_test_BFF(f_stat = 1.5, n = 25, df1 = 0, df2 = 20, omega = 0.2)
+  )
+  testthat::expect_error(
+    f_test_BFF(f_stat = 1.5, n = 25, df1 = 5, df2 = 0, omega = 0.2)
+  )
+  testthat::expect_error(
+    f_test_BFF(
+      f_stat = c(1.5, 2.0),
+      n = c(25, 30),
+      df1 = c(5, 6),
+      df2 = c(20, 21, 22),
+      omega = 0.2
+    )
+  )
 })

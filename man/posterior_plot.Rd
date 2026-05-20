@@ -18,15 +18,22 @@ frame with the support, prior ordinates, and
 posterior ordinates is returned instead.}
 
 \item{...}{additional arguments to the plotting
-function. These include: \itemize{
- \item{"x_limit"}{vector defining the plotting range,
+function. These include: \describe{
+ \item{x_limit}{vector defining the plotting range,
  defaults to \code{c(-3, 3)}.}
- \item{"color"}{vector with color for the posterior and
+ \item{color}{vector with color for the posterior and
  prior line. Defaults to \code{c("black", "grey")}}
- \item{"linetype"}{vector with linetype for the posterior and
+ \item{linetype}{vector with linetype for the posterior and
  prior line. Defaults to \code{c(2, 1)}}
- \item{"linewidth"}{vector with linewidth for the posterior and
+ \item{linewidth}{vector with linewidth for the posterior and
  prior line. Defaults to \code{c(1, 1)}}
+ \item{effect_size}{effect-size scale for plotting the prior and
+ posterior density. Defaults to the scale used to fit the BFF object,
+ or to the package's internal omega scale.}
+ \item{table_dim}{integer vector \code{c(rows, columns)} for
+ chi-square transformations that require table dimensions.}
+ \item{table_margins}{two marginal probabilities for 2x2
+ table effect-size transformations.}
 }}
 }
 \value{
@@ -36,8 +43,8 @@ with prior and posterior densities if \code{plot = FALSE}
 \description{
 Creates a prior and posterior plot
 of an BFF object. If no specific omega was set
-when fitting the model, the omega resulting in
-maximum BF against the null hypothesis is selected.
+when fitting the model, the omega corresponding to
+the largest evaluated grid BF against the null hypothesis is selected.
 }
 \seealso{
 [z_test_BFF()], [t_test_BFF()], [chi2_test_BFF()], [f_test_BFF()]

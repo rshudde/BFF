@@ -56,57 +56,66 @@ dnlnm <- function(x, tau2, r, log = FALSE){
 
 ### t_test
 .t_test.prior     <- function(tau2, r, effect_size, n = NULL, n1 = NULL, n2 = NULL, one_sample = FALSE, one_sided = FALSE){
+  scale <- .t_test_ncp_scale(n = n, n1 = n1, n2 = n2, one_sample = one_sample)
+  lambda <- scale * effect_size
+  density <- dnlnm(x = lambda, tau2 = tau2, r = r) * scale
+
   if(one_sided){
-    lik = .dnlnm.t_test1(n = n, effect_size = effect_size, tau2 = tau2, r = r)*sqrt(n)
-  }else{
-    if(one_sample){
-      stop("TODO")
-    }else{
-      lik = .dnlnm_t_test2(n1 = n1, n2 = n2, effect_size = effect_size, tau2 = tau2, r = r) * ((sqrt(2*n1*n2))/(sqrt(n1+n2)))
-    }
+    density <- ifelse(effect_size >= 0, 2 * density, 0)
   }
-  return(lik)
+
+  return(density)
 }
 
 .t_test.posterior <- function(t_stat, tau2, r, effect_size, n = NULL, n1 = NULL, n2 = NULL, one_sample = FALSE, one_sided = FALSE){
+  df <- .t_test_df(n = n, n1 = n1, n2 = n2, one_sample = one_sample)
+  scale <- .t_test_ncp_scale(n = n, n1 = n1, n2 = n2, one_sample = one_sample)
 
-  if(one_sided){
-    # TODO: please check whether the code for one-sample and two sample identical, if not, dispatch
-    df <- n - 1
-    lik_prior = .t_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n = n, n1 = n1, n2 = n2, one_sample = one_sample, one_sided = one_sided)
-    m0 = .m0.t_test1(t = t_stat, df = df)
-    I1 = .I1.t_test1(tau2 = tau2, r = r, df = df, t = t_stat)
-    I2 = .I2.t_test1(tau2 = tau2, r = r, df = df, t = t_stat)
-    m1 = 2*m0*(I1 + I2)
-    post_lik = ((.dt.t_test1(t = t_stat, df = df, n = n, effect_size = effect_size) * lik_prior)/m1)
-  }else{
-    if(one_sample){
-      # one-sample two-sided t-test
-      # TODO: needs to be implemented
-      stop("TODO")
-    }else{
-      # two-sample two-sided t-test
-      df <- n1 + n2 - 2
-      lik_prior <- .t_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n1 = n1, n2 = n2, one_sample = one_sample, one_sided = one_sided)
-      m0 <- .m0.t_test2(t = t_stat, df = df)
-      I1 <- .I1.t_test2(tau2 = tau2, r = r, df = df, t = t_stat)
-      I2 <- .I2.t_test2(tau2 = tau2, r = r, df = df, t = t_stat)
-      m1 <- m0*(I1 + I2)
-      post_lik <- ((.dt.t_test2(t = t_stat, df = df, n1 = n1, n2 = n2, effect_size = effect_size) * lik_prior)/m1)
-    }
+  lik_prior <- .t_test.prior(
+    tau2       = tau2,
+    r          = r,
+    effect_size = effect_size,
+    n          = n,
+    n1         = n1,
+    n2         = n2,
+    one_sample = one_sample,
+    one_sided  = one_sided
+  )
+  lik_t <- suppressWarnings(stats::dt(x = t_stat, df = df, ncp = scale * effect_size))
+  m1 <- .m1.t_test(t = t_stat, tau2 = tau2, r = r, df = df, two_sided = !one_sided)
+
+  post_lik <- (lik_t * lik_prior) / m1
+  return(post_lik)
 }
-return(post_lik)
+
+.t_test_df <- function(n = NULL, n1 = NULL, n2 = NULL, one_sample = FALSE){
+  if(one_sample){
+    return(n - 1)
+  }
+  return(n1 + n2 - 2)
+}
+
+.t_test_ncp_scale <- function(n = NULL, n1 = NULL, n2 = NULL, one_sample = FALSE){
+  if(one_sample){
+    return(sqrt(n))
+  }
+  return(sqrt(n1 * n2 / (n1 + n2)))
+}
+
+.m1.t_test <- function(t, tau2, r, df, two_sided){
+  stats::dt(x = t, df = df, ncp = 0) *
+    exp(BFF_t_test(tau2 = tau2, t_stat = t, r = r, two_sided = two_sided, df = df))
 }
 
 ### helper functions for one-sided t-test (i.e., t_test1)
 # likelihood
 .dt.t_test1 <- function(t, df, n, effect_size){
-  ifelse(t>0, 2*stats::dt(x = t, df = df, ncp = sqrt(n)*effect_size), 0)
+  suppressWarnings(stats::dt(x = t, df = df, ncp = .t_test_ncp_scale(n = n, one_sample = TRUE) * effect_size))
 }
 
 # for prior
 .dnlnm.t_test1 <- function(n, effect_size, tau2, r) {
-  density = ifelse(sqrt(n)*effect_size >= 0, dnlnm(x = sqrt(n)*effect_size, tau2 = tau2, r = r)*2, 0)
+  density = ifelse(effect_size >= 0, dnlnm(x = .t_test_ncp_scale(n = n, one_sample = TRUE) * effect_size, tau2 = tau2, r = r)*2, 0)
   return(density)
 }
 
@@ -135,7 +144,7 @@ return(post_lik)
 ### helper functions for two-sample t-test (i.e., t_test2)
 # likelihood
 .dt.t_test2 <- function(t, df, n1, n2, effect_size){
-  stats::dt(x = t, df = df, ncp =  ((sqrt(2*n1*n2))/(sqrt(n1+n2))) * effect_size)
+  suppressWarnings(stats::dt(x = t, df = df, ncp = .t_test_ncp_scale(n1 = n1, n2 = n2, one_sample = FALSE) * effect_size))
 }
 
 # marginal under null
@@ -146,14 +155,14 @@ return(post_lik)
 
 # for prior
 .dnlnm_t_test2 <- function(n1, n2, effect_size, tau2, r){
-  density = dnlnm((((sqrt(2*n1*n2))/(sqrt(n1+n2))) * effect_size), tau2, r)
+  density = dnlnm(.t_test_ncp_scale(n1 = n1, n2 = n2, one_sample = FALSE) * effect_size, tau2, r)
   return(density)
 }
 
 # I1 in closed form expression of marginal under alternative (in supplemental material)
 .I1.t_test2 <- function(tau2, r, df, t){
   c = 1/((1+tau2)^(r + 0.5))
-  gauss = Gauss2F1(a = (df +1)/2, b = (r = 0.5), c = 0.5, x = (tau2*(t^2))/(((t^2)+df)*(1 + tau2)))
+  gauss = Gauss2F1(a = (df +1)/2, b = (r + 0.5), c = 0.5, x = (tau2*(t^2))/(((t^2)+df)*(1 + tau2)))
   I1 = c*gauss
   return(I1)
 }
@@ -163,5 +172,180 @@ return(post_lik)
   gauss = Gauss2F1(a = ((df/2)+1), b = (r + 1), c = 1.5, x = (tau2*(t^2))/((1 + tau2)*((t^2) + df)))
   I2 = c*gauss
   return(I2)
+}
+
+
+### z_test
+.z_test.prior <- function(tau2, r, effect_size, n = NULL, n1 = NULL, n2 = NULL, one_sample = FALSE, one_sided = FALSE){
+  scale <- .t_test_ncp_scale(n = n, n1 = n1, n2 = n2, one_sample = one_sample)
+  lambda <- scale * effect_size
+  density <- dnlnm(x = lambda, tau2 = tau2, r = r) * scale
+
+  if(one_sided){
+    density <- ifelse(effect_size >= 0, 2 * density, 0)
+  }
+
+  return(density)
+}
+
+.z_test.posterior <- function(z_stat, tau2, r, effect_size, n = NULL, n1 = NULL, n2 = NULL, one_sample = FALSE, one_sided = FALSE){
+  scale <- .t_test_ncp_scale(n = n, n1 = n1, n2 = n2, one_sample = one_sample)
+
+  lik_prior <- .z_test.prior(
+    tau2       = tau2,
+    r          = r,
+    effect_size = effect_size,
+    n          = n,
+    n1         = n1,
+    n2         = n2,
+    one_sample = one_sample,
+    one_sided  = one_sided
+  )
+  lik_z <- stats::dnorm(x = z_stat, mean = scale * effect_size, sd = 1)
+  m1 <- .m1.z_test(z = z_stat, tau2 = tau2, r = r, two_sided = !one_sided)
+
+  post_lik <- (lik_z * lik_prior) / m1
+  return(post_lik)
+}
+
+.m1.z_test <- function(z, tau2, r, two_sided){
+  stats::dnorm(x = z, mean = 0, sd = 1) *
+    exp(BFF_z_test(tau2 = tau2, z_stat = z, r = r, two_sided = two_sided))
+}
+
+
+### regression_test
+.regression_test.prior <- function(tau2, r, effect_size, n, k, one_sided = FALSE){
+  scale <- .regression_test_ncp_scale(n = n, k = k)
+  lambda <- scale * effect_size
+  density <- dnlnm(x = lambda, tau2 = tau2, r = r) * scale
+
+  if(one_sided){
+    density <- ifelse(effect_size >= 0, 2 * density, 0)
+  }
+
+  return(density)
+}
+
+.regression_test.posterior <- function(t_stat, tau2, r, effect_size, n, k, one_sided = FALSE){
+  df <- .regression_test_df(n = n, k = k)
+  scale <- .regression_test_ncp_scale(n = n, k = k)
+
+  lik_prior <- .regression_test.prior(
+    tau2       = tau2,
+    r          = r,
+    effect_size = effect_size,
+    n          = n,
+    k          = k,
+    one_sided  = one_sided
+  )
+  lik_t <- suppressWarnings(stats::dt(x = t_stat, df = df, ncp = scale * effect_size))
+  m1 <- .m1.regression_test(t = t_stat, tau2 = tau2, r = r, df = df, two_sided = !one_sided)
+
+  post_lik <- (lik_t * lik_prior) / m1
+  return(post_lik)
+}
+
+.regression_test_df <- function(n, k){
+  n - k - 1
+}
+
+.regression_test_ncp_scale <- function(n, k){
+  sqrt(.regression_test_df(n = n, k = k))
+}
+
+.m1.regression_test <- function(t, tau2, r, df, two_sided){
+  stats::dt(x = t, df = df, ncp = 0) *
+    exp(BFF_reg_test(tau2 = tau2, t_stat = t, df = df, r = r, two_sided = two_sided))
+}
+
+
+### chi2_test
+.chi2_test.prior <- function(tau2, r, effect_size, n, df){
+  lambda <- .chi2_test_ncp(effect_size = effect_size, n = n, df = df)
+  jacobian <- .chi2_test_ncp_jacobian(effect_size = effect_size, n = n, df = df)
+
+  density <- stats::dgamma(
+    x     = lambda,
+    shape = df/2 + r,
+    rate  = 1/(2*tau2)
+  ) * jacobian
+  density <- ifelse(effect_size >= 0, density, 0)
+
+  return(density)
+}
+
+.chi2_test.posterior <- function(chi2_stat, tau2, r, effect_size, n, df){
+  lambda <- .chi2_test_ncp(effect_size = effect_size, n = n, df = df)
+  lik_prior <- .chi2_test.prior(
+    tau2       = tau2,
+    r          = r,
+    effect_size = effect_size,
+    n          = n,
+    df         = df
+  )
+  lik_chi2 <- suppressWarnings(stats::dchisq(x = chi2_stat, df = df, ncp = lambda))
+  m1 <- .m1.chi2_test(chi2_stat = chi2_stat, tau2 = tau2, r = r, df = df)
+
+  post_lik <- (lik_chi2 * lik_prior) / m1
+  return(post_lik)
+}
+
+.chi2_test_ncp <- function(effect_size, n, df){
+  n * df * effect_size^2
+}
+
+.chi2_test_ncp_jacobian <- function(effect_size, n, df){
+  2 * n * df * effect_size
+}
+
+.m1.chi2_test <- function(chi2_stat, tau2, r, df){
+  stats::dchisq(x = chi2_stat, df = df, ncp = 0) *
+    exp(BFF_chi2_test(tau2 = tau2, chi2_stat = chi2_stat, k = df, r = r))
+}
+
+
+### f_test
+.f_test.prior <- function(tau2, r, effect_size, n, df1){
+  lambda <- .f_test_ncp(effect_size = effect_size, n = n, df1 = df1)
+  jacobian <- .f_test_ncp_jacobian(effect_size = effect_size, n = n, df1 = df1)
+
+  density <- stats::dgamma(
+    x     = lambda,
+    shape = df1/2 + r,
+    rate  = 1/(2*tau2)
+  ) * jacobian
+  density <- ifelse(effect_size >= 0, density, 0)
+
+  return(density)
+}
+
+.f_test.posterior <- function(f_stat, tau2, r, effect_size, n, df1, df2){
+  lambda <- .f_test_ncp(effect_size = effect_size, n = n, df1 = df1)
+  lik_prior <- .f_test.prior(
+    tau2       = tau2,
+    r          = r,
+    effect_size = effect_size,
+    n          = n,
+    df1        = df1
+  )
+  lik_f <- suppressWarnings(stats::df(x = f_stat, df1 = df1, df2 = df2, ncp = lambda))
+  m1 <- .m1.f_test(f_stat = f_stat, tau2 = tau2, r = r, df1 = df1, df2 = df2)
+
+  post_lik <- (lik_f * lik_prior) / m1
+  return(post_lik)
+}
+
+.f_test_ncp <- function(effect_size, n, df1){
+  n * df1 * effect_size^2 / 2
+}
+
+.f_test_ncp_jacobian <- function(effect_size, n, df1){
+  n * df1 * effect_size
+}
+
+.m1.f_test <- function(f_stat, tau2, r, df1, df2){
+  stats::df(x = f_stat, df1 = df1, df2 = df2, ncp = 0) *
+    exp(BFF_f_test(tau2 = tau2, f_stat = f_stat, k = df1, m = df2, r = r))
 }
 

@@ -16,7 +16,7 @@ get_two_sample_tau2 = function(n1, n2, w, r)
 get_count_tau2 = function(n, w, k, r)
 {
   top = n * w ^ 2 * k
-  bottom =2 * (k / 2 + r - 1)
+  bottom = k + 2 * r - 1
   to_return = top / bottom
   return(to_return)
 }
@@ -24,7 +24,7 @@ get_count_tau2 = function(n, w, k, r)
 get_LRT_tau2 = function(n, w, k, r)
 {
   top = n * k * w ^ 2
-  bottom = 2 * (k / 2 + r - 1)
+  bottom = k + 2 * r - 1
   to_return = top / bottom
   return(to_return)
 }
@@ -32,7 +32,7 @@ get_LRT_tau2 = function(n, w, k, r)
 get_linear_tau2 = function(n, w, k, r)
 {
   top = n * k * w ^ 2
-  bottom = 4 * (k / 2 + r - 1)
+  bottom = 2 * (k + 2 * r - 1)
   to_return = top / bottom
   return(to_return)
 }

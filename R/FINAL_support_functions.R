@@ -56,9 +56,10 @@ get_b = function(tau2, r, k) {
 }
 
 get_c = function(tau2, df, r) {
-  numerator = gamma_approx(df/2+1) * gamma_approx(r + 1)
-  denomonator = gamma_approx((df+1)/2) * gamma_approx(r + 1/2)
-  to_return = numerator / denomonator
+  to_return = exp(
+    lgamma(df / 2 + 1) + lgamma(r + 1) -
+      lgamma((df + 1) / 2) - lgamma(r + 1 / 2)
+  )
   return(to_return)
 }
 
@@ -74,15 +75,20 @@ get_y_t_test = function(tau2, t, df) {
 }
 
 ## functions to return minimum bff for anything greater than small threshold
-get_min_omega_bff = function(omega, bff, cutoff) {
-  idx = which(omega < 0.1)
-  bff = bff[-idx]
-  omega = omega[-idx]
+get_min_omega_bff_index = function(omega, bff, cutoff) {
+  idx = which(omega >= cutoff)
+  if(length(idx) == 0){
+    return(NA_integer_)
+  }
+  idx[which.min(bff[idx])]
+}
 
-  idx_min = which.min(bff)
-  bff_min = bff[idx_min]
-  omega_min = omega[idx_min]
-  return(c(bff_min, omega_min))
+get_min_omega_bff = function(omega, bff, cutoff) {
+  idx_min = get_min_omega_bff_index(omega = omega, bff = bff, cutoff = cutoff)
+  if(is.na(idx_min)){
+    return(c(NA_real_, NA_real_))
+  }
+  return(c(bff[idx_min], omega[idx_min]))
 }
 
 

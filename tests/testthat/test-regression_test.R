@@ -9,7 +9,7 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf_h1, -0.43374, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf_h1, -0.8319082, tolerance = 1e-5)
   testthat::expect_equal(fit$omega_h1,  0.5)
 
   # test S3 methods
@@ -18,44 +18,13 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local regression test"  ,
       ""                                        ,
-      "log Bayes factor = -0.43"                 ,
-      "omega = 0.50 (Cohen's d)"                ,
+    "log Bayes factor = -0.83"                 ,
+      "omega = 0.50 (signed Cohen's f)"                ,
       "alternative = two.sided"
     )
   )
   testthat::expect_error(plot(fit), "Bayes factor function can be plotted only if a specific omega/tau2 is not user set")
 
-  # # TODO: fix posterior plots
-  # # - I fixed the arguments not being properly passed
-  # # - however, the posterior distribution does not integrate to 1
-  # # (I remember that I raised this issue when I was in US, and Saptati was working on fixing it)
-  #
-  # # this is how the functions should work
-  # posterior_plot(fit)
-  # posterior_plot(fit, prior = TRUE)
-  #
-  # # this highlights the issue (run `devtools::load_all()` first)
-  # tau2 <- get_two_sample_tau2(n1 = fit$input$n1, n2 = fit$input$n2, w = fit$omega_h1, r = fit$r)
-  #
-  # # does not integrate to 1
-  # integrate(
-  #   f = function(x) .t_test.posterior(
-  #     t_stat = fit$input$t_stat, tau2 = tau2, r = fit$r, effect_size = x,
-  #     n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
-  #   lower = -Inf,
-  #   upper = Inf
-  # )
-  #
-  # # prior seems to work just fine (i.e., integrates to one)
-  # integrate(
-  #   f = function(x) .t_test.prior(
-  #     tau2 = tau2, r = fit$r, effect_size = x,
-  #     n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
-  #   lower = -Inf,
-  #   upper = Inf
-  # )
-  # # <\TODO>
-  #
   # # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior",           posterior_plot(fit))
   # # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE))
 
@@ -80,7 +49,7 @@ test_that("two-sample: basic functionality", {
       "\tBayesian non-local regression test"  ,
       ""                                        ,
       "log Bayes factor = -0.28"                 ,
-      "omega = 0.50 (Cohen's d)"                ,
+      "omega = 0.50 (signed Cohen's f)"                ,
       "alternative = greater"
     )
   )
@@ -96,8 +65,8 @@ test_that("two-sample: basic functionality", {
     k = 1)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf_h1, 0.03282, tolerance = 1e-5)
-  testthat::expect_equal(fit$omega_h1,  0.05)
+  testthat::expect_equal(fit$log_bf_h1, 0.00, tolerance = 1e-5)
+  testthat::expect_equal(fit$omega_h1,  0.00)
 
   # test S3 methods
   testthat::expect_equal(
@@ -105,10 +74,10 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local regression test"  ,
       ""                                        ,
-      "maximized (in favor of alternative) log Bayes factor = 0.03",
-      "maximized (in favor of alternative) omega = 0.05 (Cohen's d)",
-      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -3.17",
-      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (Cohen's d)",
+      "maximized (in favor of alternative) log Bayes factor = 0.00",
+      "maximized (in favor of alternative) omega = 0.00 (signed Cohen's f)",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -3.45",
+      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (signed Cohen's f)",
       "alternative = two.sided"
     )
   )
@@ -142,13 +111,41 @@ test_that("two-sample: basic functionality", {
       "\tBayesian non-local regression test",
       ""                                        ,
       "maximized (in favor of alternative) log Bayes factor = 0.00",
-      "maximized (in favor of alternative) omega = 0.00 (Cohen's d)",
+      "maximized (in favor of alternative) omega = 0.00 (signed Cohen's f)",
       "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -8.63",
-      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (Cohen's d)",
+      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (signed Cohen's f)",
       "alternative = less"
     )
   )
   # vdiffr::expect_doppelganger("regression_test_BFF-two_sample-one_sided-BFF", plot(fit))
   # testthat::expect_error(posterior_plot(fit), "There is no non-local prior distribution")
+})
+
+test_that("regression test rejects invalid inputs", {
+  testthat::expect_error(
+    regression_test_BFF(t_stat = NA, n = 50, k = 3, omega = 0.2)
+  )
+  testthat::expect_error(
+    regression_test_BFF(t_stat = 1.5, n = 4, k = 3, omega = 0.2)
+  )
+  testthat::expect_error(
+    regression_test_BFF(
+      t_stat = c(1.5, 2.0),
+      n = c(50, 60),
+      k = c(3, 4, 5),
+      omega = 0.2
+    )
+  )
+})
+
+test_that("regression test default h0 cutoff is on the internal delta scale", {
+  fit <- regression_test_BFF(
+    t_stat = 2.5,
+    n = 50,
+    k = 3,
+    omega_sequence = c(0.02, sqrt(0.02), 0.15)
+  )
+
+  testthat::expect_equal(fit$omega_h0, sqrt(0.02), tolerance = 1e-12)
 })
 

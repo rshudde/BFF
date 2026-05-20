@@ -1,4 +1,4 @@
-################# chih2 functions if r is an integer and equal to 1
+################# chi2 functions if r is an integer and equal to 1
 G_val_r1 = function(tau2, chi2_stat, df)
 {
   BFF = (tau2 + 1) ^ (-df / 2 - 1) * (1 + tau2 * chi2_stat / (df * (tau2 + 1))) * exp(tau2 *
@@ -15,7 +15,7 @@ BFF_chi2_test = function(tau2, chi2_stat, k, r)
 
   b = get_b(tau2=tau2, r = r, k = k)
 
-  term_three = tau2 * chi2_stat / (2*(1 + tau2^2))
+  term_three = tau2 * chi2_stat / (2*(1 + tau2))
   hypergeo = hypergeom1F1(k/2 + r, k/2, term_three)$f
 
   final_BF = b*hypergeo
@@ -28,19 +28,22 @@ BFF_chi2_test = function(tau2, chi2_stat, k, r)
 backend_chi2 <- function(
     input,
     r,
-    omega = NULL){
+    omega = NULL,
+    tau2 = NULL){
 
   # compute tau2 from omega
   # if multiple omegas and t-stats are supplied, each element of tau2
   # corresponds a vector of tau2 for the corresponding t-statistics
   # i.e., tau2[omega][t-stat]
-  tau2 <- lapply(omega, function(x){
-    if(input$LRT){
-      tau2 <- get_LRT_tau2(n = input$n, k = input$df, w = x, r = r)
-    }else{
-      tau2 <- get_count_tau2(n = input$n, k = input$df, w = x, r = r)
-    }
-  })
+  if(is.null(tau2)){
+    tau2 <- lapply(omega, function(x){
+      if(input$LRT){
+        tau2 <- get_LRT_tau2(n = input$n, k = input$df, w = x, r = r)
+      }else{
+        tau2 <- get_count_tau2(n = input$n, k = input$df, w = x, r = r)
+      }
+    })
+  }
 
   # compute log_BF
   log_BF <- sapply(tau2, function(x){
@@ -48,7 +51,7 @@ backend_chi2 <- function(
       BFF_chi2_test(
           tau2 = x[i],
           chi2_stat    = input$chi2_stat[i],
-          k = input$df,
+          k = input$df[i],
           r = r
         )
     }))
@@ -63,24 +66,27 @@ backend_chi2 <- function(
       Please contact the maintainer for more information."
     )
 
-  return(log_BF)
+  return(unname(log_BF))
 }
 
-################# T function user interaction
+################# chi2 function user interaction
 
 #' chi2_test_BFF
 #'
-#' chi2_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' chi2_test_BFF constructs BFFs based on the chi-square test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' When \code{omega} or \code{omega_sequence} is used, tau^2 is calibrated so that the induced prior density on the selected effect-size scale has its mode at the requested value.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
 #'
 #' @param chi2_stat chi-square statistic
-#' @param n sample size (if one sample test)
+#' @param n sample size
 #' @param df degrees of freedom
 #' @param LRT should LRT be performed? Default is FALSE
-#' @param omega standardized effect size. For the chi^2-test, this is often called Cohen's w (can be a single entry or a vector of values)
-#' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
+#' @param omega prior-mode standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values). Use \code{effect_size = "cohens_w"} to specify or plot conventional Cohen's \code{w}.
+#' @param omega_sequence sequence of prior-mode standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
 #' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1
+#' @param effect_size scale used for \code{omega} and \code{omega_sequence}. Defaults to the package's internal \code{omega} scale. Alternatives include \code{"cohens_w"}, \code{"phi"}, \code{"cramers_v"}, \code{"tschuprow_t"}, and \code{"contingency_coefficient"}.
+#' @param table_dim integer vector \code{c(rows, columns)}. Required when \code{effect_size} is \code{"cramers_v"} or \code{"tschuprow_t"}.
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
@@ -96,24 +102,68 @@ chi2_test_BFF = function(chi2_stat,
                       LRT = FALSE,
                       omega = NULL,
                       omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
-                      r = 1)
+                      r = 1,
+                      effect_size = NULL,
+                      table_dim = NULL)
 
 {
+  omega_sequence_missing <- missing(omega_sequence)
+  effect_size_supplied   <- !is.null(effect_size)
+
   ### input checks and processing
-  input <- .process_input.chi2.test(chi2_stat, n, LRT, df, r)
+  input <- .process_input.chi2.test(chi2_stat, n, LRT, df, r, table_dim)
+
+  effect_size <- .effect_size_normalize("chi2_test", effect_size)
+  .effect_size_check_common_transform_scale("chi2_test", effect_size, input)
+  if(is.null(omega) && omega_sequence_missing){
+    omega_sequence <- .effect_size_default_sequence("chi2_test", effect_size)
+  }
+  if(effect_size_supplied){
+    input$effect_size <- effect_size
+  }
+
+  omega_input <- unname(if(!is.null(omega)) omega else omega_sequence)
+  omega_internal <- unname(.effect_size_to_internal(
+    value       = omega_input,
+    test_type   = "chi2_test",
+    effect_size = effect_size,
+    input       = input,
+    table_dim   = table_dim
+  ))
+  tau2 <- lapply(omega_input, function(x){
+    unname(.effect_size_prior_mode_tau2(
+      value       = x,
+      test_type   = "chi2_test",
+      effect_size = effect_size,
+      input       = input,
+      r           = r,
+      table_dim   = table_dim
+    ))
+  })
 
   ### computation
   # calculate BF
   results   <- backend_chi2(
     input     = input,
     r         = r,
-    omega     = if(!is.null(omega)) omega else omega_sequence
+    omega     = omega_internal,
+    tau2      = tau2
   )
 
 
   ## compute minimum BFF for anything larger than small effect sizes
   if (is.null(omega)) {
-    minimums = get_min_omega_bff(omega = omega_sequence, bff = results, cutoff = 0.1)
+    minimums = get_min_omega_bff(
+      omega  = omega_internal,
+      bff    = results,
+      cutoff = if(effect_size_supplied) .effect_size_minimum_cutoff(
+        test_type   = "chi2_test",
+        effect_size = effect_size,
+        input       = input,
+        table_dim   = table_dim,
+        default     = 0.1
+      ) else 0.1
+    )
   }  else
   {
     minimums = c(NULL, NULL)
@@ -122,13 +172,16 @@ chi2_test_BFF = function(chi2_stat,
   ###### return logic
   if(is.null(omega)){
     log_bf         <- c(0, results)
-    omega_sequence <- c(0, omega_sequence)
+    omega_internal <- c(0, omega_internal)
+    tau2_output    <- c(list(rep(0, length(input$chi2_stat))), tau2)
     idx_max        <- which.max(log_bf)
     this_log_bf    <- log_bf[idx_max]
-    this_omega     <- omega_sequence[idx_max]
+    this_omega     <- omega_internal[idx_max]
+    this_tau2      <- tau2_output[[idx_max]]
   }else{
     this_log_bf    <- results
-    this_omega     <- omega
+    this_omega     <- omega_internal
+    this_tau2      <- tau2
   }
 
   output = list(
@@ -137,13 +190,14 @@ chi2_test_BFF = function(chi2_stat,
     log_bf_h0     = minimums[1],
     omega_h0      = minimums[2],
     omega_set    = !is.null(omega),
+    tau2_h1      = this_tau2,
     test_type    = "chi2_test",
     generic_test = FALSE,
     r            = r,
     input        = input
   )
   if(is.null(omega)){
-    output$BFF = list(log_bf = log_bf, omega = omega_sequence)
+    output$BFF = list(log_bf = log_bf, omega = omega_internal, tau2 = tau2_output)
   }
 
   class(output) = "BFF"
@@ -153,17 +207,33 @@ chi2_test_BFF = function(chi2_stat,
 
 
 
-.process_input.chi2.test <- function(chi2_stat, n, LRT, df, r){
+.process_input.chi2.test <- function(chi2_stat, n, LRT, df, r, table_dim = NULL){
 
-  if (r < 1)
-    stop("r must be greater than or equal to 1")
+  .check_r(r)
 
-  return(list(
+  .check_nonnegative_numeric(chi2_stat, "chi2_stat")
+  .check_positive_numeric(n, "n")
+  .check_positive_numeric(df, "df")
+
+  if(!is.logical(LRT) || length(LRT) != 1 || is.na(LRT))
+    stop("`LRT` must be TRUE or FALSE.")
+
+  n_stat <- length(chi2_stat)
+  n  <- .recycle_stat_input(n, "n", n_stat)
+  df <- .recycle_stat_input(df, "df", n_stat)
+
+  input <- list(
     chi2_stat     = chi2_stat,
     n          = n,
     df         = df,
     LRT = LRT
-  ))
+  )
+
+  if(!is.null(table_dim)){
+    input$table_dim <- .effect_size_table_dim(input = input, table_dim = table_dim)
+  }
+
+  return(input)
 }
 
 

@@ -25,37 +25,6 @@ test_that("two-sample: basic functionality", {
   )
   testthat::expect_error(plot(fit), "Bayes factor function can be plotted only if a specific omega/tau2 is not user set")
 
-  # TODO: fix posterior plots
-  # - I fixed the arguments not being properly passed
-  # - however, the posterior distribution does not integrate to 1
-  # (I remember that I raised this issue when I was in US, and Saptati was working on fixing it)
-
-  # # this is how the functions should work
-  # posterior_plot(fit)
-  # posterior_plot(fit, prior = TRUE)
-  #
-  # # this highlights the issue (run `devtools::load_all()` first)
-  # tau2 <- get_two_sample_tau2(n1 = fit$input$n1, n2 = fit$input$n2, w = fit$omega_h1, r = fit$r)
-  #
-  # # does not integrate to 1
-  # integrate(
-  #   f = function(x) .z_test.posterior(
-  #     z_stat = fit$input$z_stat, tau2 = tau2, r = fit$r, effect_size = x,
-  #     n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
-  #   lower = -Inf,
-  #   upper = Inf
-  # )
-  #
-  # # prior seems to work just fine (i.e., integrates to one)
-  # integrate(
-  #   f = function(x) .z_test.prior(
-  #     tau2 = tau2, r = fit$r, effect_size = x,
-  #     n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
-  #   lower = -Inf,
-  #   upper = Inf
-  # )
-  # <\TODO>
-
   # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior",           posterior_plot(fit))
   # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE))
 
@@ -106,8 +75,8 @@ test_that("two-sample: basic functionality", {
       ""                                        ,
       "maximized (in favor of alternative) log Bayes factor = 2.08",
       "maximized (in favor of alternative) omega = 0.45 (Cohen's d)",
-      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = 0.65",
-      "minimized (in favor of null for medium/large effect sizes) omega = 0.11 (Cohen's d)",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = 1.21",
+      "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (Cohen's d)",
       "alternative = two.sided"
     )
   )
@@ -148,5 +117,27 @@ test_that("two-sample: basic functionality", {
   )
   # vdiffr::expect_doppelganger("z_test_BFF-two_sample-one_sided-BFF", plot(fit))
   # testthat::expect_error(posterior_plot(fit), "There is no non-local prior distribution")
+})
+
+test_that("z-test rejects negative omega inputs", {
+  testthat::expect_error(
+    z_test_BFF(
+      z_stat = 1.5,
+      n1 = 50,
+      n2 = 50,
+      omega = -0.5
+    ),
+    "`omega` must be nonnegative."
+  )
+
+  testthat::expect_error(
+    z_test_BFF(
+      z_stat = 1.5,
+      n1 = 50,
+      n2 = 50,
+      omega_sequence = c(0.1, -0.2)
+    ),
+    "`omega_sequence` must be nonnegative."
+  )
 })
 

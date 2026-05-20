@@ -19,19 +19,19 @@ t_test_BFF(
 \arguments{
 \item{t_stat}{t statistic}
 
-\item{n}{sample size (if one sample test)}
+\item{n}{sample size for one-sample test. Must be provided if \code{one_sample = TRUE}.}
 
-\item{n1}{sample size of group one for two sample test. Must be provided if one_sample = FALSE}
+\item{n1}{sample size of group one for pooled equal-variance two-sample test. Must be provided if \code{one_sample = FALSE}.}
 
-\item{n2}{sample size of group two for two sample test. Must be provided if one_sample = FALSE}
+\item{n2}{sample size of group two for pooled equal-variance two-sample test. Must be provided if \code{one_sample = FALSE}.}
 
-\item{one_sample}{is test one sided? Default is FALSE}
+\item{one_sample}{is this a one-sample test? Default is FALSE}
 
 \item{alternative}{the alternative. options are "two.sided" or "less" or "greater"}
 
 \item{omega}{standardized effect size. For the t-test, this is often called Cohen's d (can be a single entry or a vector of values)}
 
-\item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
+\item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01). In that case, \code{log_bf_h1} and \code{omega_h1} report the largest log Bayes factor and corresponding effect size on this evaluated grid, with 0 also included.}
 
 \item{r}{variable controlling dispersion of non-local priors. Default is 1. r must be >= 1}
 }
@@ -41,6 +41,7 @@ Returns an S3 object of class `BFF` (see `BFF.object` for details).
 \description{
 t_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
+For two-sample tests (\code{one_sample = FALSE}), the function assumes the usual pooled equal-variance two-sample t statistic with \code{df = n1 + n2 - 2}. Welch unequal-variance t statistics are not supported by this interface.
 All results are on the log scale.
 }
 \examples{
