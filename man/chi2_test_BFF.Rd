@@ -25,9 +25,9 @@ chi2_test_BFF(
 
 \item{LRT}{should LRT be performed? Default is FALSE}
 
-\item{omega}{standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values). Use \code{effect_size = "cohens_w"} to specify or plot conventional Cohen's \code{w}.}
+\item{omega}{prior-mode standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values). Use \code{effect_size = "cohens_w"} to specify or plot conventional Cohen's \code{w}.}
 
-\item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
+\item{omega_sequence}{sequence of prior-mode standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
 
 \item{r}{variable controlling dispersion of non-local priors. Default is 1. r must be >= 1}
 
@@ -40,6 +40,7 @@ Returns an S3 object of class `BFF` (see `BFF.object` for details).
 }
 \description{
 chi2_test_BFF constructs BFFs based on the chi-square test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+When \code{omega} or \code{omega_sequence} is used, tau^2 is calibrated so that the induced prior density on the selected effect-size scale has its mode at the requested value.
 By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 All results are on the log scale.
 }

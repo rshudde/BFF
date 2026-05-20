@@ -240,7 +240,7 @@ regression_test_BFF <- function(
   k <- .recycle_stat_input(k, "k", n_stat)
 
   df <- n - k - 1
-  .check_df(df, "(Sample size must exceed the number of predictors by more than 2.)")
+  .check_df(df, "(Sample size must exceed the number of predictors by more than 1.)")
 
   # computation is implemented only for alternative = "two-sided" or "greater"
   # if lower, reverse the sign of t_stat, set alternative to "greater",

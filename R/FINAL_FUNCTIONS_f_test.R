@@ -75,6 +75,7 @@ backend_f <- function(
 #' f_test_BFF
 #'
 #' f_test_BFF constructs BFFs based on the F test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' When \code{omega} or \code{omega_sequence} is used, tau^2 is calibrated so that the induced prior density on the selected effect-size scale has its mode at the requested value.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
 #'
@@ -82,8 +83,8 @@ backend_f <- function(
 #' @param n sample size
 #' @param df1 numerator degrees of freedom.
 #' @param df2 denominator degrees of freedom.
-#' @param omega standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values)
-#' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
+#' @param omega prior-mode standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values)
+#' @param omega_sequence sequence of prior-mode standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
 #' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1
 #' @param effect_size scale used for \code{omega} and \code{omega_sequence}. Defaults to the package's internal \code{"omega"} RMSES scale. Alternatives include \code{"cohens_f"}, \code{"cohens_f2"}, \code{"partial_eta2"}, and \code{"partial_r2"}.
 #'

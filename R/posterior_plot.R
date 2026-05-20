@@ -2,8 +2,8 @@
 #'
 #' @description Creates a prior and posterior plot
 #' of an BFF object. If no specific omega was set
-#' when fitting the model, the omega resulting in
-#' maximum BF against the null hypothesis is selected.
+#' when fitting the model, the omega corresponding to
+#' the largest evaluated grid BF against the null hypothesis is selected.
 #'
 #' @param x a BFF object
 #' @param prior whether prior distribution should
@@ -154,12 +154,17 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
   tau2
 }
 
+.posterior_plot_signed_2x2_effect_size <- function(effect_size){
+  effect_size %in% c("logOR", "OR", "logRR", "risk_ratio", "risk_difference", "arcsine_h")
+}
+
 .posterior_plot_branch_sign <- function(x, effect_size){
   if(!.effect_size_chi2_family(x$test_type) ||
-     !effect_size %in% c("logOR", "OR", "logRR", "risk_ratio", "risk_difference", "arcsine_h")){
+     !.posterior_plot_signed_2x2_effect_size(effect_size)){
     return(NULL)
   }
-  if(is.null(x$input$effect_size) || .effect_size_normalize(x$test_type, x$input$effect_size) != effect_size){
+  if(is.null(x$input$effect_size) ||
+     !.posterior_plot_signed_2x2_effect_size(.effect_size_normalize(x$test_type, x$input$effect_size))){
     return(NULL)
   }
   if(is.null(x$effect_size_sign_h1) || length(x$effect_size_sign_h1) != 1){

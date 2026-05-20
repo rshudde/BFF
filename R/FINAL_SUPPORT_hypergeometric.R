@@ -16,10 +16,19 @@ hypergeom1F1 <- function(a, b, z, n) {
     n <- 64
   }
 
-  done <- FALSE
-  transf <- FALSE
   szz <- dim(z)
   z <- c(z)
+  gsl_f <- tryCatch(gsl::hyperg_1F1(a, b, z), error = function(e) NULL)
+  if(!is.null(gsl_f) && all(is.finite(gsl_f))){
+    dim(gsl_f) <- szz
+    method <- rep(4L, length(z))
+    dim(method) <- szz
+    loops <- rep(NA_integer_, length(z))
+    return(list("f" = gsl_f, "method" = method, "loops" = loops))
+  }
+
+  done <- FALSE
+  transf <- FALSE
   sz <- length(z)
   f <- rep(NaN, sz)
   method <- -rep(1, sz)

@@ -24,7 +24,9 @@ prop_test_BFF(
 \item{omega}{prior-mode effect size on the scale selected by \code{effect_size}.}
 
 \item{omega_sequence}{sequence of prior-mode effect sizes. If no \code{omega}
-is provided, the default sequence is chosen for the selected effect-size scale.}
+is provided, the default sequence is chosen for the selected effect-size scale.
+In that case, \code{log_bf_h1} and \code{omega_h1} report the largest log
+Bayes factor and corresponding effect size on this evaluated grid.}
 
 \item{r}{variable controlling dispersion of non-local priors. Default is 1. r must be >= 1.}
 
@@ -38,9 +40,14 @@ Constructs a BFF for a two-sample test of proportions from success counts
 and sample sizes. The test statistic is the uncorrected Pearson chi-square
 statistic, or the likelihood-ratio G-squared statistic when \code{LRT = TRUE}.
 Effect-size transformations for odds ratios, risk ratios, risk differences,
-and arcsine h are local/asymptotic transformations around the pooled
-independence margins. Because the underlying chi-square BFF is sign-blind,
-signed prior and posterior plots split mass symmetrically over both signs.
+and arcsine h are first-order local/asymptotic transformations around the
+pooled independence margins, not exact finite-sample parameterizations away
+from the independence null. Because the underlying chi-square BFF is
+sign-blind, signed transformed scales use the sign of the supplied
+\code{omega} or \code{omega_sequence} to select a branch; odds/risk ratios
+below 1 select the negative branch and values above 1 select the positive
+branch. Prior and posterior density plots use the fitted signed branch when
+available and otherwise split density symmetrically over both signs.
 }
 \examples{
 propBFF <- prop_test_BFF(x = c(30, 20), n = c(100, 100))

@@ -14,17 +14,17 @@ NULL
 #' @description The BFF object is a class that contains the results of a Bayes Factor Function.
 #' The BFF object contains the following fields:
 #' \tabular{ll}{
-#'  \code{BFF} \tab the object containing the log_bf (log Bayes factor values) and corresponding omega values \cr
+#'  \code{BFF} \tab the object containing the evaluated grid of log_bf (log Bayes factor values) and corresponding omega values \cr
 #'  \tab \cr
 #'  \code{input} \tab the object containing the input values \cr
 #'  \tab \cr
-#'  \code{log_bf_h1} \tab maximized Bayes factor in favor of the alternative, or the corresponding Bayes factor if an omega is supplied\cr
+#'  \code{log_bf_h1} \tab largest log Bayes factor in favor of the alternative on the evaluated omega grid, or the corresponding log Bayes factor if an omega is supplied\cr
 #'  \tab \cr
-#'  \code{omega_h1} \tab corresponding omega value for maximized Bayes factor in favor of the alternative, orthe corresponding omega for the Bayes factor if an omega is supplied\cr
+#'  \code{omega_h1} \tab corresponding omega value for the grid maximum in favor of the alternative, or the corresponding omega for the Bayes factor if an omega is supplied\cr
 #'  \tab \cr
-#'  \code{log_bf_h0} \tab minimized Bayes factor in favor of the null (for medium or large effect sizes, only returned if a specific omega is not set) \cr
+#'  \code{log_bf_h0} \tab smallest log Bayes factor on the evaluated omega grid in favor of the null (for medium or large effect sizes, only returned if a specific omega is not set) \cr
 #'  \tab \cr
-#'  \code{omega_h0} \tab corresponding omega value for minimized Bayes factor in favor of the null (for medium or large effect sizes, only returned if a specific omega is not set)\cr
+#'  \code{omega_h0} \tab corresponding omega value for the grid minimum in favor of the null (for medium or large effect sizes, only returned if a specific omega is not set)\cr
 #'  \tab \cr
 #'  \code{alternative} \tab alternative hypothesis used in calculations \cr
 #'  \tab \cr

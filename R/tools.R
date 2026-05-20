@@ -13,8 +13,8 @@
   if(!is.numeric(df) || any(!is.finite(df)))
     stop(paste0("Degrees of freedom must contain finite numeric values. ", information_message))
 
-  if(any(df <= 1))
-    stop(paste0("Degrees of freedom must be greater than 1. ", information_message))
+  if(any(df <= 0))
+    stop(paste0("Degrees of freedom must be positive. ", information_message))
 }
 .check_n <- function(n, n_min = 1, information_message = ""){
 

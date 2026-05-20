@@ -274,6 +274,9 @@
 
 .effect_size_check_interval <- function(value, effect_size, lower = 0, upper = Inf, upper_open = FALSE, allow_negative = FALSE){
   value <- as.numeric(value)
+  if(any(!is.finite(value))){
+    stop(sprintf("`omega` and `omega_sequence` must contain finite values for effect_size = \"%s\".", effect_size))
+  }
   finite_value <- value[is.finite(value)]
 
   if(!allow_negative && any(finite_value < lower)){
@@ -297,6 +300,9 @@
 
 .effect_size_check_positive <- function(value, effect_size){
   value <- as.numeric(value)
+  if(any(!is.finite(value))){
+    stop(sprintf("`omega` and `omega_sequence` must contain finite values for effect_size = \"%s\".", effect_size))
+  }
   finite_value <- value[is.finite(value)]
   if(any(finite_value <= 0)){
     stop(sprintf("`omega` and `omega_sequence` must be > 0 for effect_size = \"%s\".", effect_size))

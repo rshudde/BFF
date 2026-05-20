@@ -56,9 +56,10 @@ get_b = function(tau2, r, k) {
 }
 
 get_c = function(tau2, df, r) {
-  numerator = gamma_approx(df/2+1) * gamma_approx(r + 1)
-  denomonator = gamma_approx((df+1)/2) * gamma_approx(r + 1/2)
-  to_return = numerator / denomonator
+  to_return = exp(
+    lgamma(df / 2 + 1) + lgamma(r + 1) -
+      lgamma((df + 1) / 2) - lgamma(r + 1 / 2)
+  )
   return(to_return)
 }
 

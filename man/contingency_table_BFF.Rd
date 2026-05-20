@@ -21,7 +21,9 @@ contingency_table_BFF(
 \item{omega}{prior-mode effect size on the scale selected by \code{effect_size}.}
 
 \item{omega_sequence}{sequence of prior-mode effect sizes. If no \code{omega}
-is provided, the default sequence is chosen for the selected effect-size scale.}
+is provided, the default sequence is chosen for the selected effect-size scale.
+In that case, \code{log_bf_h1} and \code{omega_h1} report the largest log
+Bayes factor and corresponding effect size on this evaluated grid.}
 
 \item{r}{variable controlling dispersion of non-local priors. Default is 1. r must be >= 1.}
 
@@ -34,9 +36,16 @@ Returns an S3 object of class `BFF` (see `BFF.object` for details).
 Constructs a BFF for an independence test from a contingency table. The test
 statistic is the uncorrected Pearson chi-square statistic, or the
 likelihood-ratio G-squared statistic when \code{LRT = TRUE}. For 2x2 tables,
-the function stores the table margins required for local/asymptotic
-transformations to odds-ratio, risk-ratio, risk-difference, and arcsine-h
-scales. For larger tables, use the usual chi-square association scales.
+the function stores the table margins required for first-order
+local/asymptotic transformations to odds-ratio, risk-ratio, risk-difference,
+and arcsine-h scales; these are not exact finite-sample parameterizations
+away from the independence null. For signed transformed scales, the
+chi-square BFF is sign-blind: the sign of the supplied \code{omega} or
+\code{omega_sequence} selects the branch, odds/risk ratios below 1 select
+the negative branch, and values above 1 select the positive branch. Prior
+and posterior density plots use the fitted signed branch when available and
+otherwise split density symmetrically over both signs. For larger tables,
+use the usual chi-square association scales.
 }
 \examples{
 tab <- matrix(c(30, 70, 20, 80), nrow = 2, byrow = TRUE)

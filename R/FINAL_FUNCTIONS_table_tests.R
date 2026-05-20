@@ -6,9 +6,14 @@
 #' and sample sizes. The test statistic is the uncorrected Pearson chi-square
 #' statistic, or the likelihood-ratio G-squared statistic when \code{LRT = TRUE}.
 #' Effect-size transformations for odds ratios, risk ratios, risk differences,
-#' and arcsine h are local/asymptotic transformations around the pooled
-#' independence margins. Because the underlying chi-square BFF is sign-blind,
-#' signed prior and posterior plots split mass symmetrically over both signs.
+#' and arcsine h are first-order local/asymptotic transformations around the
+#' pooled independence margins, not exact finite-sample parameterizations away
+#' from the independence null. Because the underlying chi-square BFF is
+#' sign-blind, signed transformed scales use the sign of the supplied
+#' \code{omega} or \code{omega_sequence} to select a branch; odds/risk ratios
+#' below 1 select the negative branch and values above 1 select the positive
+#' branch. Prior and posterior density plots use the fitted signed branch when
+#' available and otherwise split density symmetrically over both signs.
 #'
 #' @param x vector of two success counts.
 #' @param n vector of two group sample sizes.
@@ -16,6 +21,8 @@
 #' @param omega prior-mode effect size on the scale selected by \code{effect_size}.
 #' @param omega_sequence sequence of prior-mode effect sizes. If no \code{omega}
 #' is provided, the default sequence is chosen for the selected effect-size scale.
+#' In that case, \code{log_bf_h1} and \code{omega_h1} report the largest log
+#' Bayes factor and corresponding effect size on this evaluated grid.
 #' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1.
 #' @param effect_size scale used for \code{omega} and \code{omega_sequence}. Defaults to \code{"logOR"}. Alternatives include \code{"OR"}, \code{"logRR"}, \code{"risk_ratio"}, \code{"risk_difference"}, \code{"arcsine_h"}, \code{"cohens_w"}, and \code{"phi"}.
 #'
@@ -63,15 +70,24 @@ prop_test_BFF <- function(
 #' Constructs a BFF for an independence test from a contingency table. The test
 #' statistic is the uncorrected Pearson chi-square statistic, or the
 #' likelihood-ratio G-squared statistic when \code{LRT = TRUE}. For 2x2 tables,
-#' the function stores the table margins required for local/asymptotic
-#' transformations to odds-ratio, risk-ratio, risk-difference, and arcsine-h
-#' scales. For larger tables, use the usual chi-square association scales.
+#' the function stores the table margins required for first-order
+#' local/asymptotic transformations to odds-ratio, risk-ratio, risk-difference,
+#' and arcsine-h scales; these are not exact finite-sample parameterizations
+#' away from the independence null. For signed transformed scales, the
+#' chi-square BFF is sign-blind: the sign of the supplied \code{omega} or
+#' \code{omega_sequence} selects the branch, odds/risk ratios below 1 select
+#' the negative branch, and values above 1 select the positive branch. Prior
+#' and posterior density plots use the fitted signed branch when available and
+#' otherwise split density symmetrically over both signs. For larger tables,
+#' use the usual chi-square association scales.
 #'
 #' @param table matrix-like object of nonnegative integer counts.
 #' @param LRT should the likelihood-ratio chi-square statistic be used? Default is \code{FALSE}.
 #' @param omega prior-mode effect size on the scale selected by \code{effect_size}.
 #' @param omega_sequence sequence of prior-mode effect sizes. If no \code{omega}
 #' is provided, the default sequence is chosen for the selected effect-size scale.
+#' In that case, \code{log_bf_h1} and \code{omega_h1} report the largest log
+#' Bayes factor and corresponding effect size on this evaluated grid.
 #' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1.
 #' @param effect_size scale used for \code{omega} and \code{omega_sequence}. Defaults to the package's internal \code{omega} RMSES scale. Alternatives include \code{"cohens_w"}, \code{"phi"}, \code{"cramers_v"}, \code{"tschuprow_t"}, \code{"contingency_coefficient"}, and, for 2x2 tables, \code{"logOR"}, \code{"OR"}, \code{"logRR"}, \code{"risk_ratio"}, \code{"risk_difference"}, and \code{"arcsine_h"}.
 #'
