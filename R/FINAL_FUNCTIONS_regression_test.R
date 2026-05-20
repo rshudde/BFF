@@ -21,11 +21,13 @@ BFF_reg_test = function(tau2, t_stat, df, r, two_sided)
   y = get_y_t_test(tau2=tau2, t=t_stat, df=df)
 
   first_hypergeo = Gauss2F1((df+1)/2, r + 1/2, 1/2, y^2)
-  second_hypergeo = Gauss2F1(df/2 + 1, r + 1, 3/2, y^2)
 
-  const = ifelse(two_sided, 1, 2)
-
-  final_BF = a*(first_hypergeo + const*c*y*second_hypergeo)
+  if(two_sided){
+    final_BF = a*first_hypergeo
+  }else{
+    second_hypergeo = Gauss2F1(df/2 + 1, r + 1, 3/2, y^2)
+    final_BF = a*(first_hypergeo + 2*c*y*second_hypergeo)
+  }
   to_return = log(final_BF)
   return(to_return)
 }
@@ -74,7 +76,8 @@ backend_reg <- function(
 
 #' regression_test_BFF
 #'
-#' regression_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' regression_test_BFF constructs rank-one coefficient-style BFFs based on a t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' The internal effect-size scale is a signed Cohen's f-like coefficient effect delta with noncentrality parameter sqrt(n - k - 1) * delta. This is not the full multivariate linear-model RMSES parameterization for multi-df model comparisons.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
 #'
@@ -82,9 +85,10 @@ backend_reg <- function(
 #' @param alternative is the alternative a one.sided or two.sided test? default is two.sided
 #' @param n sample size (if one sample test)
 #' @param k number of predictors
-#' @param omega standadized effect size. For the regression test, this is also known as Cohen's f^@ (can be a single entry or a vector of values)
+#' @param omega nonnegative prior-mode magnitude on the internal signed Cohen's f-like coefficient-effect scale (can be a single entry or a vector of values). Direction is represented by \code{alternative} for one-sided tests.
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
 #' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1
+#' @param effect_size scale used for \code{omega} and \code{omega_sequence}. Defaults to the signed Cohen's f scale used internally. Alternatives include \code{"partial_r"}, \code{"partial_r2"}, and \code{"cohens_f2"}.
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
@@ -101,23 +105,50 @@ regression_test_BFF <- function(
     alternative = "two.sided",
     omega = NULL,
     omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
-    r = 1){
+    r = 1,
+    effect_size = NULL){
 
+  omega_sequence_missing <- missing(omega_sequence)
+  effect_size_supplied   <- !is.null(effect_size)
 
   ### input checks and processing
   input <- .process_input.reg.test(t_stat, n, k, alternative, r)
+
+  effect_size <- .effect_size_normalize("regression_test", effect_size)
+  if(is.null(omega) && omega_sequence_missing){
+    omega_sequence <- .effect_size_default_sequence("regression_test", effect_size)
+  }
+  if(effect_size_supplied){
+    input$effect_size <- effect_size
+  }
+
+  omega_internal <- .effect_size_to_internal(
+    value       = if(!is.null(omega)) omega else omega_sequence,
+    test_type   = "regression_test",
+    effect_size = effect_size,
+    input       = input
+  )
 
   ### computation
   # calculate BF
   results   <- backend_reg(
     input     = input,
     r         = r,
-    omega     = if(!is.null(omega)) omega else omega_sequence
+    omega     = omega_internal
   )
 
   ## compute minimum BFF for anything larger than small effect sizes
   if (is.null(omega)) {
-    minimums = get_min_omega_bff(omega = omega_sequence, bff = results, cutoff = 0.02)
+    minimums = get_min_omega_bff(
+      omega  = omega_internal,
+      bff    = results,
+      cutoff = if(effect_size_supplied) .effect_size_minimum_cutoff(
+        test_type   = "regression_test",
+        effect_size = effect_size,
+        input       = input,
+        default     = 0.02
+      ) else 0.02
+    )
   }  else
   {
     minimums = c(NULL, NULL)
@@ -126,13 +157,13 @@ regression_test_BFF <- function(
   ###### return logic
   if(is.null(omega)){
     log_bf         <- c(0, results)
-    omega_sequence <- c(0, omega_sequence)
+    omega_internal <- c(0, omega_internal)
     idx_max        <- which.max(log_bf)
     this_log_bf    <- log_bf[idx_max]
-    this_omega     <- omega_sequence[idx_max]
+    this_omega     <- omega_internal[idx_max]
   }else{
     this_log_bf    <- results
-    this_omega     <- omega
+    this_omega     <- omega_internal
   }
 
   output = list(
@@ -147,7 +178,7 @@ regression_test_BFF <- function(
     input        = input
   )
   if(is.null(omega)){
-    output$BFF = list(log_bf = log_bf, omega = omega_sequence)
+    output$BFF = list(log_bf = log_bf, omega = omega_internal)
   }
 
   class(output) = "BFF"

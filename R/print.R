@@ -28,6 +28,18 @@ print.BFF <- function(x, ...) {
   cat(gettextf("%1$slog Bayes factor = %2$.2f\n", if(!x$omega_set) "maximized (in favor of alternative) " else "", x$log_bf_h1))
   if(x$generic_test){
     cat(gettextf("%1$s tau2 = %2$.2f\n", if(!x$omega_set) "maximized (in favor of alternative) " else "", x$omega_h1))
+  }else if(!is.null(x$input$effect_size)){
+    cat(gettextf(
+      "%1$sprior mode = %2$.2f (%3$s)\n",
+      if(!x$omega_set) "maximized (in favor of alternative) " else "",
+      .effect_size_from_internal(
+        value       = x$omega_h1,
+        test_type   = x$test_type,
+        effect_size = x$input$effect_size,
+        input       = x$input
+      ),
+      .effect_size_label(x$test_type, x$input$effect_size)
+    ))
   }else{
     cat(gettextf("%1$somega = %2$.2f (%3$s)\n", if(!x$omega_set) "maximized (in favor of alternative) " else "", x$omega_h1, .test_effect_size_name(x$test_type)))
   }
@@ -37,6 +49,18 @@ print.BFF <- function(x, ...) {
     cat(gettextf("%1$slog Bayes factor = %2$.2f\n", if(!x$omega_set) "minimized (in favor of null for medium/large effect sizes) " else "", x$log_bf_h0))
     if(x$generic_test){
       cat(gettextf("%1$s tau2 = %2$.2f\n", if(!x$omega_set) "minimized (in favor of null for medium/large effect sizes) " else "", x$omega_h0))
+    }else if(!is.null(x$input$effect_size)){
+      cat(gettextf(
+        "%1$sprior mode = %2$.2f (%3$s)\n",
+        if(!x$omega_set) "minimized (in favor of null for medium/large effect sizes) " else "",
+        .effect_size_from_internal(
+          value       = x$omega_h0,
+          test_type   = x$test_type,
+          effect_size = x$input$effect_size,
+          input       = x$input
+        ),
+        .effect_size_label(x$test_type, x$input$effect_size)
+      ))
     }else{
       cat(gettextf("%1$somega = %2$.2f (%3$s)\n", if(!x$omega_set) "minimized (in favor of null for medium/large effect sizes) " else "", x$omega_h0, .test_effect_size_name(x$test_type)))
     }
@@ -62,8 +86,8 @@ print.BFF <- function(x, ...) {
   switch(test_type,
          "t_test"           = "Cohen's d",
          "z_test"           = "Cohen's d",
-         "f_test"           = "Cohen's f",
-         "chi2_test"        = "Cohen's w",
-         "regression_test"  = "Cohen's d",
+         "f_test"           = "RMSES",
+         "chi2_test"        = "RMSES",
+         "regression_test"  = "signed Cohen's f",
          "correlation_test" = "correlation coefficient")
 }

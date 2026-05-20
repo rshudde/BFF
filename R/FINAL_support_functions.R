@@ -75,9 +75,12 @@ get_y_t_test = function(tau2, t, df) {
 
 ## functions to return minimum bff for anything greater than small threshold
 get_min_omega_bff = function(omega, bff, cutoff) {
-  idx = which(omega < 0.1)
-  bff = bff[-idx]
-  omega = omega[-idx]
+  idx = which(omega >= cutoff)
+  if(length(idx) == 0){
+    return(c(NA_real_, NA_real_))
+  }
+  bff = bff[idx]
+  omega = omega[idx]
 
   idx_min = which.min(bff)
   bff_min = bff[idx_min]

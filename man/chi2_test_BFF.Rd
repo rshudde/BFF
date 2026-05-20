@@ -11,7 +11,9 @@ chi2_test_BFF(
   LRT = FALSE,
   omega = NULL,
   omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01),
-  r = 1
+  r = 1,
+  effect_size = NULL,
+  table_dim = NULL
 )
 }
 \arguments{
@@ -23,11 +25,15 @@ chi2_test_BFF(
 
 \item{LRT}{should LRT be performed? Default is FALSE}
 
-\item{omega}{standardized effect size. For the chi^2-test, this is often called Cohen's w (can be a single entry or a vector of values)}
+\item{omega}{standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values). Use \code{effect_size = "cohens_w"} to specify or plot conventional Cohen's \code{w}.}
 
 \item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
 
 \item{r}{variable controlling dispersion of non-local priors. Default is 1. r must be >= 1}
+
+\item{effect_size}{scale used for \code{omega} and \code{omega_sequence}. Defaults to the package's internal \code{omega} scale. Alternatives include \code{"cohens_w"}, \code{"phi"}, \code{"cramers_v"}, \code{"tschuprow_t"}, and \code{"contingency_coefficient"}.}
+
+\item{table_dim}{integer vector \code{c(rows, columns)}. Required when \code{effect_size} is \code{"cramers_v"} or \code{"tschuprow_t"}.}
 }
 \value{
 Returns an S3 object of class `BFF` (see `BFF.object` for details).

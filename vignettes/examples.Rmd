@@ -1,0 +1,362 @@
+---
+title: "Examples for BFF tests"
+output: rmarkdown::html_vignette
+bibliography: references.bib
+vignette: >
+  %\VignetteIndexEntry{Examples for BFF tests}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  dpi = 300,
+  fig.width = 9,
+  out.width = "648px",
+  message = FALSE,
+  warning = FALSE
+)
+
+suppressPackageStartupMessages(library(BFF))
+```
+
+This vignette reproduces examples from the papers that motivate Bayes factor functions (BFFs).  The left column in each figure displays the BFF over an effect-size scale.  The right column displays the prior and posterior density for one selected non-local prior, not for the whole BFF.  When a source article reported a specific prior mode or target effect size, the posterior panel uses that value.
+
+```{r helpers, include = FALSE}
+plot_pair_matrix <- function(bff_fits,
+                             posterior_fit,
+                             effect_sizes,
+                             labels,
+                             table_dim = NULL,
+                             x_limits = NULL) {
+  stopifnot(length(effect_sizes) == length(labels))
+
+  if (inherits(bff_fits, "BFF")) {
+    bff_fits <- rep(list(bff_fits), length(effect_sizes))
+  }
+
+  if (is.null(x_limits)) {
+    x_limits <- rep(list(NULL), length(effect_sizes))
+  }
+
+  grid::grid.newpage()
+  grid::pushViewport(grid::viewport(
+    layout = grid::grid.layout(
+      nrow = length(effect_sizes),
+      ncol = 2
+    )
+  ))
+
+  for (i in seq_along(effect_sizes)) {
+    bff_args <- list(
+      x = bff_fits[[i]],
+      effect_size = effect_sizes[i],
+      add_segments = FALSE,
+      title = paste("BFF:", labels[i])
+    )
+    post_args <- list(
+      x = posterior_fit,
+      prior = TRUE,
+      effect_size = effect_sizes[i],
+      color = c("black", "grey45"),
+      linetype = c(1, 2),
+      linewidth = c(0.9, 0.9)
+    )
+
+    if (!is.null(table_dim)) {
+      bff_args$table_dim <- table_dim
+      post_args$table_dim <- table_dim
+    }
+
+    if (!is.null(x_limits[[i]])) {
+      post_args$x_limit <- x_limits[[i]]
+    }
+
+    bff_plot <- do.call(plot, bff_args) +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(size = 10),
+        axis.title = ggplot2::element_text(size = 9)
+      )
+    posterior_gg <- do.call(posterior_plot, post_args) +
+      ggplot2::ggtitle(paste("Prior and posterior:", labels[i])) +
+      ggplot2::theme_bw() +
+      ggplot2::theme(
+        plot.title = ggplot2::element_text(size = 10, hjust = 0.5),
+        axis.title = ggplot2::element_text(size = 9),
+        panel.grid = ggplot2::element_blank()
+      )
+
+    print(
+      bff_plot,
+      vp = grid::viewport(layout.pos.row = i, layout.pos.col = 1)
+    )
+    print(
+      posterior_gg,
+      vp = grid::viewport(layout.pos.row = i, layout.pos.col = 2)
+    )
+  }
+
+  grid::upViewport()
+  invisible(NULL)
+}
+
+fit_chi2_sequence <- function(effect_size) {
+  upper <- switch(
+    effect_size,
+    "omega" = 0.12,
+    "cohens_w" = 0.30,
+    "phi" = 0.30,
+    "cramers_v" = 0.25,
+    "tschuprow_t" = 0.25,
+    "contingency_coefficient" = 0.30
+  )
+
+  chi2_test_BFF(
+    chi2_stat = 12.65,
+    n = 707,
+    df = 6,
+    LRT = FALSE,
+    omega_sequence = seq(0.001, upper, length.out = 120),
+    effect_size = effect_size,
+    table_dim = c(4, 3)
+  )
+}
+
+fit_f_sequence <- function(effect_size) {
+  upper <- switch(
+    effect_size,
+    "omega" = 0.60,
+    "cohens_f" = 0.60,
+    "cohens_f2" = 0.35,
+    "partial_eta2" = 0.30,
+    "partial_r2" = 0.30
+  )
+
+  f_test_BFF(
+    f_stat = 4.05,
+    n = 85,
+    df1 = 2,
+    df2 = 82,
+    omega_sequence = seq(0.001, upper, length.out = 120),
+    effect_size = effect_size
+  )
+}
+
+fit_regression_sequence <- function(effect_size) {
+  upper <- switch(
+    effect_size,
+    "cohens_f" = 1.20,
+    "partial_r" = 0.80,
+    "partial_r2" = 0.70,
+    "cohens_f2" = 1.00
+  )
+
+  regression_test_BFF(
+    t_stat = 1.475031,
+    n = 175,
+    k = 4,
+    alternative = "greater",
+    omega_sequence = seq(0.001, upper, length.out = 120),
+    effect_size = effect_size
+  )
+}
+```
+
+## z test
+
+Johnson, Pramanik, and Shudde use a stylized z-test example with `z = 2` and `n = 100` to show how a BFF summarizes evidence across standardized effect sizes [@johnson2023pnas_bayes].  This is a method illustration rather than an empirical data example.  In their Figure 1, the maximum Bayes factor is about 2.90 and occurs when the normal moment prior has modes at standardized effects of about `+/- 0.15`.  The posterior panel below therefore fixes the prior mode at `omega = 0.15`.
+
+```{r z-fit}
+z_bff <- z_test_BFF(z_stat = 2, n = 100, one_sample = TRUE)
+z_prior <- z_test_BFF(z_stat = 2, n = 100, one_sample = TRUE, omega = 0.15)
+
+z_bff
+```
+
+```{r z-plots, fig.height = 3}
+plot_pair_matrix(
+  bff_fits = z_bff,
+  posterior_fit = z_prior,
+  effect_sizes = "cohens_d",
+  labels = "Cohen's d"
+)
+```
+
+As implemented here, the z-test effect size is Cohen's `d`.  For a one-sample z test, the noncentrality parameter is `sqrt(n) * d`; for a two-sample z test, it is `sqrt(n1 * n2 / (n1 + n2)) * d`.  The BFF prior mode is specified directly on `d`.
+
+## t test
+
+Klauer, Meyer-Grant, and Kellen discuss a recognition-memory experiment by Grider and Malmberg in which emotional words were compared with neutral words [@klauerndmisc_bayes; @grider2008recognition].  They report `t(79) = 2.03` for negative versus neutral words, corresponding to `N = 80`.  Their example focuses on small, medium, and large targeted effects; for the posterior panel below, we use the small-effect target `d = 0.20`.  The BFF prior used by this package is a normal moment prior, so the numerical Bayes factor is not intended to reproduce the effect-size-prior Bayes factor from that article exactly.
+
+```{r t-fit}
+t_bff <- t_test_BFF(t_stat = 2.03, n = 80, one_sample = TRUE)
+t_prior <- t_test_BFF(t_stat = 2.03, n = 80, one_sample = TRUE, omega = 0.20)
+
+t_bff
+```
+
+```{r t-plots, fig.height = 3}
+plot_pair_matrix(
+  bff_fits = t_bff,
+  posterior_fit = t_prior,
+  effect_sizes = "cohens_d",
+  labels = "Cohen's d"
+)
+```
+
+As implemented here, the t-test effect size is Cohen's `d`.  For a one-sample t test, the noncentrality parameter is `sqrt(n) * d`; for a two-sample t test, it is `sqrt(n1 * n2 / (n1 + n2)) * d`.  The BFF prior mode is specified directly on `d`.
+
+## Chi-square test
+
+White and Eisenberg cross-classified 707 stomach-cancer patients by cancer site and blood type [@white1959abo].  Johnson, Pramanik, and Shudde use these data as a chi-square BFF example and report Pearson's chi-square statistic `12.65` on `6` degrees of freedom [@johnson2023pnas_bayes].  The rows of the table are the four cancer-site categories and the columns are the three blood-type categories, so `table_dim = c(4, 3)` is used for effect sizes that depend on table dimension.  The article reports the maximum BFF near RMSES `omega = 0.035`, which is used for the prior and posterior panels below.
+
+```{r chi2-fit}
+chi2_effect_sizes <- c(
+  "omega",
+  "cohens_w",
+  "phi",
+  "cramers_v",
+  "tschuprow_t",
+  "contingency_coefficient"
+)
+chi2_labels <- c(
+  "omega (RMSES)",
+  "Cohen's w",
+  "phi",
+  "Cramer's V",
+  "Tschuprow's T",
+  "contingency coefficient"
+)
+chi2_limits <- list(
+  c(0, 0.12),
+  c(0, 0.30),
+  c(0, 0.30),
+  c(0, 0.25),
+  c(0, 0.25),
+  c(0, 0.30)
+)
+
+chi2_bff <- chi2_test_BFF(chi2_stat = 12.65, n = 707, df = 6, LRT = FALSE)
+chi2_prior <- chi2_test_BFF(
+  chi2_stat = 12.65,
+  n = 707,
+  df = 6,
+  LRT = FALSE,
+  omega = 0.035
+)
+chi2_bff
+```
+
+```{r chi2-plots, fig.height = 14}
+plot_pair_matrix(
+  bff_fits = lapply(chi2_effect_sizes, fit_chi2_sequence),
+  posterior_fit = chi2_prior,
+  effect_sizes = chi2_effect_sizes,
+  labels = chi2_labels,
+  table_dim = c(4, 3),
+  x_limits = chi2_limits
+)
+```
+
+The package's internal chi-square scale is `omega = sqrt(lambda / (n * df))`, where `lambda` is the noncentrality parameter.  Cohen's `w` and `phi` are implemented as `sqrt(df) * omega`, equivalently `sqrt(lambda / n)`.  For a table with `R` rows and `C` columns, Cramer's `V` is `w / sqrt(min(R - 1, C - 1))`, and Tschuprow's `T` is `w / ((R - 1) * (C - 1))^(1 / 4)`.  The contingency coefficient is `w / sqrt(1 + w^2)`.
+
+## F test
+
+Johnson, Pramanik, and Shudde illustrate F-test BFFs using an original and replicated study of confirmatory information processing [@johnson2023pnas_bayes].  The original study by Fischer, Greitemeyer, and Frey recruited 85 undergraduate students and reported `F(2, 82) = 4.05`; the replication in the Open Science Collaboration project reported `F(2, 137) = 1.99` with 140 participants [@fischer2008self; @open2015reproducibility].  The package currently draws prior and posterior densities for a single F statistic, so the plots below use the original study's statistic.  The source article reports that the combined two-study BFF is maximized near RMSES `omega = 0.14`, and that value is used for the prior and posterior panels.
+
+```{r f-fit}
+f_effect_sizes <- c(
+  "omega",
+  "cohens_f",
+  "cohens_f2",
+  "partial_eta2",
+  "partial_r2"
+)
+f_labels <- c(
+  "omega (RMSES)",
+  "Cohen's f",
+  "Cohen's f^2",
+  "partial eta^2",
+  "partial R^2"
+)
+f_limits <- list(
+  c(0, 0.60),
+  c(0, 0.60),
+  c(0, 0.35),
+  c(0, 0.30),
+  c(0, 0.30)
+)
+
+f_bff <- f_test_BFF(f_stat = 4.05, n = 85, df1 = 2, df2 = 82)
+f_prior <- f_test_BFF(f_stat = 4.05, n = 85, df1 = 2, df2 = 82, omega = 0.14)
+f_bff
+```
+
+```{r f-plots, fig.height = 11}
+plot_pair_matrix(
+  bff_fits = lapply(f_effect_sizes, fit_f_sequence),
+  posterior_fit = f_prior,
+  effect_sizes = f_effect_sizes,
+  labels = f_labels,
+  x_limits = f_limits
+)
+```
+
+The package's internal F-test scale is `omega = sqrt(2 * lambda / (n * df1))`, where `lambda` is the noncentrality parameter.  Cohen's `f` is implemented as `sqrt(df1 / 2) * omega`, and Cohen's `f^2` is `df1 * omega^2 / 2`.  Partial `eta^2` and partial `R^2` are both implemented as `f^2 / (1 + f^2)`.
+
+## Regression test
+
+Klauer, Meyer-Grant, and Kellen reanalyze Bailey and Geary's hominid cranial-capacity data, using partial `R^2` values reported from Rouder and Morey's regression model comparisons [@klauerndmisc_bayes; @bailey2009hominid; @rouder2012regression].  For model `M2`, the reduced model contains local climate, global temperature, and population density, and the full model adds parasite load.  Because this comparison adds one predictor, its partial `R^2 = (0.7109 - 0.7072) / (1 - 0.7072)` can be converted to `F(1, 170) = 2.175718` and then to `t = 1.475031`.  Following the request, the effect is treated as positive, and the prior/posterior panels use the article's large-effect target `f^2 = 0.35`.
+
+```{r regression-fit}
+regression_effect_sizes <- c(
+  "cohens_f",
+  "partial_r",
+  "partial_r2",
+  "cohens_f2"
+)
+regression_labels <- c(
+  "signed Cohen's f",
+  "partial r",
+  "partial R^2",
+  "Cohen's f^2"
+)
+regression_limits <- list(
+  c(0, 1.20),
+  c(0, 0.80),
+  c(0, 0.70),
+  c(0, 1.00)
+)
+
+regression_bff <- regression_test_BFF(
+  t_stat = 1.475031,
+  n = 175,
+  k = 4,
+  alternative = "greater"
+)
+regression_prior <- regression_test_BFF(
+  t_stat = 1.475031,
+  n = 175,
+  k = 4,
+  alternative = "greater",
+  omega = 0.35,
+  effect_size = "cohens_f2"
+)
+regression_bff
+```
+
+```{r regression-plots, fig.height = 9}
+plot_pair_matrix(
+  bff_fits = lapply(regression_effect_sizes, fit_regression_sequence),
+  posterior_fit = regression_prior,
+  effect_sizes = regression_effect_sizes,
+  labels = regression_labels,
+  x_limits = regression_limits
+)
+```
+
+The regression-test BFF is a one-degree-of-freedom coefficient test based on a t statistic.  The package's internal effect-size scale is signed Cohen's `f`, denoted here by `delta`, with noncentrality parameter `sqrt(n - k - 1) * delta`.  Partial `r` is implemented as `delta / sqrt(1 + delta^2)`, partial `R^2` is `delta^2 / (1 + delta^2)`, and Cohen's `f^2` is `delta^2`.  For two-sided regression tests, the `partial_r2` and `cohens_f2` density transformations sum the positive and negative branches; in this vignette the example is one-sided positive.
+
+## References

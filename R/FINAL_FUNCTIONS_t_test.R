@@ -63,7 +63,7 @@ backend_t <- function(
         tau2 = x[i],
         t_stat    = input$t_stat[i],
         r = r,
-        df = input$df,
+        df = input$df[i],
         two_sided = input$alternative == "two.sided"
       )
     }))

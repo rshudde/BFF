@@ -15,7 +15,7 @@ BFF_chi2_test = function(tau2, chi2_stat, k, r)
 
   b = get_b(tau2=tau2, r = r, k = k)
 
-  term_three = tau2 * chi2_stat / (2*(1 + tau2^2))
+  term_three = tau2 * chi2_stat / (2*(1 + tau2))
   hypergeo = hypergeom1F1(k/2 + r, k/2, term_three)$f
 
   final_BF = b*hypergeo
@@ -78,9 +78,11 @@ backend_chi2 <- function(
 #' @param n sample size (if one sample test)
 #' @param df degrees of freedom
 #' @param LRT should LRT be performed? Default is FALSE
-#' @param omega standardized effect size. For the chi^2-test, this is often called Cohen's w (can be a single entry or a vector of values)
+#' @param omega standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values). Use \code{effect_size = "cohens_w"} to specify or plot conventional Cohen's \code{w}.
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
 #' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1
+#' @param effect_size scale used for \code{omega} and \code{omega_sequence}. Defaults to the package's internal \code{omega} scale. Alternatives include \code{"cohens_w"}, \code{"phi"}, \code{"cramers_v"}, \code{"tschuprow_t"}, and \code{"contingency_coefficient"}.
+#' @param table_dim integer vector \code{c(rows, columns)}. Required when \code{effect_size} is \code{"cramers_v"} or \code{"tschuprow_t"}.
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
@@ -96,24 +98,55 @@ chi2_test_BFF = function(chi2_stat,
                       LRT = FALSE,
                       omega = NULL,
                       omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
-                      r = 1)
+                      r = 1,
+                      effect_size = NULL,
+                      table_dim = NULL)
 
 {
+  omega_sequence_missing <- missing(omega_sequence)
+  effect_size_supplied   <- !is.null(effect_size)
+
   ### input checks and processing
-  input <- .process_input.chi2.test(chi2_stat, n, LRT, df, r)
+  input <- .process_input.chi2.test(chi2_stat, n, LRT, df, r, table_dim)
+
+  effect_size <- .effect_size_normalize("chi2_test", effect_size)
+  if(is.null(omega) && omega_sequence_missing){
+    omega_sequence <- .effect_size_default_sequence("chi2_test", effect_size)
+  }
+  if(effect_size_supplied){
+    input$effect_size <- effect_size
+  }
+
+  omega_internal <- .effect_size_to_internal(
+    value       = if(!is.null(omega)) omega else omega_sequence,
+    test_type   = "chi2_test",
+    effect_size = effect_size,
+    input       = input,
+    table_dim   = table_dim
+  )
 
   ### computation
   # calculate BF
   results   <- backend_chi2(
     input     = input,
     r         = r,
-    omega     = if(!is.null(omega)) omega else omega_sequence
+    omega     = omega_internal
   )
 
 
   ## compute minimum BFF for anything larger than small effect sizes
   if (is.null(omega)) {
-    minimums = get_min_omega_bff(omega = omega_sequence, bff = results, cutoff = 0.1)
+    minimums = get_min_omega_bff(
+      omega  = omega_internal,
+      bff    = results,
+      cutoff = if(effect_size_supplied) .effect_size_minimum_cutoff(
+        test_type   = "chi2_test",
+        effect_size = effect_size,
+        input       = input,
+        table_dim   = table_dim,
+        default     = 0.1
+      ) else 0.1
+    )
   }  else
   {
     minimums = c(NULL, NULL)
@@ -122,13 +155,13 @@ chi2_test_BFF = function(chi2_stat,
   ###### return logic
   if(is.null(omega)){
     log_bf         <- c(0, results)
-    omega_sequence <- c(0, omega_sequence)
+    omega_internal <- c(0, omega_internal)
     idx_max        <- which.max(log_bf)
     this_log_bf    <- log_bf[idx_max]
-    this_omega     <- omega_sequence[idx_max]
+    this_omega     <- omega_internal[idx_max]
   }else{
     this_log_bf    <- results
-    this_omega     <- omega
+    this_omega     <- omega_internal
   }
 
   output = list(
@@ -143,7 +176,7 @@ chi2_test_BFF = function(chi2_stat,
     input        = input
   )
   if(is.null(omega)){
-    output$BFF = list(log_bf = log_bf, omega = omega_sequence)
+    output$BFF = list(log_bf = log_bf, omega = omega_internal)
   }
 
   class(output) = "BFF"
@@ -153,17 +186,23 @@ chi2_test_BFF = function(chi2_stat,
 
 
 
-.process_input.chi2.test <- function(chi2_stat, n, LRT, df, r){
+.process_input.chi2.test <- function(chi2_stat, n, LRT, df, r, table_dim = NULL){
 
   if (r < 1)
     stop("r must be greater than or equal to 1")
 
-  return(list(
+  input <- list(
     chi2_stat     = chi2_stat,
     n          = n,
     df         = df,
     LRT = LRT
-  ))
+  )
+
+  if(!is.null(table_dim)){
+    input$table_dim <- .effect_size_table_dim(input = input, table_dim = table_dim)
+  }
+
+  return(input)
 }
 
 

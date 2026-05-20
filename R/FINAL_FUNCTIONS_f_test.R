@@ -3,7 +3,7 @@ f_val_r1 = function(tau2, f_stat, df1, df2)
 {
   v = df2 * (tau2 + 1)
   term_one = (tau2 + 1) ^ (-df1 / 2 - 1)
-  term_two = (1 + df1 * f_stat / df2) / (1 + df1 * f_stat / v)
+  term_two = ((1 + df1 * f_stat / df2) / (1 + df1 * f_stat / v)) ^ ((df1 + df2) / 2)
   term_three = 1 + (df1 + df2) * tau2 * f_stat / (v * (1 + df1 * f_stat /
                                                          v))
 
@@ -79,9 +79,10 @@ backend_f <- function(
 #' @param n sample size (if one sample test)
 #' @param df1 sample size of group one for two sample test.
 #' @param df2 sample size of group two for two sample test
-#' @param omega standardized effect size. For the f-test, this is often called Cohen's f (can be a single entry or a vector of values)
+#' @param omega standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
 #' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1
+#' @param effect_size scale used for \code{omega} and \code{omega_sequence}. Defaults to the package's internal \code{"omega"} RMSES scale. Alternatives include \code{"cohens_f"}, \code{"cohens_f2"}, \code{"partial_eta2"}, and \code{"partial_r2"}.
 #'
 #' @return Returns an S3 object of class `BFF` (see `BFF.object` for details).
 #' @export
@@ -97,25 +98,52 @@ f_test_BFF = function(f_stat,
                       df2,
                       omega = NULL,
                       omega_sequence = if(is.null(omega)) seq(0.01, 1, by = 0.01),
-                      r = 1)
+                      r = 1,
+                      effect_size = NULL)
 
 
 {
+  omega_sequence_missing <- missing(omega_sequence)
+  effect_size_supplied   <- !is.null(effect_size)
 
   ### input checks and processing
   input <- .process_input.f.test(f_stat, n, df1, df2, r)
+
+  effect_size <- .effect_size_normalize("f_test", effect_size)
+  if(is.null(omega) && omega_sequence_missing){
+    omega_sequence <- .effect_size_default_sequence("f_test", effect_size)
+  }
+  if(effect_size_supplied){
+    input$effect_size <- effect_size
+  }
+
+  omega_internal <- .effect_size_to_internal(
+    value       = if(!is.null(omega)) omega else omega_sequence,
+    test_type   = "f_test",
+    effect_size = effect_size,
+    input       = input
+  )
 
   ### computation
   # calculate BF
   results   <- backend_f(
     input     = input,
     r         = r,
-    omega     = if(!is.null(omega)) omega else omega_sequence
+    omega     = omega_internal
   )
 
   ## compute minimum BFF for anything larger than small effect sizes
   if (is.null(omega)) {
-    minimums = get_min_omega_bff(omega = omega_sequence, bff = results, cutoff = 0.1)
+    minimums = get_min_omega_bff(
+      omega  = omega_internal,
+      bff    = results,
+      cutoff = if(effect_size_supplied) .effect_size_minimum_cutoff(
+        test_type   = "f_test",
+        effect_size = effect_size,
+        input       = input,
+        default     = 0.1
+      ) else 0.1
+    )
   }  else
   {
     minimums = c(NULL, NULL)
@@ -124,13 +152,13 @@ f_test_BFF = function(f_stat,
   ###### return logic
   if(is.null(omega)){
     log_bf         <- c(0, results)
-    omega_sequence <- c(0, omega_sequence)
+    omega_internal <- c(0, omega_internal)
     idx_max        <- which.max(log_bf)
     this_log_bf    <- log_bf[idx_max]
-    this_omega     <- omega_sequence[idx_max]
+    this_omega     <- omega_internal[idx_max]
   }else{
     this_log_bf    <- results
-    this_omega     <- omega
+    this_omega     <- omega_internal
   }
 
   output = list(
@@ -145,7 +173,7 @@ f_test_BFF = function(f_stat,
     input        = input
   )
   if(is.null(omega)){
-    output$BFF = list(log_bf = log_bf, omega = omega_sequence)
+    output$BFF = list(log_bf = log_bf, omega = omega_internal)
   }
 
   class(output) = "BFF"

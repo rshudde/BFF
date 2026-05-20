@@ -19,6 +19,12 @@ function. These include: \describe{
  \item{"title"}{tile of the figure}
  \item{"xlab"}{x-axis label of the figure}
  \item{"ylab"}{y-axis label of the figure}
+ \item{"effect_size"}{effect-size scale for plotting
+ the Bayes factor function. Defaults to the scale used
+ to fit the BFF object, or to the package's internal
+ omega scale.}
+ \item{"table_dim"}{integer vector \code{c(rows, columns)}
+ for chi-square transformations that require table dimensions.}
  \item{"add_segments"}{whether effect size
  segments should be added to the figure. Available only
  for standardized effect sizes. Defaults to \code{TRUE}}

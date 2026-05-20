@@ -11,7 +11,8 @@ regression_test_BFF(
   alternative = "two.sided",
   omega = NULL,
   omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01),
-  r = 1
+  r = 1,
+  effect_size = NULL
 )
 }
 \arguments{
@@ -23,17 +24,20 @@ regression_test_BFF(
 
 \item{alternative}{is the alternative a one.sided or two.sided test? default is two.sided}
 
-\item{omega}{standadized effect size. For the regression test, this is also known as Cohen's f^@ (can be a single entry or a vector of values)}
+\item{omega}{nonnegative prior-mode magnitude on the internal signed Cohen's f-like coefficient-effect scale (can be a single entry or a vector of values). Direction is represented by \code{alternative} for one-sided tests.}
 
 \item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
 
 \item{r}{variable controlling dispersion of non-local priors. Default is 1. r must be >= 1}
+
+\item{effect_size}{scale used for \code{omega} and \code{omega_sequence}. Defaults to the signed Cohen's f scale used internally. Alternatives include \code{"partial_r"}, \code{"partial_r2"}, and \code{"cohens_f2"}.}
 }
 \value{
 Returns an S3 object of class `BFF` (see `BFF.object` for details).
 }
 \description{
-regression_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+regression_test_BFF constructs rank-one coefficient-style BFFs based on a t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+The internal effect-size scale is a signed Cohen's f-like coefficient effect delta with noncentrality parameter sqrt(n - k - 1) * delta. This is not the full multivariate linear-model RMSES parameterization for multi-df model comparisons.
 By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 All results are on the log scale.
 }

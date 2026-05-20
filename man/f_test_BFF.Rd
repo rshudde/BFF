@@ -11,7 +11,8 @@ f_test_BFF(
   df2,
   omega = NULL,
   omega_sequence = if (is.null(omega)) seq(0.01, 1, by = 0.01),
-  r = 1
+  r = 1,
+  effect_size = NULL
 )
 }
 \arguments{
@@ -23,11 +24,13 @@ f_test_BFF(
 
 \item{df2}{sample size of group two for two sample test}
 
-\item{omega}{standardized effect size. For the f-test, this is often called Cohen's f (can be a single entry or a vector of values)}
+\item{omega}{standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values)}
 
 \item{omega_sequence}{sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)}
 
 \item{r}{variable controlling dispersion of non-local priors. Default is 1. r must be >= 1}
+
+\item{effect_size}{scale used for \code{omega} and \code{omega_sequence}. Defaults to the package's internal \code{"omega"} RMSES scale. Alternatives include \code{"cohens_f"}, \code{"cohens_f2"}, \code{"partial_eta2"}, and \code{"partial_r2"}.}
 }
 \value{
 Returns an S3 object of class `BFF` (see `BFF.object` for details).

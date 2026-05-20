@@ -18,15 +18,20 @@ frame with the support, prior ordinates, and
 posterior ordinates is returned instead.}
 
 \item{...}{additional arguments to the plotting
-function. These include: \itemize{
- \item{"x_limit"}{vector defining the plotting range,
+function. These include: \describe{
+ \item{x_limit}{vector defining the plotting range,
  defaults to \code{c(-3, 3)}.}
- \item{"color"}{vector with color for the posterior and
+ \item{color}{vector with color for the posterior and
  prior line. Defaults to \code{c("black", "grey")}}
- \item{"linetype"}{vector with linetype for the posterior and
+ \item{linetype}{vector with linetype for the posterior and
  prior line. Defaults to \code{c(2, 1)}}
- \item{"linewidth"}{vector with linewidth for the posterior and
+ \item{linewidth}{vector with linewidth for the posterior and
  prior line. Defaults to \code{c(1, 1)}}
+ \item{effect_size}{effect-size scale for plotting the prior and
+ posterior density. Defaults to the scale used to fit the BFF object,
+ or to the package's internal omega scale.}
+ \item{table_dim}{integer vector \code{c(rows, columns)} for
+ chi-square transformations that require table dimensions.}
 }}
 }
 \value{

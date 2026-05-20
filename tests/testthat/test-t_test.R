@@ -25,37 +25,6 @@ test_that("two-sample: basic functionality", {
   )
   testthat::expect_error(plot(fit), "Bayes factor function can be plotted only if a specific omega/tau2 is not user set")
 
-  # TODO: fix posterior plots
-  # - I fixed the arguments not being properly passed
-  # - however, the posterior distribution does not integrate to 1
-  # (I remember that I raised this issue when I was in US, and Saptati was working on fixing it)
-
-  # this is how the functions should work
-  # posterior_plot(fit)
-  # posterior_plot(fit, prior = TRUE)
-  #
-  # # this highlights the issue (run `devtools::load_all()` first)
-  # tau2 <- get_two_sample_tau2(n1 = fit$input$n1, n2 = fit$input$n2, w = fit$omega_h1, r = fit$r)
-  #
-  # # does not integrate to 1
-  # integrate(
-  #   f = function(x) .t_test.posterior(
-  #     t_stat = fit$input$t_stat, tau2 = tau2, r = fit$r, effect_size = x,
-  #     n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
-  #   lower = -Inf,
-  #   upper = Inf
-  # )
-  #
-  # # prior seems to work just fine (i.e., integrates to one)
-  # integrate(
-  #   f = function(x) .t_test.prior(
-  #     tau2 = tau2, r = fit$r, effect_size = x,
-  #     n = fit$input$n, n1 = fit$input$n1, n2 = fit$input$n2, one_sample = fit$one_sample, one_sided = fit$alternative != "two.sided"),
-  #   lower = -Inf,
-  #   upper = Inf
-  # )
-  # # <\TODO>
-  #
   # # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior",           posterior_plot(fit))
   # # vdiffr::expect_doppelganger("t_test-two_sample-two_sided-posterior_and_prior", posterior_plot(fit, prior = TRUE))
   #
@@ -150,5 +119,33 @@ test_that("two-sample: basic functionality", {
   )
   # vdiffr::expect_doppelganger("t_test_BFF-two_sample-one_sided-BFF", plot(fit))
   # testthat::expect_error(posterior_plot(fit), "There is no non-local prior distribution")
+})
+
+test_that("vectorized t-test uses statistic-specific degrees of freedom", {
+  t_stat <- c(2.5, 2.0)
+  n <- c(50, 60)
+  omega <- 0.3
+
+  fit <- t_test_BFF(
+    t_stat = t_stat,
+    n = n,
+    one_sample = TRUE,
+    omega = omega
+  )
+  expected <- sum(mapply(
+    function(ti, ni){
+      BFF:::BFF_t_test(
+        tau2 = BFF:::get_one_sample_tau2(n = ni, w = omega, r = 1),
+        t_stat = ti,
+        r = 1,
+        two_sided = TRUE,
+        df = ni - 1
+      )
+    },
+    t_stat,
+    n
+  ))
+
+  testthat::expect_equal(fit$log_bf_h1, expected, tolerance = 1e-12)
 })
 

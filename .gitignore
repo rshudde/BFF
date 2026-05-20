@@ -4,3 +4,7 @@
 .Ruserdata
 /doc/
 /Meta/
+.positai
+/.StatsVault
+AGENTS.md
+CLAUDE.md
