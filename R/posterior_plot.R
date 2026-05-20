@@ -135,6 +135,40 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
   return(omega)
 }
 
+.posterior_plot_selected_tau2 <- function(x){
+  tau2 <- x$tau2_h1
+
+  if(is.null(tau2)){
+    return(NULL)
+  }
+  if(is.list(tau2)){
+    if(length(tau2) != 1){
+      stop("`posterior_plot` requires a single selected omega. Fit a single omega or a full BFF so the maximizing omega can be selected.")
+    }
+    tau2 <- tau2[[1]]
+  }
+  if(length(tau2) != 1 || is.na(tau2)){
+    stop("`posterior_plot` requires a single selected omega. Fit a single omega or a full BFF so the maximizing omega can be selected.")
+  }
+
+  tau2
+}
+
+.posterior_plot_branch_sign <- function(x, effect_size){
+  if(!.effect_size_chi2_family(x$test_type) ||
+     !effect_size %in% c("logOR", "OR", "logRR", "risk_ratio", "risk_difference", "arcsine_h")){
+    return(NULL)
+  }
+  if(is.null(x$input$effect_size) || .effect_size_normalize(x$test_type, x$input$effect_size) != effect_size){
+    return(NULL)
+  }
+  if(is.null(x$effect_size_sign_h1) || length(x$effect_size_sign_h1) != 1){
+    return(NULL)
+  }
+
+  x$effect_size_sign_h1
+}
+
 .posterior_plot_default_x_limit <- function(x, alternative, effect_size = NULL){
   transformed_x_limit <- .effect_size_default_x_limit(x[["test_type"]], effect_size, alternative)
   if(!is.null(transformed_x_limit)){
@@ -251,15 +285,19 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
   if(length(chi2_stat) != 1 || length(x$input$n) != 1 || length(x$input$df) != 1)
     stop("`posterior_plot` for chi-square BFF objects is currently implemented only for a single chi-square statistic.")
 
-  tau2 <- if(x$input$LRT){
-    get_LRT_tau2(n = x$input$n, k = x$input$df, w = omega, r = r)
-  }else{
-    get_count_tau2(n = x$input$n, k = x$input$df, w = omega, r = r)
+  tau2 <- .posterior_plot_selected_tau2(x)
+  if(is.null(tau2)){
+    tau2 <- if(x$input$LRT){
+      get_LRT_tau2(n = x$input$n, k = x$input$df, w = omega, r = r)
+    }else{
+      get_count_tau2(n = x$input$n, k = x$input$df, w = omega, r = r)
+    }
   }
 
   if(tau2 <= 0)
     stop("There is no non-local prior distribution that provides more evidence for the null hypothesis than the null prior distribution.")
 
+  branch_sign <- .posterior_plot_branch_sign(x, effect_size)
   lik.prior <- .effect_size_density(
     test_type   = x$test_type,
     effect_size = effect_size,
@@ -267,7 +305,8 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
     density     = function(effect_size) .chi2_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n = x$input$n, df = x$input$df),
     input       = x$input,
     table_dim   = table_dim,
-    table_margins = table_margins
+    table_margins = table_margins,
+    branch_sign = branch_sign
   )
   lik.posterior <- .effect_size_density(
     test_type   = x$test_type,
@@ -276,7 +315,8 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
     density     = function(effect_size) .chi2_test.posterior(chi2_stat = chi2_stat, tau2 = tau2, r = r, effect_size = effect_size, n = x$input$n, df = x$input$df),
     input       = x$input,
     table_dim   = table_dim,
-    table_margins = table_margins
+    table_margins = table_margins,
+    branch_sign = branch_sign
   )
 
   df <- data.frame(
@@ -299,7 +339,10 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
   if(length(f_stat) != 1 || length(x$input$n) != 1 || length(x$input$df1) != 1 || length(x$input$df2) != 1)
     stop("`posterior_plot` for F-test BFF objects is currently implemented only for a single F statistic.")
 
-  tau2 <- get_linear_tau2(n = x$input$n, w = omega, k = x$input$df1, r = r)
+  tau2 <- .posterior_plot_selected_tau2(x)
+  if(is.null(tau2)){
+    tau2 <- get_linear_tau2(n = x$input$n, w = omega, k = x$input$df1, r = r)
+  }
 
   if(tau2 <= 0)
     stop("There is no non-local prior distribution that provides more evidence for the null hypothesis than the null prior distribution.")
@@ -339,7 +382,10 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
   if(length(t_stat) != 1 || length(x$input$n) != 1 || length(x$input$k) != 1)
     stop("`posterior_plot` for regression-test BFF objects is currently implemented only for a single t statistic.")
 
-  tau2 <- get_regression_tau2(n = x$input$n, k = x$input$k, w = omega, r = r)
+  tau2 <- .posterior_plot_selected_tau2(x)
+  if(is.null(tau2)){
+    tau2 <- get_regression_tau2(n = x$input$n, k = x$input$k, w = omega, r = r)
+  }
 
   if(tau2 <= 0)
     stop("There is no non-local prior distribution that provides more evidence for the null hypothesis than the null prior distribution.")

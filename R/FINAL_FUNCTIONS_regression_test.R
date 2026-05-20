@@ -36,15 +36,18 @@ BFF_reg_test = function(tau2, t_stat, df, r, two_sided)
 backend_reg <- function(
     input,
     r,
-    omega = NULL){
+    omega = NULL,
+    tau2 = NULL){
 
   # compute tau2 from omega
   # if multiple omegas and t-stats are supplied, each element of tau2
   # corresponds a vector of tau2 for the corresponding t-statistics
   # i.e., tau2[omega][t-stat]
-  tau2 <- lapply(omega, function(x){
+  if(is.null(tau2)){
+    tau2 <- lapply(omega, function(x){
       tau2 <- get_regression_tau2(n = input$n, k = input$k, w = x, r = r)
-  })
+    })
+  }
 
   # compute log_BF
   log_BF <- sapply(tau2, function(x){
@@ -68,7 +71,7 @@ backend_reg <- function(
       Please contact the maintainer for more information."
     )
 
-  return(log_BF)
+  return(unname(log_BF))
 }
 
 
@@ -122,27 +125,37 @@ regression_test_BFF <- function(
     input$effect_size <- effect_size
   }
 
-  omega_input <- if(!is.null(omega)) omega else omega_sequence
-  omega_sign <- .effect_size_branch_sign(
+  omega_input <- unname(if(!is.null(omega)) omega else omega_sequence)
+  omega_sign <- unname(.effect_size_branch_sign(
     value       = omega_input,
     test_type   = "regression_test",
     effect_size = effect_size,
     input       = input
-  )
+  ))
 
-  omega_internal <- .effect_size_to_internal(
+  omega_internal <- unname(.effect_size_to_internal(
     value       = omega_input,
     test_type   = "regression_test",
     effect_size = effect_size,
     input       = input
-  )
+  ))
+  tau2 <- lapply(omega_input, function(x){
+    unname(.effect_size_prior_mode_tau2(
+      value       = x,
+      test_type   = "regression_test",
+      effect_size = effect_size,
+      input       = input,
+      r           = r
+    ))
+  })
 
   ### computation
   # calculate BF
   results   <- backend_reg(
     input     = input,
     r         = r,
-    omega     = omega_internal
+    omega     = omega_internal,
+    tau2      = tau2
   )
 
   ## compute minimum BFF for anything larger than small effect sizes
@@ -176,14 +189,17 @@ regression_test_BFF <- function(
     log_bf         <- c(0, results)
     omega_internal <- c(0, omega_internal)
     omega_sign     <- c(1, omega_sign)
+    tau2_output    <- c(list(rep(0, length(input$t_stat))), tau2)
     idx_max        <- which.max(log_bf)
     this_log_bf    <- log_bf[idx_max]
     this_omega     <- omega_internal[idx_max]
     this_sign      <- omega_sign[idx_max]
+    this_tau2      <- tau2_output[[idx_max]]
   }else{
     this_log_bf    <- results
     this_omega     <- omega_internal
     this_sign      <- omega_sign
+    this_tau2      <- tau2
   }
 
   output = list(
@@ -194,13 +210,14 @@ regression_test_BFF <- function(
     effect_size_sign_h1 = this_sign,
     effect_size_sign_h0 = minimum_sign,
     omega_set    = !is.null(omega),
+    tau2_h1      = this_tau2,
     test_type    = "regression_test",
     generic_test = FALSE,
     r            = r,
     input        = input
   )
   if(is.null(omega)){
-    output$BFF = list(log_bf = log_bf, omega = omega_internal, effect_size_sign = omega_sign)
+    output$BFF = list(log_bf = log_bf, omega = omega_internal, effect_size_sign = omega_sign, tau2 = tau2_output)
   }
 
   class(output) = "BFF"

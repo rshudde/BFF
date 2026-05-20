@@ -30,36 +30,50 @@ plot_pair_matrix <- function(bff_fits,
                              effect_sizes,
                              labels,
                              table_dim = NULL,
+                             table_margins = NULL,
                              x_limits = NULL) {
-  stopifnot(length(effect_sizes) == length(labels))
+  row_effect_sizes <- if (is.list(effect_sizes)) {
+    effect_sizes
+  } else {
+    as.list(effect_sizes)
+  }
+  plot_effect_sizes <- vapply(
+    row_effect_sizes,
+    function(effect_size) effect_size[1],
+    character(1)
+  )
+  stopifnot(length(row_effect_sizes) == length(labels))
 
   if (inherits(bff_fits, "BFF")) {
-    bff_fits <- rep(list(bff_fits), length(effect_sizes))
+    bff_fits <- rep(list(bff_fits), length(row_effect_sizes))
   }
+  stopifnot(length(bff_fits) == length(row_effect_sizes))
 
   if (is.null(x_limits)) {
-    x_limits <- rep(list(NULL), length(effect_sizes))
+    x_limits <- rep(list(NULL), length(row_effect_sizes))
   }
+  stopifnot(length(x_limits) == length(row_effect_sizes))
 
   grid::grid.newpage()
   grid::pushViewport(grid::viewport(
     layout = grid::grid.layout(
-      nrow = length(effect_sizes),
+      nrow = length(row_effect_sizes),
       ncol = 2
     )
   ))
 
-  for (i in seq_along(effect_sizes)) {
+  for (i in seq_along(row_effect_sizes)) {
     bff_args <- list(
       x = bff_fits[[i]],
-      effect_size = effect_sizes[i],
+      effect_size = plot_effect_sizes[i],
       add_segments = FALSE,
-      title = paste("BFF:", labels[i])
+      title = paste("BFF:", labels[i]),
+      xlab = labels[i]
     )
     post_args <- list(
       x = posterior_fit,
       prior = TRUE,
-      effect_size = effect_sizes[i],
+      effect_size = plot_effect_sizes[i],
       color = c("black", "grey45"),
       linetype = c(1, 2),
       linewidth = c(0.9, 0.9)
@@ -68,6 +82,11 @@ plot_pair_matrix <- function(bff_fits,
     if (!is.null(table_dim)) {
       bff_args$table_dim <- table_dim
       post_args$table_dim <- table_dim
+    }
+
+    if (!is.null(table_margins)) {
+      bff_args$table_margins <- table_margins
+      post_args$table_margins <- table_margins
     }
 
     if (!is.null(x_limits[[i]])) {
@@ -81,6 +100,7 @@ plot_pair_matrix <- function(bff_fits,
       )
     posterior_gg <- do.call(posterior_plot, post_args) +
       ggplot2::ggtitle(paste("Prior and posterior:", labels[i])) +
+      ggplot2::labs(x = labels[i]) +
       ggplot2::theme_bw() +
       ggplot2::theme(
         plot.title = ggplot2::element_text(size = 10, hjust = 0.5),
@@ -188,7 +208,7 @@ As implemented here, the z-test effect size is Cohen's `d`.  For a one-sample z 
 
 ## t test
 
-Klauer, Meyer-Grant, and Kellen discuss a recognition-memory experiment by Grider and Malmberg in which emotional words were compared with neutral words [@klauerndmisc_bayes; @grider2008recognition].  They report `t(79) = 2.03` for negative versus neutral words, corresponding to `N = 80`.  Their example focuses on small, medium, and large targeted effects; for the posterior panel below, we use the small-effect target `d = 0.20`.  The BFF prior used by this package is a normal moment prior, so the numerical Bayes factor is not intended to reproduce the effect-size-prior Bayes factor from that article exactly.
+Klauer, Meyer-Grant, and Kellen discuss a recognition-memory experiment by Grider and Malmberg in which emotional words were compared with neutral words [@klauer2025pbnr_on; @grider2008recognition].  They report `t(79) = 2.03` for negative versus neutral words, corresponding to `N = 80`.  Their example focuses on small, medium, and large targeted effects; for the posterior panel below, we use the small-effect target `d = 0.20`.  The BFF prior used by this package is a normal moment prior, so the numerical Bayes factor is not intended to reproduce the effect-size-prior Bayes factor from that article exactly.
 
 ```{r t-fit}
 t_bff <- t_test_BFF(t_stat = 2.03, n = 80, one_sample = TRUE)
@@ -213,25 +233,27 @@ As implemented here, the t-test effect size is Cohen's `d`.  For a one-sample t 
 White and Eisenberg cross-classified 707 stomach-cancer patients by cancer site and blood type [@white1959abo].  Johnson, Pramanik, and Shudde use these data as a chi-square BFF example and report Pearson's chi-square statistic `12.65` on `6` degrees of freedom [@johnson2023pnas_bayes].  The rows of the table are the four cancer-site categories and the columns are the three blood-type categories, so `table_dim = c(4, 3)` is used for effect sizes that depend on table dimension.  The article reports the maximum BFF near RMSES `omega = 0.035`, which is used for the prior and posterior panels below.
 
 ```{r chi2-fit}
-chi2_effect_sizes <- c(
+chi2_effect_sizes <- list(
   "omega",
-  "cohens_w",
-  "phi",
+  c("cohens_w", "phi"),
   "cramers_v",
   "tschuprow_t",
   "contingency_coefficient"
 )
+chi2_plot_effect_sizes <- vapply(
+  chi2_effect_sizes,
+  function(effect_size) effect_size[1],
+  character(1)
+)
 chi2_labels <- c(
   "omega (RMSES)",
-  "Cohen's w",
-  "phi",
+  "Cohen's w / phi",
   "Cramer's V",
   "Tschuprow's T",
   "contingency coefficient"
 )
 chi2_limits <- list(
   c(0, 0.12),
-  c(0, 0.30),
   c(0, 0.30),
   c(0, 0.25),
   c(0, 0.25),
@@ -249,9 +271,9 @@ chi2_prior <- chi2_test_BFF(
 chi2_bff
 ```
 
-```{r chi2-plots, fig.height = 14}
+```{r chi2-plots, fig.height = 12}
 plot_pair_matrix(
-  bff_fits = lapply(chi2_effect_sizes, fit_chi2_sequence),
+  bff_fits = lapply(chi2_plot_effect_sizes, fit_chi2_sequence),
   posterior_fit = chi2_prior,
   effect_sizes = chi2_effect_sizes,
   labels = chi2_labels,
@@ -260,32 +282,119 @@ plot_pair_matrix(
 )
 ```
 
-The package's internal chi-square scale is `omega = sqrt(lambda / (n * df))`, where `lambda` is the noncentrality parameter.  Cohen's `w` and `phi` are implemented as `sqrt(df) * omega`, equivalently `sqrt(lambda / n)`.  For a table with `R` rows and `C` columns, Cramer's `V` is `w / sqrt(min(R - 1, C - 1))`, and Tschuprow's `T` is `w / ((R - 1) * (C - 1))^(1 / 4)`.  The contingency coefficient is `w / sqrt(1 + w^2)`.
+The package's internal chi-square scale is `omega = sqrt(lambda / (n * df))`, where `lambda` is the noncentrality parameter.  Cohen's `w` and `phi` are implemented as `sqrt(df) * omega`, equivalently `sqrt(lambda / n)`, so they share one plot row above.  For a table with `R` rows and `C` columns, Cramer's `V` is `w / sqrt(min(R - 1, C - 1))`, and Tschuprow's `T` is `w / ((R - 1) * (C - 1))^(1 / 4)`.  The contingency coefficient is `w / sqrt(1 + w^2)`.
+
+For a log odds-ratio-specific chi-square example, the table below compares `30 / 100` successes in one group with `20 / 100` successes in another group.  Because the table is 2-by-2, the BFF can be fit and plotted on `logOR`, odds-ratio, risk-ratio, risk-difference, and arcsine-h scales in addition to the usual chi-square association scales.  The posterior panel uses the maximizing prior mode from the `logOR` BFF, rounded to `logOR = 0.28`.
+
+```{r chi2-logor-fit}
+chi2_logOR_table <- matrix(
+  c(30, 70, 20, 80),
+  nrow = 2,
+  byrow = TRUE,
+  dimnames = list(group = c("group 1", "group 2"), outcome = c("success", "failure"))
+)
+chi2_logOR_bff <- contingency_table_BFF(
+  chi2_logOR_table,
+  effect_size = "logOR"
+)
+chi2_logOR_prior <- contingency_table_BFF(
+  chi2_logOR_table,
+  omega = 0.28,
+  effect_size = "logOR"
+)
+chi2_logOR_effect_sizes <- list(
+  c("omega", "cohens_w", "phi", "cramers_v", "tschuprow_t"),
+  "contingency_coefficient",
+  "logOR",
+  "OR",
+  "logRR",
+  "risk_ratio",
+  "risk_difference",
+  "arcsine_h"
+)
+chi2_logOR_plot_effect_sizes <- vapply(
+  chi2_logOR_effect_sizes,
+  function(effect_size) effect_size[1],
+  character(1)
+)
+chi2_logOR_labels <- c(
+  "omega / Cohen's w / phi / Cramer's V / Tschuprow's T",
+  "contingency coefficient",
+  "log odds ratio",
+  "odds ratio",
+  "log risk ratio",
+  "risk ratio",
+  "risk difference",
+  "arcsine h"
+)
+chi2_logOR_limits <- list(
+  c(0, 0.25),
+  c(0, 0.25),
+  c(-2, 2),
+  exp(c(-2, 2)),
+  c(-1.5, 1.5),
+  exp(c(-1.5, 1.5)),
+  c(-0.5, 0.5),
+  c(-1, 1)
+)
+fit_chi2_logOR_sequence <- function(effect_size) {
+  sequence <- switch(
+    effect_size,
+    "omega" = seq(0.001, 0.25, length.out = 120),
+    "contingency_coefficient" = seq(0.001, 0.25, length.out = 120),
+    "logOR" = seq(0.001, 2, length.out = 120),
+    "OR" = exp(seq(0.001, 2, length.out = 120)),
+    "logRR" = seq(0.001, 1.5, length.out = 120),
+    "risk_ratio" = exp(seq(0.001, 1.5, length.out = 120)),
+    "risk_difference" = seq(0.001, 0.5, length.out = 120),
+    "arcsine_h" = seq(0.001, 1, length.out = 120)
+  )
+
+  contingency_table_BFF(
+    chi2_logOR_table,
+    omega_sequence = sequence,
+    effect_size = effect_size
+  )
+}
+
+chi2_logOR_bff
+```
+
+```{r chi2-logor-plot, fig.height = 18}
+plot_pair_matrix(
+  bff_fits = lapply(chi2_logOR_plot_effect_sizes, fit_chi2_logOR_sequence),
+  posterior_fit = chi2_logOR_prior,
+  effect_sizes = chi2_logOR_effect_sizes,
+  labels = chi2_logOR_labels,
+  x_limits = chi2_logOR_limits
+)
+```
+
+For 2-by-2 tables, the usual chi-square scales `omega`, Cohen's `w`, `phi`, Cramer's `V`, and Tschuprow's `T` are equivalent because `df = 1` and `min(R - 1, C - 1) = 1`.  The log odds-ratio, odds-ratio, log risk-ratio, risk-ratio, risk-difference, and arcsine-h transformations are local/asymptotic transformations around the observed margins, so their scales differ and are displayed in separate rows.
 
 ## F test
 
 Johnson, Pramanik, and Shudde illustrate F-test BFFs using an original and replicated study of confirmatory information processing [@johnson2023pnas_bayes].  The original study by Fischer, Greitemeyer, and Frey recruited 85 undergraduate students and reported `F(2, 82) = 4.05`; the replication in the Open Science Collaboration project reported `F(2, 137) = 1.99` with 140 participants [@fischer2008self; @open2015reproducibility].  The package currently draws prior and posterior densities for a single F statistic, so the plots below use the original study's statistic.  The source article reports that the combined two-study BFF is maximized near RMSES `omega = 0.14`, and that value is used for the prior and posterior panels.
 
 ```{r f-fit}
-f_effect_sizes <- c(
-  "omega",
-  "cohens_f",
+f_effect_sizes <- list(
+  c("omega", "cohens_f"),
   "cohens_f2",
-  "partial_eta2",
-  "partial_r2"
+  c("partial_eta2", "partial_r2")
+)
+f_plot_effect_sizes <- vapply(
+  f_effect_sizes,
+  function(effect_size) effect_size[1],
+  character(1)
 )
 f_labels <- c(
-  "omega (RMSES)",
-  "Cohen's f",
+  "omega (RMSES) / Cohen's f",
   "Cohen's f^2",
-  "partial eta^2",
-  "partial R^2"
+  "partial eta^2 / partial R^2"
 )
 f_limits <- list(
   c(0, 0.60),
-  c(0, 0.60),
   c(0, 0.35),
-  c(0, 0.30),
   c(0, 0.30)
 )
 
@@ -294,9 +403,9 @@ f_prior <- f_test_BFF(f_stat = 4.05, n = 85, df1 = 2, df2 = 82, omega = 0.14)
 f_bff
 ```
 
-```{r f-plots, fig.height = 11}
+```{r f-plots, fig.height = 7}
 plot_pair_matrix(
-  bff_fits = lapply(f_effect_sizes, fit_f_sequence),
+  bff_fits = lapply(f_plot_effect_sizes, fit_f_sequence),
   posterior_fit = f_prior,
   effect_sizes = f_effect_sizes,
   labels = f_labels,
@@ -304,11 +413,11 @@ plot_pair_matrix(
 )
 ```
 
-The package's internal F-test scale is `omega = sqrt(2 * lambda / (n * df1))`, where `lambda` is the noncentrality parameter.  Cohen's `f` is implemented as `sqrt(df1 / 2) * omega`, and Cohen's `f^2` is `df1 * omega^2 / 2`.  Partial `eta^2` and partial `R^2` are both implemented as `f^2 / (1 + f^2)`.
+The package's internal F-test scale is `omega = sqrt(2 * lambda / (n * df1))`, where `lambda` is the noncentrality parameter.  Cohen's `f` is implemented as `sqrt(df1 / 2) * omega`, so `omega` and Cohen's `f` coincide in this example because `df1 = 2`.  Cohen's `f^2` is `df1 * omega^2 / 2`.  Partial `eta^2` and partial `R^2` are both implemented as `f^2 / (1 + f^2)`.
 
 ## Regression test
 
-Klauer, Meyer-Grant, and Kellen reanalyze Bailey and Geary's hominid cranial-capacity data, using partial `R^2` values reported from Rouder and Morey's regression model comparisons [@klauerndmisc_bayes; @bailey2009hominid; @rouder2012regression].  For model `M2`, the reduced model contains local climate, global temperature, and population density, and the full model adds parasite load.  Because this comparison adds one predictor, its partial `R^2 = (0.7109 - 0.7072) / (1 - 0.7072)` can be converted to `F(1, 170) = 2.175718` and then to `t = 1.475031`.  Following the request, the effect is treated as positive, and the prior/posterior panels use the article's large-effect target `f^2 = 0.35`.
+Klauer, Meyer-Grant, and Kellen reanalyze Bailey and Geary's hominid cranial-capacity data, using partial `R^2` values reported from Rouder and Morey's regression model comparisons [@klauer2025pbnr_on; @bailey2009hominid; @rouder2012regression].  For model `M2`, the reduced model contains local climate, global temperature, and population density, and the full model adds parasite load.  Because this comparison adds one predictor, its partial `R^2 = (0.7109 - 0.7072) / (1 - 0.7072)` can be converted to `F(1, 170) = 2.175718` and then to `t = 1.475031`.  Following the request, the effect is treated as positive, and the prior/posterior panels use the article's large-effect target `f^2 = 0.35`.
 
 ```{r regression-fit}
 regression_effect_sizes <- c(

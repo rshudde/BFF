@@ -33,11 +33,11 @@ test_that("chi-square effect-size modes are converted to the internal omega scal
   base <- chi2_test_BFF(chi2_stat = 12, n = 60, df = df, omega = internal_omega)
 
   cases <- list(
-    list(effect_size = "cohens_w", value = sqrt(df) * internal_omega, table_dim = NULL),
-    list(effect_size = "phi", value = sqrt(df) * internal_omega, table_dim = NULL),
-    list(effect_size = "cramers_v", value = sqrt(df) * internal_omega / sqrt(min(table_dim - 1)), table_dim = table_dim),
-    list(effect_size = "tschuprow_t", value = sqrt(df) * internal_omega / ((table_dim[1] - 1) * (table_dim[2] - 1))^(1/4), table_dim = table_dim),
-    list(effect_size = "contingency_coefficient", value = sqrt(df) * internal_omega / sqrt(1 + df * internal_omega^2), table_dim = NULL)
+    list(effect_size = "cohens_w", value = sqrt(df) * internal_omega, table_dim = NULL, same_bf = TRUE),
+    list(effect_size = "phi", value = sqrt(df) * internal_omega, table_dim = NULL, same_bf = TRUE),
+    list(effect_size = "cramers_v", value = sqrt(df) * internal_omega / sqrt(min(table_dim - 1)), table_dim = table_dim, same_bf = TRUE),
+    list(effect_size = "tschuprow_t", value = sqrt(df) * internal_omega / ((table_dim[1] - 1) * (table_dim[2] - 1))^(1/4), table_dim = table_dim, same_bf = TRUE),
+    list(effect_size = "contingency_coefficient", value = sqrt(df) * internal_omega / sqrt(1 + df * internal_omega^2), table_dim = NULL, same_bf = FALSE)
   )
 
   for(case in cases){
@@ -51,7 +51,9 @@ test_that("chi-square effect-size modes are converted to the internal omega scal
     )
 
     testthat::expect_equal(fit$omega_h1, internal_omega, tolerance = 1e-12, info = case$effect_size)
-    testthat::expect_equal(fit$log_bf_h1, base$log_bf_h1, tolerance = 1e-12, info = case$effect_size)
+    if(case$same_bf){
+      testthat::expect_equal(fit$log_bf_h1, base$log_bf_h1, tolerance = 1e-12, info = case$effect_size)
+    }
   }
 })
 
@@ -68,14 +70,14 @@ test_that("2x2 table effect-size modes are converted to the internal omega scale
   h_scale <- sqrt(margins[1] * (1 - margins[1]))
 
   cases <- list(
-    list(effect_size = "logOR", value = internal_omega / log_or_scale),
-    list(effect_size = "logOR", value = -internal_omega / log_or_scale),
-    list(effect_size = "OR", value = exp(internal_omega / log_or_scale)),
-    list(effect_size = "OR", value = exp(-internal_omega / log_or_scale)),
-    list(effect_size = "logRR", value = internal_omega / log_rr_scale),
-    list(effect_size = "risk_ratio", value = exp(internal_omega / log_rr_scale)),
-    list(effect_size = "risk_difference", value = internal_omega / rd_scale),
-    list(effect_size = "arcsine_h", value = internal_omega / h_scale)
+    list(effect_size = "logOR", value = internal_omega / log_or_scale, same_bf = TRUE),
+    list(effect_size = "logOR", value = -internal_omega / log_or_scale, same_bf = TRUE),
+    list(effect_size = "OR", value = exp(internal_omega / log_or_scale), same_bf = FALSE),
+    list(effect_size = "OR", value = exp(-internal_omega / log_or_scale), same_bf = FALSE),
+    list(effect_size = "logRR", value = internal_omega / log_rr_scale, same_bf = TRUE),
+    list(effect_size = "risk_ratio", value = exp(internal_omega / log_rr_scale), same_bf = FALSE),
+    list(effect_size = "risk_difference", value = internal_omega / rd_scale, same_bf = TRUE),
+    list(effect_size = "arcsine_h", value = internal_omega / h_scale, same_bf = TRUE)
   )
 
   for(case in cases){
@@ -87,7 +89,9 @@ test_that("2x2 table effect-size modes are converted to the internal omega scale
     )
 
     testthat::expect_equal(fit$omega_h1, internal_omega, tolerance = 1e-12, info = case$effect_size)
-    testthat::expect_equal(fit$log_bf_h1, base$log_bf_h1, tolerance = 1e-12, info = case$effect_size)
+    if(case$same_bf){
+      testthat::expect_equal(fit$log_bf_h1, base$log_bf_h1, tolerance = 1e-12, info = case$effect_size)
+    }
   }
 })
 
@@ -149,10 +153,10 @@ test_that("F-test and regression effect-size modes are converted to the internal
   f_base <- f_test_BFF(f_stat = 1.75, n = 25, df1 = 5, df2 = 50, omega = 0.5)
   conventional_f <- sqrt(5 / 2) * 0.5
   f_cases <- list(
-    list(effect_size = "cohens_f", value = conventional_f, internal = 0.5),
-    list(effect_size = "cohens_f2", value = conventional_f^2, internal = 0.5),
-    list(effect_size = "partial_eta2", value = conventional_f^2 / (1 + conventional_f^2), internal = 0.5),
-    list(effect_size = "partial_r2", value = conventional_f^2 / (1 + conventional_f^2), internal = 0.5)
+    list(effect_size = "cohens_f", value = conventional_f, internal = 0.5, same_bf = TRUE),
+    list(effect_size = "cohens_f2", value = conventional_f^2, internal = 0.5, same_bf = FALSE),
+    list(effect_size = "partial_eta2", value = conventional_f^2 / (1 + conventional_f^2), internal = 0.5, same_bf = FALSE),
+    list(effect_size = "partial_r2", value = conventional_f^2 / (1 + conventional_f^2), internal = 0.5, same_bf = FALSE)
   )
 
   for(case in f_cases){
@@ -167,15 +171,18 @@ test_that("F-test and regression effect-size modes are converted to the internal
     base <- f_test_BFF(f_stat = 1.75, n = 25, df1 = 5, df2 = 50, omega = case$internal)
 
     testthat::expect_equal(fit$omega_h1, case$internal, tolerance = 1e-12, info = case$effect_size)
-    testthat::expect_equal(fit$log_bf_h1, base$log_bf_h1, tolerance = 1e-12, info = case$effect_size)
+    if(case$same_bf){
+      testthat::expect_equal(fit$log_bf_h1, base$log_bf_h1, tolerance = 1e-12, info = case$effect_size)
+    }
   }
 
   testthat::expect_equal(f_base$omega_h1, 0.5)
 
   reg_cases <- list(
-    list(effect_size = "partial_r", value = -0.3, internal = 0.3 / sqrt(1 - 0.3^2)),
-    list(effect_size = "partial_r2", value = 0.09, internal = sqrt(0.09 / 0.91)),
-    list(effect_size = "cohens_f2", value = 0.16, internal = 0.4)
+    list(effect_size = "cohens_f", value = -0.4, internal = 0.4, same_bf = TRUE),
+    list(effect_size = "partial_r", value = -0.3, internal = 0.3 / sqrt(1 - 0.3^2), same_bf = FALSE),
+    list(effect_size = "partial_r2", value = 0.09, internal = sqrt(0.09 / 0.91), same_bf = FALSE),
+    list(effect_size = "cohens_f2", value = 0.16, internal = 0.4, same_bf = FALSE)
   )
 
   for(case in reg_cases){
@@ -189,7 +196,9 @@ test_that("F-test and regression effect-size modes are converted to the internal
     base <- regression_test_BFF(t_stat = 2.5, n = 50, k = 3, omega = case$internal)
 
     testthat::expect_equal(fit$omega_h1, case$internal, tolerance = 1e-12, info = case$effect_size)
-    testthat::expect_equal(fit$log_bf_h1, base$log_bf_h1, tolerance = 1e-12, info = case$effect_size)
+    if(case$same_bf){
+      testthat::expect_equal(fit$log_bf_h1, base$log_bf_h1, tolerance = 1e-12, info = case$effect_size)
+    }
   }
 })
 

@@ -9,7 +9,7 @@ test_that("chi2: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf_h1, -25.05399, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf_h1, -24.60179, tolerance = 1e-5)
   testthat::expect_equal(fit$omega_h1,  0.5)
 
   # test S3 methods
@@ -18,7 +18,7 @@ test_that("chi2: basic functionality", {
     c(
       "\tBayesian non-local chi2 test"  ,
       ""                                        ,
-      "log Bayes factor = -25.05"                 ,
+      "log Bayes factor = -24.60"                 ,
       "omega = 0.50 (RMSES)"
     )
   )
@@ -37,7 +37,7 @@ test_that("chi2: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf_h1, -23.20205, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf_h1, -22.76035, tolerance = 1e-5)
   testthat::expect_equal(fit$omega_h1,  0.50)
 
   # test S3 methods
@@ -46,7 +46,7 @@ test_that("chi2: basic functionality", {
     c(
       "\tBayesian non-local chi2 test"  ,
       ""                                        ,
-      "log Bayes factor = -23.20"                 ,
+      "log Bayes factor = -22.76"                 ,
       "omega = 0.50 (RMSES)"
     )
   )
@@ -74,7 +74,7 @@ test_that("chi2: basic functionality", {
       ""                                        ,
       "maximized (in favor of alternative) log Bayes factor = 0.00"       ,
       "maximized (in favor of alternative) omega = 0.00 (RMSES)"       ,
-      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -83.22"       ,
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -82.72"       ,
       "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (RMSES)"
     )
   )
@@ -109,7 +109,7 @@ test_that("chi2: basic functionality", {
       ""                                        ,
       "maximized (in favor of alternative) log Bayes factor = 0.00"       ,
       "maximized (in favor of alternative) omega = 0.00 (RMSES)" ,
-      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -84.24",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -83.73",
       "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (RMSES)"
     )
   )
@@ -138,7 +138,7 @@ test_that("chi2: basic functionality", {
 
       "maximized (in favor of alternative) log Bayes factor = 0.00",
       "maximized (in favor of alternative) omega = 0.00 (RMSES)",
-      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -94.56",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -94.06",
       "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (RMSES)"
     )
   )

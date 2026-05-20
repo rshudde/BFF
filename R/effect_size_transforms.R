@@ -314,9 +314,9 @@
     "partial_r2" = ,
     "contingency_coefficient" = seq(0.01, 0.99, by = 0.01),
     "logOR" = seq(0.01, 4, by = 0.01),
-    "OR" = exp(seq(0.01, 4, by = 0.01)),
+    "OR" = exp(seq(0.01, 1.99, by = 0.01)),
     "logRR" = seq(0.01, 3, by = 0.01),
-    "risk_ratio" = exp(seq(0.01, 3, by = 0.01)),
+    "risk_ratio" = exp(seq(0.01, 1.99, by = 0.01)),
     "risk_difference" = seq(0.01, 0.99, by = 0.01),
     "arcsine_h" = seq(0.01, 0.99 * pi, length.out = 400),
     seq(0.01, 1, by = 0.01)
@@ -548,6 +548,131 @@
   )
 }
 
+.effect_size_prior_mode_tau2 <- function(value, test_type, effect_size = NULL, input = NULL, r, table_dim = NULL, table_margins = NULL){
+  effect_size <- .effect_size_normalize(test_type, effect_size)
+  value <- as.numeric(value)
+
+  switch(
+    test_type,
+    "t_test" = ,
+    "z_test" = {
+      if(input$one_sample){
+        return(get_one_sample_tau2(n = input$n, w = abs(value), r = r))
+      }
+      return(get_two_sample_tau2(n1 = input$n1, n2 = input$n2, w = abs(value), r = r))
+    },
+    "chi2_test" = ,
+    "contingency_table" = ,
+    "prop_test" = {
+      df <- unique(input$df)
+      if(length(df) != 1) df <- input$df
+      lambda_scale <- input$n * df
+      alpha <- df / 2 + r
+
+      switch(
+        effect_size,
+        "omega" = ,
+        "cohens_w" = ,
+        "phi" = ,
+        "cramers_v" = ,
+        "tschuprow_t" = ,
+        "logOR" = ,
+        "logRR" = ,
+        "risk_difference" = ,
+        "arcsine_h" = {
+          internal <- .effect_size_to_internal(
+            value = value, test_type = test_type, effect_size = effect_size,
+            input = input, table_dim = table_dim, table_margins = table_margins
+          )
+          lambda_scale * internal^2 / (2 * alpha - 1)
+        },
+        "contingency_coefficient" = {
+          .effect_size_check_interval(value, effect_size, upper = 1, upper_open = TRUE)
+          ifelse(value == 0, 0, {
+            b <- (2 * alpha - 1) * (1 - value^2)^2 / (2 * value^2) +
+              (alpha + 1) * (1 - value^2)
+            input$n / (2 * b)
+          })
+        },
+        "OR" = ,
+        "risk_ratio" = {
+          scale <- .effect_size_2x2_scale(effect_size, input, table_dim, table_margins)
+          .effect_size_check_positive(value, effect_size)
+          log_value <- log(value)
+          A <- ifelse(log_value == 0, Inf, ((2 * alpha - 1) / log_value - 1) / (2 * log_value))
+          if(any(is.finite(A) & A <= 0)){
+            stop(sprintf(
+              "No finite non-local prior can have its mode at this value on the %s scale; use the corresponding log scale or a value closer to 1.",
+              .effect_size_label(test_type, effect_size)
+            ))
+          }
+          ifelse(is.infinite(A), 0, lambda_scale * scale^2 / (2 * A))
+        }
+      )
+    },
+    "f_test" = {
+      df1 <- unique(input$df1)
+      if(length(df1) != 1) df1 <- input$df1
+      alpha <- df1 / 2 + r
+      lambda_scale <- input$n * df1 / 2
+
+      switch(
+        effect_size,
+        "omega" = ,
+        "cohens_f" = {
+          internal <- .effect_size_to_internal(value, "f_test", effect_size, input)
+          lambda_scale * internal^2 / (2 * alpha - 1)
+        },
+        "cohens_f2" = {
+          .effect_size_check_interval(value, effect_size)
+          input$n * value / (2 * (alpha - 1))
+        },
+        "partial_eta2" = ,
+        "partial_r2" = {
+          .effect_size_check_interval(value, effect_size, upper = 1, upper_open = TRUE)
+          ifelse(value == 0, 0, {
+            b <- (alpha - 1) * (1 - value)^2 / value + (alpha + 1) * (1 - value)
+            input$n / (2 * b)
+          })
+        }
+      )
+    },
+    "regression_test" = {
+      scale2 <- .regression_test_df(n = input$n, k = input$k)
+
+      switch(
+        effect_size,
+        "cohens_f" = {
+          .effect_size_check_interval(value, effect_size, allow_negative = TRUE, upper = Inf)
+          scale2 * abs(value)^2 / (2 * r)
+        },
+        "partial_r" = {
+          .effect_size_check_interval(value, effect_size, allow_negative = TRUE, upper = 1)
+          abs_value <- abs(value)
+          ifelse(abs_value == 0, 0, {
+            a <- r * (1 - abs_value^2)^2 / abs_value^2 +
+              (r + 3 / 2) * (1 - abs_value^2)
+            scale2 / (2 * a)
+          })
+        },
+        "partial_r2" = {
+          .effect_size_check_interval(value, effect_size, upper = 1, upper_open = TRUE)
+          ifelse(value == 0, 0, {
+            a <- (r - 1 / 2) * (1 - value)^2 / value +
+              (r + 3 / 2) * (1 - value)
+            scale2 / (2 * a)
+          })
+        },
+        "cohens_f2" = {
+          .effect_size_check_interval(value, effect_size)
+          scale2 * value / (2 * (r - 1 / 2))
+        }
+      )
+    },
+    stop("Unknown BFF test type.")
+  )
+}
+
 .effect_size_from_internal <- function(value, test_type, effect_size = NULL, input = NULL, table_dim = NULL, table_margins = NULL, branch_sign = NULL){
   effect_size <- .effect_size_normalize(test_type, effect_size)
   value <- as.numeric(value)
@@ -630,7 +755,7 @@
   )
 }
 
-.effect_size_internal_branches <- function(x, test_type, effect_size = NULL, input = NULL, alternative = NULL, table_dim = NULL, table_margins = NULL){
+.effect_size_internal_branches <- function(x, test_type, effect_size = NULL, input = NULL, alternative = NULL, table_dim = NULL, table_margins = NULL, branch_sign = NULL){
   effect_size <- .effect_size_normalize(test_type, effect_size)
   x <- as.numeric(x)
 
@@ -641,6 +766,36 @@
   if(.effect_size_chi2_family(test_type)){
     df <- unique(input$df)
     if(length(df) != 1) df <- input$df
+    if(!is.null(branch_sign) && effect_size %in% c("logOR", "OR", "logRR", "risk_ratio", "risk_difference", "arcsine_h")){
+      branch_sign <- .effect_size_recycle_branch_sign(branch_sign, x)
+      branch_sign <- ifelse(branch_sign < 0, -1, 1)
+      return(switch(
+        effect_size,
+        "logOR" = ,
+        "logRR" = {
+          scale <- .effect_size_2x2_scale(effect_size, input, table_dim, table_margins)
+          valid <- ifelse(branch_sign > 0, x >= 0, x <= 0)
+          make_branch(abs(x) * scale, rep(scale, length(x)), valid)
+        },
+        "OR" = ,
+        "risk_ratio" = {
+          scale <- .effect_size_2x2_scale(effect_size, input, table_dim, table_margins)
+          log_x <- log(x)
+          valid <- x > 0 & ifelse(branch_sign > 0, log_x >= 0, log_x <= 0)
+          make_branch(abs(log_x) * scale, scale / x, valid)
+        },
+        "risk_difference" = {
+          scale <- .effect_size_2x2_scale(effect_size, input, table_dim, table_margins)
+          valid <- abs(x) < 1 & ifelse(branch_sign > 0, x >= 0, x <= 0)
+          make_branch(abs(x) * scale, rep(scale, length(x)), valid)
+        },
+        "arcsine_h" = {
+          scale <- .effect_size_2x2_scale(effect_size, input, table_dim, table_margins)
+          valid <- abs(x) < pi & ifelse(branch_sign > 0, x >= 0, x <= 0)
+          make_branch(abs(x) * scale, rep(scale, length(x)), valid)
+        }
+      ))
+    }
     return(switch(
       effect_size,
       "omega" = make_branch(x, rep(1, length(x)), x >= 0),
@@ -801,7 +956,7 @@
   normalizer
 }
 
-.effect_size_density <- function(test_type, effect_size = NULL, x, density, input = NULL, alternative = NULL, table_dim = NULL, table_margins = NULL){
+.effect_size_density <- function(test_type, effect_size = NULL, x, density, input = NULL, alternative = NULL, table_dim = NULL, table_margins = NULL, branch_sign = NULL){
   effect_size <- .effect_size_normalize(test_type, effect_size)
   branches <- .effect_size_internal_branches(
     x           = x,
@@ -810,7 +965,8 @@
     input       = input,
     alternative = alternative,
     table_dim   = table_dim,
-    table_margins = table_margins
+    table_margins = table_margins,
+    branch_sign = branch_sign
   )
 
   if(!is.list(branches[[1]])){

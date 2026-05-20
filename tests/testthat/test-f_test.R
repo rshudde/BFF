@@ -9,7 +9,7 @@ test_that("two-sample: basic functionality", {
     omega = 0.5)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf_h1, -2.89426, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf_h1, -2.73527, tolerance = 1e-5)
   testthat::expect_equal(fit$omega_h1,  0.5)
 
   # test S3 methods
@@ -18,7 +18,7 @@ test_that("two-sample: basic functionality", {
     c(
       "\tBayesian non-local f test"  ,
       ""                                        ,
-      "log Bayes factor = -2.89"                 ,
+      "log Bayes factor = -2.74"                 ,
       "omega = 0.50 (RMSES)"
     )
   )
@@ -37,7 +37,7 @@ test_that("two-sample: basic functionality", {
     df2 = 75)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf_h1, 0.82228, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf_h1, 0.82374, tolerance = 1e-5)
   testthat::expect_equal(fit$omega_h1,  0.14)
 
   # test S3 methods
@@ -48,7 +48,7 @@ test_that("two-sample: basic functionality", {
       ""                                        ,
       "maximized (in favor of alternative) log Bayes factor = 0.82",
       "maximized (in favor of alternative) omega = 0.14 (RMSES)",
-      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -23.60",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -23.13",
       "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (RMSES)"
     )
   )
@@ -74,7 +74,7 @@ test_that("two-sample: basic functionality", {
     r = 3)
 
   # check that the BF and omega is consistent
-  testthat::expect_equal(fit$log_bf_h1, 1.93714, tolerance = 1e-5)
+  testthat::expect_equal(fit$log_bf_h1, 1.93649, tolerance = 1e-5)
   testthat::expect_equal(fit$omega_h1,  0.24)
 
   # test S3 methods
@@ -85,7 +85,7 @@ test_that("two-sample: basic functionality", {
       ""                                        ,
       "maximized (in favor of alternative) log Bayes factor = 1.94",
       "maximized (in favor of alternative) omega = 0.24 (RMSES)",
-      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -22.83",
+      "minimized (in favor of null for medium/large effect sizes) log Bayes factor = -22.46",
       "minimized (in favor of null for medium/large effect sizes) omega = 1.00 (RMSES)"
     )
   )

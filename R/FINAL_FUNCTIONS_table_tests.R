@@ -128,27 +128,39 @@ contingency_table_BFF <- function(
     input$effect_size <- effect_size
   }
 
-  omega_input <- if(!is.null(omega)) omega else omega_sequence
-  omega_sign <- .effect_size_branch_sign(
+  omega_input <- unname(if(!is.null(omega)) omega else omega_sequence)
+  omega_sign <- unname(.effect_size_branch_sign(
     value       = omega_input,
     test_type   = test_type,
     effect_size = effect_size,
     input       = input
-  )
+  ))
 
-  omega_internal <- .effect_size_to_internal(
+  omega_internal <- unname(.effect_size_to_internal(
     value         = omega_input,
     test_type     = test_type,
     effect_size   = effect_size,
     input         = input,
     table_dim     = input$table_dim,
     table_margins = input$table_margins
-  )
+  ))
+  tau2 <- lapply(omega_input, function(x){
+    unname(.effect_size_prior_mode_tau2(
+      value         = x,
+      test_type     = test_type,
+      effect_size   = effect_size,
+      input         = input,
+      r             = r,
+      table_dim     = input$table_dim,
+      table_margins = input$table_margins
+    ))
+  })
 
   results <- backend_chi2(
     input = input,
     r     = r,
-    omega = omega_internal
+    omega = omega_internal,
+    tau2  = tau2
   )
 
   if(is.null(omega)){
@@ -181,14 +193,17 @@ contingency_table_BFF <- function(
     log_bf         <- c(0, results)
     omega_internal <- c(0, omega_internal)
     omega_sign     <- c(1, omega_sign)
+    tau2_output    <- c(list(rep(0, length(input$chi2_stat))), tau2)
     idx_max        <- which.max(log_bf)
     this_log_bf    <- log_bf[idx_max]
     this_omega     <- omega_internal[idx_max]
     this_sign      <- omega_sign[idx_max]
+    this_tau2      <- tau2_output[[idx_max]]
   }else{
     this_log_bf    <- results
     this_omega     <- omega_internal
     this_sign      <- omega_sign
+    this_tau2      <- tau2
   }
 
   output <- list(
@@ -199,13 +214,14 @@ contingency_table_BFF <- function(
     effect_size_sign_h1 = this_sign,
     effect_size_sign_h0 = minimum_sign,
     omega_set   = !is.null(omega),
+    tau2_h1     = this_tau2,
     test_type   = test_type,
     generic_test = FALSE,
     r           = r,
     input       = input
   )
   if(is.null(omega)){
-    output$BFF <- list(log_bf = log_bf, omega = omega_internal, effect_size_sign = omega_sign)
+    output$BFF <- list(log_bf = log_bf, omega = omega_internal, effect_size_sign = omega_sign, tau2 = tau2_output)
   }
 
   class(output) <- "BFF"
