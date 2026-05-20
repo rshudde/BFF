@@ -149,3 +149,25 @@ test_that("vectorized t-test uses statistic-specific degrees of freedom", {
   testthat::expect_equal(fit$log_bf_h1, expected, tolerance = 1e-12)
 })
 
+test_that("t-test rejects negative omega inputs", {
+  testthat::expect_error(
+    t_test_BFF(
+      t_stat = 2.5,
+      n1 = 50,
+      n2 = 50,
+      omega = -0.5
+    ),
+    "`omega` must be nonnegative."
+  )
+
+  testthat::expect_error(
+    t_test_BFF(
+      t_stat = 2.5,
+      n1 = 50,
+      n2 = 50,
+      omega_sequence = c(0.1, -0.2)
+    ),
+    "`omega_sequence` must be nonnegative."
+  )
+})
+

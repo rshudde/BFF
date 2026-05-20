@@ -25,7 +25,7 @@ z_test_BFF(
 
 \item{n2}{sample size of group two for two sample test. Must be provided if one_sample = FALSE}
 
-\item{one_sample}{is test one sided? Default is FALSE}
+\item{one_sample}{is this a one-sample test? Default is FALSE}
 
 \item{alternative}{the alternative. options are "two.sided" or "less" or "greater"}
 

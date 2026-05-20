@@ -1,4 +1,4 @@
-################# chih2 functions if r is an integer and equal to 1
+################# chi2 functions if r is an integer and equal to 1
 G_val_r1 = function(tau2, chi2_stat, df)
 {
   BFF = (tau2 + 1) ^ (-df / 2 - 1) * (1 + tau2 * chi2_stat / (df * (tau2 + 1))) * exp(tau2 *
@@ -48,7 +48,7 @@ backend_chi2 <- function(
       BFF_chi2_test(
           tau2 = x[i],
           chi2_stat    = input$chi2_stat[i],
-          k = input$df,
+          k = input$df[i],
           r = r
         )
     }))
@@ -66,16 +66,16 @@ backend_chi2 <- function(
   return(log_BF)
 }
 
-################# T function user interaction
+################# chi2 function user interaction
 
 #' chi2_test_BFF
 #'
-#' chi2_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' chi2_test_BFF constructs BFFs based on the chi-square test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
 #'
 #' @param chi2_stat chi-square statistic
-#' @param n sample size (if one sample test)
+#' @param n sample size
 #' @param df degrees of freedom
 #' @param LRT should LRT be performed? Default is FALSE
 #' @param omega standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values). Use \code{effect_size = "cohens_w"} to specify or plot conventional Cohen's \code{w}.
@@ -110,6 +110,7 @@ chi2_test_BFF = function(chi2_stat,
   input <- .process_input.chi2.test(chi2_stat, n, LRT, df, r, table_dim)
 
   effect_size <- .effect_size_normalize("chi2_test", effect_size)
+  .effect_size_check_common_transform_scale("chi2_test", effect_size, input)
   if(is.null(omega) && omega_sequence_missing){
     omega_sequence <- .effect_size_default_sequence("chi2_test", effect_size)
   }
@@ -188,8 +189,18 @@ chi2_test_BFF = function(chi2_stat,
 
 .process_input.chi2.test <- function(chi2_stat, n, LRT, df, r, table_dim = NULL){
 
-  if (r < 1)
-    stop("r must be greater than or equal to 1")
+  .check_r(r)
+
+  .check_nonnegative_numeric(chi2_stat, "chi2_stat")
+  .check_positive_numeric(n, "n")
+  .check_positive_numeric(df, "df")
+
+  if(!is.logical(LRT) || length(LRT) != 1 || is.na(LRT))
+    stop("`LRT` must be TRUE or FALSE.")
+
+  n_stat <- length(chi2_stat)
+  n  <- .recycle_stat_input(n, "n", n_stat)
+  df <- .recycle_stat_input(df, "df", n_stat)
 
   input <- list(
     chi2_stat     = chi2_stat,

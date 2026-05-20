@@ -27,6 +27,8 @@
 #'  or to the package's internal omega scale.}
 #'  \item{table_dim}{integer vector \code{c(rows, columns)} for
 #'  chi-square transformations that require table dimensions.}
+#'  \item{table_margins}{two marginal probabilities for 2x2
+#'  table effect-size transformations.}
 #' }
 #'
 #' @return either a ggplot2 object if \code{plot = TRUE} or a data.frame
@@ -53,6 +55,7 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
   alternative <- if(x[["test_type"]] %in% c("z_test", "t_test", "regression_test")) .posterior_plot_alternative(x) else NULL
   effect_size <- .effect_size_for_object(x, dots[["effect_size"]])
   table_dim <- if(is.null(dots[["table_dim"]])) x$input$table_dim else dots[["table_dim"]]
+  table_margins <- if(is.null(dots[["table_margins"]])) x$input$table_margins else dots[["table_margins"]]
   x_limit   <- if(is.null(dots[["x_limit"]])) .posterior_plot_default_x_limit(x, alternative, effect_size) else dots[["x_limit"]]
   # TODO: deal with positive/negative only plotting: maybe just implement everything for greater
   # (as in the t_test_BFF function) and then flip the support around y-axis
@@ -63,8 +66,8 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
     plot_data <- .posterior_plot_data.z_test(x, prior, x_limit)
   }else if(x[["test_type"]] == "t_test"){
     plot_data <- .posterior_plot_data.t_test(x, prior, x_limit)
-  }else if(x[["test_type"]] == "chi2_test"){
-    plot_data <- .posterior_plot_data.chi2_test(x, prior, x_limit, effect_size, table_dim)
+  }else if(x[["test_type"]] %in% c("chi2_test", "contingency_table", "prop_test")){
+    plot_data <- .posterior_plot_data.chi2_test(x, prior, x_limit, effect_size, table_dim, table_margins)
   }else if(x[["test_type"]] == "f_test"){
     plot_data <- .posterior_plot_data.f_test(x, prior, x_limit, effect_size)
   }else if(x[["test_type"]] == "regression_test"){
@@ -237,7 +240,7 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
   return(df)
 }
 
-.posterior_plot_data.chi2_test <- function(x, prior, x_limit, effect_size, table_dim = NULL){
+.posterior_plot_data.chi2_test <- function(x, prior, x_limit, effect_size, table_dim = NULL, table_margins = NULL){
 
   x_seq <- seq(x_limit[1], x_limit[2], length.out = 301)
 
@@ -258,20 +261,22 @@ posterior_plot <- function(x, prior = FALSE, plot = TRUE, ...){
     stop("There is no non-local prior distribution that provides more evidence for the null hypothesis than the null prior distribution.")
 
   lik.prior <- .effect_size_density(
-    test_type   = "chi2_test",
+    test_type   = x$test_type,
     effect_size = effect_size,
     x           = x_seq,
     density     = function(effect_size) .chi2_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n = x$input$n, df = x$input$df),
     input       = x$input,
-    table_dim   = table_dim
+    table_dim   = table_dim,
+    table_margins = table_margins
   )
   lik.posterior <- .effect_size_density(
-    test_type   = "chi2_test",
+    test_type   = x$test_type,
     effect_size = effect_size,
     x           = x_seq,
     density     = function(effect_size) .chi2_test.posterior(chi2_stat = chi2_stat, tau2 = tau2, r = r, effect_size = effect_size, n = x$input$n, df = x$input$df),
     input       = x$input,
-    table_dim   = table_dim
+    table_dim   = table_dim,
+    table_margins = table_margins
   )
 
   df <- data.frame(

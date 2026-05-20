@@ -55,6 +55,96 @@ test_that("chi-square effect-size modes are converted to the internal omega scal
   }
 })
 
+test_that("2x2 table effect-size modes are converted to the internal omega scale", {
+  x <- c(30, 20)
+  n <- c(100, 100)
+  internal_omega <- 0.2
+  base <- prop_test_BFF(x = x, n = n, omega = internal_omega, effect_size = "cohens_w")
+
+  margins <- c(row1 = 0.5, col1 = 0.25)
+  log_or_scale <- sqrt(prod(margins * (1 - margins)))
+  log_rr_scale <- sqrt(margins[1] * (1 - margins[1]) * margins[2] / (1 - margins[2]))
+  rd_scale <- sqrt(margins[1] * (1 - margins[1]) / (margins[2] * (1 - margins[2])))
+  h_scale <- sqrt(margins[1] * (1 - margins[1]))
+
+  cases <- list(
+    list(effect_size = "logOR", value = internal_omega / log_or_scale),
+    list(effect_size = "logOR", value = -internal_omega / log_or_scale),
+    list(effect_size = "OR", value = exp(internal_omega / log_or_scale)),
+    list(effect_size = "OR", value = exp(-internal_omega / log_or_scale)),
+    list(effect_size = "logRR", value = internal_omega / log_rr_scale),
+    list(effect_size = "risk_ratio", value = exp(internal_omega / log_rr_scale)),
+    list(effect_size = "risk_difference", value = internal_omega / rd_scale),
+    list(effect_size = "arcsine_h", value = internal_omega / h_scale)
+  )
+
+  for(case in cases){
+    fit <- prop_test_BFF(
+      x = x,
+      n = n,
+      omega = case$value,
+      effect_size = case$effect_size
+    )
+
+    testthat::expect_equal(fit$omega_h1, internal_omega, tolerance = 1e-12, info = case$effect_size)
+    testthat::expect_equal(fit$log_bf_h1, base$log_bf_h1, tolerance = 1e-12, info = case$effect_size)
+  }
+})
+
+test_that("bounded 2x2 default effect-size sequences avoid excluded endpoints", {
+  rd_sequence <- BFF:::.effect_size_default_sequence("prop_test", "risk_difference")
+  h_sequence <- BFF:::.effect_size_default_sequence("prop_test", "arcsine_h")
+
+  testthat::expect_lt(max(rd_sequence), 1)
+  testthat::expect_lt(max(h_sequence), pi)
+
+  testthat::expect_no_error(
+    prop_test_BFF(x = c(30, 20), n = c(100, 100), effect_size = "risk_difference")
+  )
+  testthat::expect_no_error(
+    prop_test_BFF(x = c(30, 20), n = c(100, 100), effect_size = "arcsine_h")
+  )
+
+  fit <- prop_test_BFF(x = c(30, 20), n = c(100, 100), omega = 0.4)
+  plot_data <- posterior_plot(fit, prior = TRUE, plot = FALSE, effect_size = "arcsine_h")
+  testthat::expect_true(all(abs(plot_data$x) < pi))
+  expect_posterior_plot_data(plot_data)
+})
+
+test_that("2x2 bounded local density transforms are normalized on their legal scales", {
+  n <- 100
+  df <- 1
+  r <- 1
+  omega <- 0.8
+  tau2 <- BFF:::get_count_tau2(n = n, k = df, w = omega, r = r)
+  input <- list(
+    n = n,
+    df = df,
+    table_dim = c(2, 2),
+    table_margins = c(row1 = 0.4, col1 = 0.3)
+  )
+  cases <- list(
+    list(effect_size = "risk_difference", lower = -1, upper = 1),
+    list(effect_size = "arcsine_h", lower = -pi, upper = pi)
+  )
+
+  for(case in cases){
+    area <- integrate_density(
+      lower = case$lower,
+      upper = case$upper,
+      f = function(x) BFF:::.effect_size_density(
+        test_type = "prop_test",
+        effect_size = case$effect_size,
+        x = x,
+        density = function(effect_size) BFF:::.chi2_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n = n, df = df),
+        input = input
+      )
+    )
+
+    testthat::expect_equal(area, 1, tolerance = 1e-5, info = case$effect_size)
+  }
+})
+
 test_that("F-test and regression effect-size modes are converted to the internal omega scale", {
   f_base <- f_test_BFF(f_stat = 1.75, n = 25, df1 = 5, df2 = 50, omega = 0.5)
   conventional_f <- sqrt(5 / 2) * 0.5
@@ -114,6 +204,24 @@ test_that("plot.BFF transforms the Bayes factor function axis", {
   chi_data <- plot(chi_fit, plot = FALSE)
   testthat::expect_equal(chi_data$x, c(0, 0.1, 0.2), tolerance = 1e-12)
 
+  log_or_fit <- prop_test_BFF(
+    x = c(30, 20),
+    n = c(100, 100),
+    omega_sequence = c(0.4, 0.8),
+    effect_size = "logOR"
+  )
+  log_or_data <- plot(log_or_fit, plot = FALSE)
+  testthat::expect_equal(log_or_data$x, c(0, 0.4, 0.8), tolerance = 1e-12)
+
+  negative_log_or_fit <- prop_test_BFF(
+    x = c(30, 20),
+    n = c(100, 100),
+    omega_sequence = c(-0.4, -0.8),
+    effect_size = "logOR"
+  )
+  negative_log_or_data <- plot(negative_log_or_fit, plot = FALSE)
+  testthat::expect_equal(negative_log_or_data$x, c(0, -0.4, -0.8), tolerance = 1e-12)
+
   f_fit <- f_test_BFF(
     f_stat = 1.75,
     n = 25,
@@ -134,6 +242,52 @@ test_that("plot.BFF transforms the Bayes factor function axis", {
   )
   reg_data <- plot(reg_fit, plot = FALSE)
   testthat::expect_equal(reg_data$x, c(0, 0.04, 0.16), tolerance = 1e-12)
+
+  signed_reg_fit <- regression_test_BFF(
+    t_stat = 2.5,
+    n = 50,
+    k = 3,
+    omega_sequence = c(-0.2, -0.4),
+    effect_size = "cohens_f"
+  )
+  signed_reg_data <- plot(signed_reg_fit, plot = FALSE)
+  testthat::expect_equal(signed_reg_data$x, c(0, -0.2, -0.4), tolerance = 1e-12)
+
+  less_reg_fit <- regression_test_BFF(
+    t_stat = 2.5,
+    n = 50,
+    k = 3,
+    alternative = "less",
+    omega_sequence = c(0.2, 0.4),
+    effect_size = "partial_r"
+  )
+  less_reg_data <- plot(less_reg_fit, plot = FALSE)
+  testthat::expect_equal(less_reg_data$x, c(0, -0.2, -0.4), tolerance = 1e-12)
+})
+
+test_that("print.BFF preserves signed transformed prior modes", {
+  log_or_fit <- prop_test_BFF(
+    x = c(30, 20),
+    n = c(100, 100),
+    omega = -0.4,
+    effect_size = "logOR"
+  )
+  testthat::expect_match(
+    paste(testthat::capture_output_lines(log_or_fit, print = TRUE, width = 100), collapse = "\n"),
+    "prior mode = -0.40 \\(log odds ratio\\)"
+  )
+
+  reg_fit <- regression_test_BFF(
+    t_stat = 2.5,
+    n = 50,
+    k = 3,
+    omega = -0.3,
+    effect_size = "cohens_f"
+  )
+  testthat::expect_match(
+    paste(testthat::capture_output_lines(reg_fit, print = TRUE, width = 100), collapse = "\n"),
+    "prior mode = -0.30 \\(signed Cohen's f\\)"
+  )
 })
 
 test_that("chi-square transformed prior and posterior densities integrate to one", {
@@ -178,6 +332,56 @@ test_that("chi-square transformed prior and posterior densities integrate to one
         density = function(effect_size) BFF:::.chi2_test.posterior(chi2_stat = chi2_stat, tau2 = tau2, r = r, effect_size = effect_size, n = n, df = df),
         input = input,
         table_dim = case$table_dim
+      )
+    )
+  }
+})
+
+test_that("2x2 table transformed prior and posterior densities integrate to one", {
+  n <- 100
+  df <- 1
+  chi2_stat <- 4.5
+  r <- 1
+  omega <- 0.2
+  tau2 <- BFF:::get_count_tau2(n = n, k = df, w = omega, r = r)
+  input <- list(
+    n = n,
+    df = df,
+    table_dim = c(2, 2),
+    table_margins = c(row1 = 0.4, col1 = 0.3)
+  )
+  cases <- list(
+    list(effect_size = "logOR", lower = -Inf, upper = Inf),
+    list(effect_size = "OR", lower = 0, upper = Inf),
+    list(effect_size = "logRR", lower = -Inf, upper = Inf),
+    list(effect_size = "risk_ratio", lower = 0, upper = Inf),
+    list(effect_size = "risk_difference", lower = -1, upper = 1),
+    list(effect_size = "arcsine_h", lower = -pi, upper = pi)
+  )
+
+  for(case in cases){
+    expect_transformed_density_integral(
+      label = paste("2x2 prior", case$effect_size),
+      lower = case$lower,
+      upper = case$upper,
+      f = function(x) BFF:::.effect_size_density(
+        test_type = "prop_test",
+        effect_size = case$effect_size,
+        x = x,
+        density = function(effect_size) BFF:::.chi2_test.prior(tau2 = tau2, r = r, effect_size = effect_size, n = n, df = df),
+        input = input
+      )
+    )
+    expect_transformed_density_integral(
+      label = paste("2x2 posterior", case$effect_size),
+      lower = case$lower,
+      upper = case$upper,
+      f = function(x) BFF:::.effect_size_density(
+        test_type = "prop_test",
+        effect_size = case$effect_size,
+        x = x,
+        density = function(effect_size) BFF:::.chi2_test.posterior(chi2_stat = chi2_stat, tau2 = tau2, r = r, effect_size = effect_size, n = n, df = df),
+        input = input
       )
     )
   }
@@ -282,6 +486,14 @@ test_that("posterior_plot returns finite data on transformed effect-size scales"
     posterior_plot(chi_fit, prior = TRUE, plot = FALSE, effect_size = "cramers_v"),
     "`table_dim` must be supplied"
   )
+
+  log_or_fit <- prop_test_BFF(
+    x = c(30, 20),
+    n = c(100, 100),
+    omega = 0.8,
+    effect_size = "logOR"
+  )
+  expect_posterior_plot_data(posterior_plot(log_or_fit, prior = TRUE, plot = FALSE))
 
   f_fit <- f_test_BFF(f_stat = 1.75, n = 25, df1 = 5, df2 = 50, omega = 0.5)
   expect_posterior_plot_data(posterior_plot(f_fit, prior = TRUE, plot = FALSE, effect_size = "cohens_f"))

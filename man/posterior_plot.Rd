@@ -32,6 +32,8 @@ function. These include: \describe{
  or to the package's internal omega scale.}
  \item{table_dim}{integer vector \code{c(rows, columns)} for
  chi-square transformations that require table dimensions.}
+ \item{table_margins}{two marginal probabilities for 2x2
+ table effect-size transformations.}
 }}
 }
 \value{

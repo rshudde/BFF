@@ -36,7 +36,10 @@ print.BFF <- function(x, ...) {
         value       = x$omega_h1,
         test_type   = x$test_type,
         effect_size = x$input$effect_size,
-        input       = x$input
+        input       = x$input,
+        table_dim   = x$input$table_dim,
+        table_margins = x$input$table_margins,
+        branch_sign = x$effect_size_sign_h1
       ),
       .effect_size_label(x$test_type, x$input$effect_size)
     ))
@@ -57,7 +60,10 @@ print.BFF <- function(x, ...) {
           value       = x$omega_h0,
           test_type   = x$test_type,
           effect_size = x$input$effect_size,
-          input       = x$input
+          input       = x$input,
+          table_dim   = x$input$table_dim,
+          table_margins = x$input$table_margins,
+          branch_sign = x$effect_size_sign_h0
         ),
         .effect_size_label(x$test_type, x$input$effect_size)
       ))
@@ -77,6 +83,8 @@ print.BFF <- function(x, ...) {
                                    "t_test"           = "t test",
                                    "z_test"           = "z test",
                                    "chi2_test"        = "chi2 test",
+                                   "contingency_table" = "contingency table test",
+                                   "prop_test"        = "two-proportions test",
                                    "f_test"           = "f test",
                                    "regression_test"  = "regression test",
                                    "correlation_test" = "correlation_test"))
@@ -88,6 +96,8 @@ print.BFF <- function(x, ...) {
          "z_test"           = "Cohen's d",
          "f_test"           = "RMSES",
          "chi2_test"        = "RMSES",
+         "contingency_table" = "RMSES",
+         "prop_test"        = "log odds ratio",
          "regression_test"  = "signed Cohen's f",
          "correlation_test" = "correlation coefficient")
 }

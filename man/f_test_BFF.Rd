@@ -16,13 +16,13 @@ f_test_BFF(
 )
 }
 \arguments{
-\item{f_stat}{T statistic}
+\item{f_stat}{F statistic}
 
-\item{n}{sample size (if one sample test)}
+\item{n}{sample size}
 
-\item{df1}{sample size of group one for two sample test.}
+\item{df1}{numerator degrees of freedom.}
 
-\item{df2}{sample size of group two for two sample test}
+\item{df2}{denominator degrees of freedom.}
 
 \item{omega}{standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values)}
 
@@ -36,7 +36,7 @@ f_test_BFF(
 Returns an S3 object of class `BFF` (see `BFF.object` for details).
 }
 \description{
-f_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+f_test_BFF constructs BFFs based on the F test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 All results are on the log scale.
 }

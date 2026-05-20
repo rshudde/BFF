@@ -94,7 +94,7 @@ backend_t <- function(
 #' @param n sample size (if one sample test)
 #' @param n1 sample size of group one for two sample test. Must be provided if one_sample = FALSE
 #' @param n2 sample size of group two for two sample test. Must be provided if one_sample = FALSE
-#' @param one_sample is test one sided? Default is FALSE
+#' @param one_sample is this a one-sample test? Default is FALSE
 #' @param alternative the alternative. options are "two.sided" or "less" or "greater"
 #' @param omega standardized effect size. For the t-test, this is often called Cohen's d (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
@@ -122,6 +122,10 @@ t_test_BFF <- function(
 {
   ### input checks and processing
   input <- .process_input.t.test(t_stat, n, n1, n2, one_sample, alternative, r)
+  .check_nonnegative_numeric(
+    if(!is.null(omega)) omega else omega_sequence,
+    if(!is.null(omega)) "omega" else "omega_sequence"
+  )
 
   ### computation
   # calculate BF
@@ -174,8 +178,7 @@ t_test_BFF <- function(
 .process_input.t.test <- function(t_stat, n, n1, n2, one_sample, alternative, r){
 
 
-  if (r < 1)
-    stop("r must be greater than or equal to 1")
+  .check_r(r)
 
   .check_alternative(alternative)
 
@@ -186,6 +189,8 @@ t_test_BFF <- function(
       stop("Both t_stat and and n must be provided for one-sample (`one_sample = TRUE`) test.")
     if(length(t_stat) != length(n))
       stop("The input length of t_stat and n must be the same.")
+    .check_finite_numeric(t_stat, "t_stat")
+    .check_positive_numeric(n, "n")
 
     df <- n - 1
     .check_df(df, "(Total sample size must be greater than 2.)")
@@ -195,6 +200,9 @@ t_test_BFF <- function(
       stop("Both t_stat, n1, and n2 must be provided for two-sample (`one_sample = FALSE`) test.")
     if(length(t_stat) != length(n1) || length(t_stat) != length(n2))
       stop("The input length of t_stat, n1, and n2 must be the same.")
+    .check_finite_numeric(t_stat, "t_stat")
+    .check_positive_numeric(n1, "n1")
+    .check_positive_numeric(n2, "n2")
 
     df <- n1 + n2 - 2
     .check_df(df, "(Total sample size must be greater than 3.)")

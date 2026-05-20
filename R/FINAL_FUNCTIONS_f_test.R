@@ -48,8 +48,8 @@ backend_f <- function(
       BFF_f_test(
         tau2 = x[i],
         f_stat    = input$f_stat[i],
-        k = input$df1,
-        m = input$df2,
+        k = input$df1[i],
+        m = input$df2[i],
         r = r
       )
     }))
@@ -67,18 +67,18 @@ backend_f <- function(
   return(log_BF)
 }
 
-################# T function user interaction
+################# F function user interaction
 
 #' f_test_BFF
 #'
-#' f_test_BFF constructs BFFs based on the t test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
+#' f_test_BFF constructs BFFs based on the F test. BFFs depend on hyperparameters r and tau^2 which determine the shape and scale of the prior distributions which define the alternative hypotheses.
 #' By setting r > 1, we use higher-order moments for replicated studies. Fractional moments are set with r > 1 and r not an integer.
 #' All results are on the log scale.
 #'
-#' @param f_stat T statistic
-#' @param n sample size (if one sample test)
-#' @param df1 sample size of group one for two sample test.
-#' @param df2 sample size of group two for two sample test
+#' @param f_stat F statistic
+#' @param n sample size
+#' @param df1 numerator degrees of freedom.
+#' @param df2 denominator degrees of freedom.
 #' @param omega standardized effect size on the package's internal RMSES scale (can be a single entry or a vector of values)
 #' @param omega_sequence sequence of standardized effect sizes. If no omega is provided, omega_sequence is set to be seq(0.01, 1, by = 0.01)
 #' @param r variable controlling dispersion of non-local priors. Default is 1. r must be >= 1
@@ -110,6 +110,7 @@ f_test_BFF = function(f_stat,
   input <- .process_input.f.test(f_stat, n, df1, df2, r)
 
   effect_size <- .effect_size_normalize("f_test", effect_size)
+  .effect_size_check_common_transform_scale("f_test", effect_size, input)
   if(is.null(omega) && omega_sequence_missing){
     omega_sequence <- .effect_size_default_sequence("f_test", effect_size)
   }
@@ -184,8 +185,17 @@ f_test_BFF = function(f_stat,
 
 .process_input.f.test <- function(f_stat, n, df1, df2, r) {
 
-  if (r < 1)
-    stop("r must be greater than or equal to 1")
+  .check_r(r)
+
+  .check_nonnegative_numeric(f_stat, "f_stat")
+  .check_positive_numeric(n, "n")
+  .check_positive_numeric(df1, "df1")
+  .check_positive_numeric(df2, "df2")
+
+  n_stat <- length(f_stat)
+  n   <- .recycle_stat_input(n, "n", n_stat)
+  df1 <- .recycle_stat_input(df1, "df1", n_stat)
+  df2 <- .recycle_stat_input(df2, "df2", n_stat)
 
   return(list(
     f_stat     = f_stat,

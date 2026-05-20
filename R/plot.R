@@ -20,6 +20,8 @@
 #'  omega scale.}
 #'  \item{"table_dim"}{integer vector \code{c(rows, columns)}
 #'  for chi-square transformations that require table dimensions.}
+#'  \item{"table_margins"}{two marginal probabilities for 2x2
+#'  table effect-size transformations.}
 #'  \item{"add_segments"}{whether effect size
 #'  segments should be added to the figure. Available only
 #'  for standardized effect sizes. Defaults to \code{TRUE}}
@@ -39,6 +41,7 @@ plot.BFF = function(x, plot = TRUE,  ...) {
   dots <- list(...)
   effect_size <- if(!x$generic_test) .effect_size_for_object(x, dots[["effect_size"]]) else NULL
   table_dim <- if(is.null(dots[["table_dim"]])) x$input$table_dim else dots[["table_dim"]]
+  table_margins <- if(is.null(dots[["table_margins"]])) x$input$table_margins else dots[["table_margins"]]
 
   # extract the BFF object (deal with generic/specific effect sizes)
   log_BF = NULL
@@ -54,7 +57,9 @@ plot.BFF = function(x, plot = TRUE,  ...) {
         test_type   = x$test_type,
         effect_size = effect_size,
         input       = x$input,
-        table_dim   = table_dim
+        table_dim   = table_dim,
+        table_margins = table_margins,
+        branch_sign = x$BFF$effect_size_sign
       ),
       log_BF = x$BFF$log_bf
     )
@@ -138,6 +143,8 @@ plot.BFF = function(x, plot = TRUE,  ...) {
            "t_test"    = c(0.2, 0.5, 0.8),
            "z_test"    = c(0.2, 0.5, 0.8), # https://pressbooks.bccampus.ca/statspsych/chapter/chapter-11/
            "chi2_test" = c(0.1, 0.3, 0.5),
+           "contingency_table" = c(0.1, 0.3, 0.5),
+           "prop_test" = numeric(0),
            "regression_test" = c(0.02, 0.15, 0.35),
            "f_test"    = c(0.1, 0.25, 0.4)))
   }
@@ -148,7 +155,9 @@ plot.BFF = function(x, plot = TRUE,  ...) {
     test_type,
     "t_test" = ,
     "z_test" = c(0.2, 0.5, 0.8),
-    "chi2_test" = switch(
+    "chi2_test" = ,
+    "contingency_table" = ,
+    "prop_test" = switch(
       effect_size,
       "omega" = ,
       "cohens_w" = ,
@@ -181,6 +190,8 @@ plot.BFF = function(x, plot = TRUE,  ...) {
          "t_test"    = c(0.0, 1.0),
          "z_test"    = c(0.0, 1.0),
          "chi2_test" = c(0.0, 1.0),
+         "contingency_table" = c(0.0, 1.0),
+         "prop_test" = c(0.0, 1.0),
          "regression_test" = c(0.0, 1.0),
          "f_test"    = c(0.0, 1.0))
 }

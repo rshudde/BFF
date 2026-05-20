@@ -121,3 +121,31 @@ test_that("two-sample: basic functionality", {
   # testthat::expect_error(posterior_plot(fit), "There is no non-local prior distribution")
 })
 
+test_that("regression test rejects invalid inputs", {
+  testthat::expect_error(
+    regression_test_BFF(t_stat = NA, n = 50, k = 3, omega = 0.2)
+  )
+  testthat::expect_error(
+    regression_test_BFF(t_stat = 1.5, n = 4, k = 3, omega = 0.2)
+  )
+  testthat::expect_error(
+    regression_test_BFF(
+      t_stat = c(1.5, 2.0),
+      n = c(50, 60),
+      k = c(3, 4, 5),
+      omega = 0.2
+    )
+  )
+})
+
+test_that("regression test default h0 cutoff is on the internal delta scale", {
+  fit <- regression_test_BFF(
+    t_stat = 2.5,
+    n = 50,
+    k = 3,
+    omega_sequence = c(0.02, sqrt(0.02), 0.15)
+  )
+
+  testthat::expect_equal(fit$omega_h0, sqrt(0.02), tolerance = 1e-12)
+})
+

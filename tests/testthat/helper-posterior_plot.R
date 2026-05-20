@@ -8,6 +8,15 @@ integrate_density <- function(f, lower, upper = Inf){
   )$value)
 }
 
+expect_transformed_density_integral <- function(label, lower, upper, f, tolerance = 1e-5){
+  testthat::expect_equal(
+    integrate_density(f = f, lower = lower, upper = upper),
+    1,
+    tolerance = tolerance,
+    info = label
+  )
+}
+
 expect_posterior_plot_data <- function(plot_data){
   testthat::expect_true(is.data.frame(plot_data))
   testthat::expect_equal(colnames(plot_data), c("x", "prior", "posterior"))

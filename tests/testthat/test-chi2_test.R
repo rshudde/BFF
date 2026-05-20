@@ -158,3 +158,77 @@ test_that("chi-square table dimensions must match degrees of freedom", {
   )
 })
 
+test_that("statistic-level chi-square BFF rejects 2x2-only effect sizes", {
+  testthat::expect_error(
+    chi2_test_BFF(
+      chi2_stat = 4.5,
+      n = 100,
+      df = 1,
+      omega = 0.8,
+      effect_size = "logOR"
+    ),
+    "Unsupported effect size for chi-square"
+  )
+})
+
+test_that("vectorized chi-square test uses study-specific degrees of freedom", {
+  fit <- chi2_test_BFF(
+    chi2_stat = c(6, 12),
+    n = c(80, 120),
+    df = c(3, 5),
+    omega = 0.2
+  )
+
+  expected <- sum(
+    chi2_test_BFF(chi2_stat = 6, n = 80, df = 3, omega = 0.2)$log_bf_h1,
+    chi2_test_BFF(chi2_stat = 12, n = 120, df = 5, omega = 0.2)$log_bf_h1
+  )
+
+  testthat::expect_equal(fit$log_bf_h1, expected, tolerance = 1e-10)
+})
+
+test_that("vectorized chi-square test handles conventional scales only with common df", {
+  fit <- chi2_test_BFF(
+    chi2_stat = c(6, 12),
+    n = c(80, 120),
+    df = c(3, 3),
+    omega = 0.4,
+    effect_size = "cohens_w"
+  )
+
+  expected <- sum(
+    chi2_test_BFF(chi2_stat = 6, n = 80, df = 3, omega = 0.4, effect_size = "cohens_w")$log_bf_h1,
+    chi2_test_BFF(chi2_stat = 12, n = 120, df = 3, omega = 0.4, effect_size = "cohens_w")$log_bf_h1
+  )
+
+  testthat::expect_length(fit$log_bf_h1, 1)
+  testthat::expect_equal(fit$log_bf_h1, expected, tolerance = 1e-10)
+
+  testthat::expect_error(
+    chi2_test_BFF(
+      chi2_stat = c(6, 12),
+      n = c(80, 120),
+      df = c(3, 5),
+      omega = 0.4,
+      effect_size = "cohens_w"
+    ),
+    "requires a common `df`"
+  )
+})
+
+test_that("chi-square test rejects invalid inputs", {
+  testthat::expect_error(
+    chi2_test_BFF(chi2_stat = -1, n = 25, df = 5, omega = 0.2)
+  )
+  testthat::expect_error(
+    chi2_test_BFF(chi2_stat = 5, n = 25, df = 0, omega = 0.2)
+  )
+  testthat::expect_error(
+    chi2_test_BFF(
+      chi2_stat = c(5, 8),
+      n = c(25, 30),
+      df = c(5, 6, 7),
+      omega = 0.2
+    )
+  )
+})

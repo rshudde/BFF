@@ -122,8 +122,16 @@ regression_test_BFF <- function(
     input$effect_size <- effect_size
   }
 
+  omega_input <- if(!is.null(omega)) omega else omega_sequence
+  omega_sign <- .effect_size_branch_sign(
+    value       = omega_input,
+    test_type   = "regression_test",
+    effect_size = effect_size,
+    input       = input
+  )
+
   omega_internal <- .effect_size_to_internal(
-    value       = if(!is.null(omega)) omega else omega_sequence,
+    value       = omega_input,
     test_type   = "regression_test",
     effect_size = effect_size,
     input       = input
@@ -139,31 +147,43 @@ regression_test_BFF <- function(
 
   ## compute minimum BFF for anything larger than small effect sizes
   if (is.null(omega)) {
-    minimums = get_min_omega_bff(
-      omega  = omega_internal,
-      bff    = results,
-      cutoff = if(effect_size_supplied) .effect_size_minimum_cutoff(
+    cutoff <- if(effect_size_supplied) .effect_size_minimum_cutoff(
         test_type   = "regression_test",
         effect_size = effect_size,
         input       = input,
         default     = 0.02
-      ) else 0.02
+      ) else sqrt(0.02)
+    idx_min <- get_min_omega_bff_index(
+      omega  = omega_internal,
+      bff    = results,
+      cutoff = cutoff
     )
+    if(is.na(idx_min)){
+      minimums <- c(NA_real_, NA_real_)
+      minimum_sign <- NA_real_
+    }else{
+      minimums <- c(results[idx_min], omega_internal[idx_min])
+      minimum_sign <- omega_sign[idx_min]
+    }
   }  else
   {
     minimums = c(NULL, NULL)
+    minimum_sign <- NULL
   }
 
   ###### return logic
   if(is.null(omega)){
     log_bf         <- c(0, results)
     omega_internal <- c(0, omega_internal)
+    omega_sign     <- c(1, omega_sign)
     idx_max        <- which.max(log_bf)
     this_log_bf    <- log_bf[idx_max]
     this_omega     <- omega_internal[idx_max]
+    this_sign      <- omega_sign[idx_max]
   }else{
     this_log_bf    <- results
     this_omega     <- omega_internal
+    this_sign      <- omega_sign
   }
 
   output = list(
@@ -171,6 +191,8 @@ regression_test_BFF <- function(
     omega_h1        = this_omega,
     log_bf_h0     = minimums[1],
     omega_h0      = minimums[2],
+    effect_size_sign_h1 = this_sign,
+    effect_size_sign_h0 = minimum_sign,
     omega_set    = !is.null(omega),
     test_type    = "regression_test",
     generic_test = FALSE,
@@ -178,7 +200,7 @@ regression_test_BFF <- function(
     input        = input
   )
   if(is.null(omega)){
-    output$BFF = list(log_bf = log_bf, omega = omega_internal)
+    output$BFF = list(log_bf = log_bf, omega = omega_internal, effect_size_sign = omega_sign)
   }
 
   class(output) = "BFF"
@@ -188,12 +210,20 @@ regression_test_BFF <- function(
 
 .process_input.reg.test <- function(t_stat, n, k, alternative, r){
 
-  if (r < 1)
-    stop("r must be greater than or equal to 1")
+  .check_r(r)
 
   .check_alternative(alternative)
 
-  df <- n -k - 1
+  .check_finite_numeric(t_stat, "t_stat")
+  .check_positive_numeric(n, "n")
+  .check_nonnegative_numeric(k, "k")
+
+  n_stat <- length(t_stat)
+  n <- .recycle_stat_input(n, "n", n_stat)
+  k <- .recycle_stat_input(k, "k", n_stat)
+
+  df <- n - k - 1
+  .check_df(df, "(Sample size must exceed the number of predictors by more than 2.)")
 
   # computation is implemented only for alternative = "two-sided" or "greater"
   # if lower, reverse the sign of t_stat, set alternative to "greater",

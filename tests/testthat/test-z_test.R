@@ -119,3 +119,25 @@ test_that("two-sample: basic functionality", {
   # testthat::expect_error(posterior_plot(fit), "There is no non-local prior distribution")
 })
 
+test_that("z-test rejects negative omega inputs", {
+  testthat::expect_error(
+    z_test_BFF(
+      z_stat = 1.5,
+      n1 = 50,
+      n2 = 50,
+      omega = -0.5
+    ),
+    "`omega` must be nonnegative."
+  )
+
+  testthat::expect_error(
+    z_test_BFF(
+      z_stat = 1.5,
+      n1 = 50,
+      n2 = 50,
+      omega_sequence = c(0.1, -0.2)
+    ),
+    "`omega_sequence` must be nonnegative."
+  )
+})
+

@@ -91,3 +91,72 @@ test_that("two-sample: basic functionality", {
   )
 
 })
+
+test_that("vectorized F-test uses study-specific degrees of freedom", {
+  fit <- f_test_BFF(
+    f_stat = c(1.4, 2.1),
+    n = c(40, 65),
+    df1 = c(2, 4),
+    df2 = c(37, 60),
+    omega = 0.25
+  )
+
+  expected <- sum(
+    f_test_BFF(f_stat = 1.4, n = 40, df1 = 2, df2 = 37, omega = 0.25)$log_bf_h1,
+    f_test_BFF(f_stat = 2.1, n = 65, df1 = 4, df2 = 60, omega = 0.25)$log_bf_h1
+  )
+
+  testthat::expect_equal(fit$log_bf_h1, expected, tolerance = 1e-10)
+})
+
+test_that("vectorized F-test handles conventional scales only with common numerator df", {
+  fit <- f_test_BFF(
+    f_stat = c(1.4, 2.1),
+    n = c(40, 65),
+    df1 = c(2, 2),
+    df2 = c(37, 62),
+    omega = 0.4,
+    effect_size = "cohens_f"
+  )
+
+  expected <- sum(
+    f_test_BFF(f_stat = 1.4, n = 40, df1 = 2, df2 = 37, omega = 0.4, effect_size = "cohens_f")$log_bf_h1,
+    f_test_BFF(f_stat = 2.1, n = 65, df1 = 2, df2 = 62, omega = 0.4, effect_size = "cohens_f")$log_bf_h1
+  )
+
+  testthat::expect_length(fit$log_bf_h1, 1)
+  testthat::expect_equal(fit$log_bf_h1, expected, tolerance = 1e-10)
+
+  testthat::expect_error(
+    f_test_BFF(
+      f_stat = c(1.4, 2.1),
+      n = c(40, 65),
+      df1 = c(2, 4),
+      df2 = c(37, 60),
+      omega = 0.4,
+      effect_size = "cohens_f"
+    ),
+    "requires a common `df1`"
+  )
+})
+
+test_that("F-test rejects invalid inputs", {
+  testthat::expect_error(
+    f_test_BFF(f_stat = -1, n = 25, df1 = 5, df2 = 20, omega = 0.2)
+  )
+  testthat::expect_error(
+    f_test_BFF(f_stat = 1.5, n = 25, df1 = 0, df2 = 20, omega = 0.2)
+  )
+  testthat::expect_error(
+    f_test_BFF(f_stat = 1.5, n = 25, df1 = 5, df2 = 0, omega = 0.2)
+  )
+  testthat::expect_error(
+    f_test_BFF(
+      f_stat = c(1.5, 2.0),
+      n = c(25, 30),
+      df1 = c(5, 6),
+      df2 = c(20, 21, 22),
+      omega = 0.2
+    )
+  )
+})
