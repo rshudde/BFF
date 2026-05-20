@@ -282,9 +282,9 @@ plot_pair_matrix(
 )
 ```
 
-The package's internal chi-square scale is `omega = sqrt(lambda / (n * df))`, where `lambda` is the noncentrality parameter.  Cohen's `w` and `phi` are implemented as `sqrt(df) * omega`, equivalently `sqrt(lambda / n)`, so they share one plot row above.  For a table with `R` rows and `C` columns, Cramer's `V` is `w / sqrt(min(R - 1, C - 1))`, and Tschuprow's `T` is `w / ((R - 1) * (C - 1))^(1 / 4)`.  The contingency coefficient is `w / sqrt(1 + w^2)`.
+The package's internal chi-square scale is `omega = sqrt(lambda / (n * df))`, where `lambda` is the noncentrality parameter.  Cohen's `w` and `phi` are implemented as `sqrt(df) * omega`, equivalently `sqrt(lambda / n)`, so they share one plot row above.  For a table with `R` rows and `C` columns, Cramer's `V` is `w / sqrt(min(R - 1, C - 1))`, and Tschuprow's `T` is `w / ((R - 1) * (C - 1))^(1 / 4)`.  These are algebraic rescalings of the BFF's noncentrality-effect scale and are not truncated at the conventional sample-statistic upper bound of 1.  The contingency coefficient is `w / sqrt(1 + w^2)`.
 
-For a log odds-ratio-specific chi-square example, the table below compares `30 / 100` successes in one group with `20 / 100` successes in another group.  Because the table is 2-by-2, the BFF can be fit and plotted on `logOR`, odds-ratio, risk-ratio, risk-difference, and arcsine-h scales in addition to the usual chi-square association scales.  The posterior panel uses the maximizing prior mode from the `logOR` BFF, rounded to `logOR = 0.28`.
+For a log odds-ratio-specific chi-square example, the table below compares `30 / 100` successes in one group with `20 / 100` successes in another group.  Because the table is 2-by-2, the BFF can be fit and plotted on `logOR`, odds-ratio, risk-ratio, risk-difference, and arcsine-h scales in addition to the usual chi-square association scales.  The posterior panel uses the maximizing prior mode from the `logOR` BFF, rounded to `logOR = 0.39`.
 
 ```{r chi2-logor-fit}
 chi2_logOR_table <- matrix(
@@ -299,7 +299,7 @@ chi2_logOR_bff <- contingency_table_BFF(
 )
 chi2_logOR_prior <- contingency_table_BFF(
   chi2_logOR_table,
-  omega = 0.28,
+  omega = 0.39,
   effect_size = "logOR"
 )
 chi2_logOR_effect_sizes <- list(
@@ -331,7 +331,7 @@ chi2_logOR_limits <- list(
   c(0, 0.25),
   c(0, 0.25),
   c(-2, 2),
-  exp(c(-2, 2)),
+  exp(c(-1.99, 1.99)),
   c(-1.5, 1.5),
   exp(c(-1.5, 1.5)),
   c(-0.5, 0.5),
@@ -343,7 +343,7 @@ fit_chi2_logOR_sequence <- function(effect_size) {
     "omega" = seq(0.001, 0.25, length.out = 120),
     "contingency_coefficient" = seq(0.001, 0.25, length.out = 120),
     "logOR" = seq(0.001, 2, length.out = 120),
-    "OR" = exp(seq(0.001, 2, length.out = 120)),
+    "OR" = exp(seq(0.001, 1.99, length.out = 120)),
     "logRR" = seq(0.001, 1.5, length.out = 120),
     "risk_ratio" = exp(seq(0.001, 1.5, length.out = 120)),
     "risk_difference" = seq(0.001, 0.5, length.out = 120),
@@ -413,7 +413,7 @@ plot_pair_matrix(
 )
 ```
 
-The package's internal F-test scale is `omega = sqrt(2 * lambda / (n * df1))`, where `lambda` is the noncentrality parameter.  Cohen's `f` is implemented as `sqrt(df1 / 2) * omega`, so `omega` and Cohen's `f` coincide in this example because `df1 = 2`.  Cohen's `f^2` is `df1 * omega^2 / 2`.  Partial `eta^2` and partial `R^2` are both implemented as `f^2 / (1 + f^2)`.
+The package's internal F-test scale is `omega = sqrt(2 * lambda / (n * df1))`, where `lambda` is the noncentrality parameter.  Cohen's `f` is implemented as `sqrt(df1 / 2) * omega`, so `omega` and Cohen's `f` coincide in this example because `df1 = 2`.  Cohen's `f^2` is `df1 * omega^2 / 2`.  Partial `eta^2` and partial `R^2` are both implemented as `f^2 / (1 + f^2)`; the `eta2` aliases in the API refer to partial eta-squared, not ordinary eta-squared.  The `n`, `df1`, and `df2` arguments should be taken from the same F test because `n` determines the effect-size-to-noncentrality mapping.
 
 ## Regression test
 
